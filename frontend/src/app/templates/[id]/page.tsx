@@ -6,10 +6,22 @@
 
 'use client';
 
-import { useParams } from 'next/navigation';
-import { useTemplatePreview, useTemplateCustomization, useTemplateValidation, useTemplateTesting } from '@/hooks/useTemplates';
+'use client';
+
+import { useParams, useRouter } from 'next/navigation';
+import {
+  useTemplatePreview,
+  useTemplateCustomization,
+  useTemplateValidation,
+  useTemplateTesting,
+  useTemplateHistory,
+} from '@/hooks/useTemplates';
 import { TemplateEditor } from '@/components/TemplateManager/TemplateEditor';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { toast } from '@/components/Toast';
+import { TemplateComparison } from '@/components/TemplateManager/TemplateComparison';
+import { templateService } from '@/services/templateService';
 
 export default function TemplateDetailPage() {
   const params = useParams();
@@ -22,7 +34,9 @@ export default function TemplateDetailPage() {
 
   const [customVariables, setCustomVariables] = useState<Record<string, any>>({});
   const [customInstructions, setCustomInstructions] = useState('');
-  const [activeTab, setActiveTab] = useState<'preview' | 'customize' | 'test' | 'history'>('preview');
+  const [activeTab, setActiveTab] = useState<'preview' | 'customize' | 'test' | 'history' | 'compare'>('preview');
+  const [comparison, setComparison] = useState<any>(null);
+  const [loadingComparison, setLoadingComparison] = useState(false);
 
   if (previewLoading) {
     return <div className="loading">Loading template...</div>;
@@ -49,8 +63,24 @@ export default function TemplateDetailPage() {
           <button onClick={() => setActiveTab('history')} className={activeTab === 'history' ? 'active' : ''}>
             History
           </button>
+          <button onClick={() => setActiveTab('compare')} className={activeTab === 'compare' ? 'active' : ''}>
+            Compare
+          </button>
         </div>
       </div>
+
+      {activeTab === 'compare' && (
+        <div className="compare-tab">
+          <CompareView
+            templateId={templateId}
+            preview={preview}
+            comparison={comparison}
+            setComparison={setComparison}
+            loadingComparison={loadingComparison}
+            setLoadingComparison={setLoadingComparison}
+          />
+        </div>
+      )}
 
       {activeTab === 'preview' && (
         <div className="preview-tab">
@@ -90,22 +120,238 @@ export default function TemplateDetailPage() {
   );
 }
 
-function TestTemplateView({ templateId, testResult, onTest }: any) {
+function TestTemplateView({
+  templateId,
+  testResult,
+  onTest,
+}: {
+  templateId: string;
+  testResult: any;
+  onTest: (vars: Record<string, any>, instructions?: string) => Promise<void>;
+}) {
+  const [customVariables, setCustomVariables] = useState<Record<string, any>>({});
+  const [customInstructions, setCustomInstructions] = useState('');
+  const [testing, setTesting] = useState(false);
+
+  const handleTest = async () => {
+    try {
+      setTesting(true);
+      await onTest(customVariables, customInstructions);
+    } catch (error) {
+      toast.error('Test failed');
+    } finally {
+      setTesting(false);
+    }
+  };
+
   return (
-    <div>
+    <div className="test-view">
       <h2>Test Template</h2>
-      <button onClick={() => onTest({}, '')}>Run Test</button>
+      <p>Test your customization before saving</p>
+
+      <div className="test-inputs">
+        <div className="test-variables">
+          <h3>Test Variables</h3>
+          <textarea
+            value={JSON.stringify(customVariables, null, 2)}
+            onChange={(e) => {
+              try {
+                setCustomVariables(JSON.parse(e.target.value));
+              } catch {
+                // Invalid JSON, ignore
+              }
+            }}
+            placeholder='{"user_role": "developer", "security_focus": true}'
+            rows={5}
+            className="json-input"
+          />
+        </div>
+
+        <div className="test-instructions">
+          <h3>Test Instructions</h3>
+          <textarea
+            value={customInstructions}
+            onChange={(e) => setCustomInstructions(e.target.value)}
+            placeholder="Add custom instructions..."
+            rows={3}
+          />
+        </div>
+      </div>
+
+      <button onClick={handleTest} className="btn-primary" disabled={testing}>
+        {testing ? 'Testing...' : 'Run Test'}
+      </button>
+
       {testResult && (
-        <div>
+        <div className="test-result">
           <h3>Test Result</h3>
-          <pre>{testResult.renderedPrompt}</pre>
+          {testResult.success ? (
+            <div className="test-success">
+              <p>✅ Template rendered successfully</p>
+              <pre className="rendered-prompt">{testResult.renderedPrompt}</pre>
+              <div className="test-metadata">
+                <p>
+                  <strong>Variables Used:</strong>{' '}
+                  {testResult.metadata.variablesUsed.join(', ') || 'None'}
+                </p>
+                <p>
+                  <strong>Prompt Length:</strong> {testResult.metadata.promptLength} characters
+                </p>
+                <p>
+                  <strong>Conditionals Evaluated:</strong>{' '}
+                  {testResult.metadata.conditionalsEvaluated}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="test-error">
+              <p>❌ Template test failed</p>
+              {testResult.validationResult?.errors && (
+                <div className="errors">
+                  {testResult.validationResult.errors.map((err: any, i: number) => (
+                    <div key={i} className="error">
+                      {err.message}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
+function CompareView({
+  templateId,
+  preview,
+  comparison,
+  setComparison,
+  loadingComparison,
+  setLoadingComparison,
+}: any) {
+  const loadComparison = async () => {
+    if (!preview?.hasCustomization) {
+      toast.info('No customization to compare');
+      return;
+    }
+
+    try {
+      setLoadingComparison(true);
+      const result = await templateService.comparePrompts(
+        templateId,
+        preview.customVariables || {},
+        preview.customInstructions
+      );
+      setComparison(result);
+    } catch (error) {
+      toast.error('Failed to load comparison');
+    } finally {
+      setLoadingComparison(false);
+    }
+  };
+
+  useEffect(() => {
+    if (preview?.hasCustomization && !comparison) {
+      loadComparison();
+    }
+  }, [preview]);
+
+  if (!preview?.hasCustomization) {
+    return (
+      <div className="empty-state">
+        <p>No customization to compare. Customize the template first.</p>
+        <Link href={`/templates/${templateId}/customize`} className="btn-primary">
+          Customize Template
+        </Link>
+      </div>
+    );
+  }
+
+  if (loadingComparison) {
+    return <div className="loading">Loading comparison...</div>;
+  }
+
+  if (!comparison) {
+    return (
+      <div>
+        <button onClick={loadComparison} className="btn-primary">
+          Load Comparison
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <TemplateComparison
+      basePrompt={preview.basePrompt}
+      customizedPrompt={preview.customizedPrompt || ''}
+      comparison={comparison.comparison}
+    />
+  );
+}
+
 function TemplateHistoryView({ templateId }: { templateId: string }) {
-  // TODO: Implement history view
-  return <div>History view coming soon...</div>;
+  const { history, loading, rollback } = useTemplateHistory(templateId);
+  const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
+
+  if (loading) {
+    return <div className="loading">Loading history...</div>;
+  }
+
+  if (history.length === 0) {
+    return (
+      <div className="empty-state">
+        <p>No history available for this template.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="history-view">
+      <h2>Customization History</h2>
+      <div className="history-list">
+        {history.map((entry) => (
+          <div key={entry.id} className="history-entry">
+            <div className="history-header">
+              <span className="change-type">{entry.change_type}</span>
+              <span className="history-date">
+                {new Date(entry.created_at).toLocaleString()}
+              </span>
+            </div>
+            {entry.change_reason && (
+              <p className="change-reason">{entry.change_reason}</p>
+            )}
+            <div className="history-actions">
+              <button
+                onClick={() => setSelectedEntry(entry.id)}
+                className="btn-secondary"
+              >
+                View Details
+              </button>
+              <button
+                onClick={() => rollback(entry.id)}
+                className="btn-primary"
+              >
+                Rollback to This
+              </button>
+            </div>
+            {selectedEntry === entry.id && (
+              <div className="history-details">
+                <h4>Custom Variables:</h4>
+                <pre>{JSON.stringify(entry.custom_variables, null, 2)}</pre>
+                {entry.custom_instructions && (
+                  <>
+                    <h4>Custom Instructions:</h4>
+                    <p>{entry.custom_instructions}</p>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

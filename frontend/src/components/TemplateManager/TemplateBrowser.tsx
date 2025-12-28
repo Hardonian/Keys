@@ -6,8 +6,11 @@
 
 'use client';
 
+'use client';
+
 import { useState, useEffect } from 'react';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useTemplates } from '@/hooks/useTemplates';
+import Link from 'next/link';
 
 interface Template {
   templateId: string;
@@ -23,53 +26,27 @@ interface Template {
 }
 
 export function TemplateBrowser() {
-  const { userProfile } = useUserProfile();
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({
-    tags: [] as string[],
-    stack: [] as string[],
-    priority: [] as string[],
+
+  const { templates, loading } = useTemplates({
+    query: searchQuery || undefined,
+    milestone: selectedMilestone ? [selectedMilestone] : undefined,
   });
 
   const milestones = [
-    '01-initialization',
-    '02-authentication',
-    '03-database-schema',
-    '04-api-routes',
-    '05-frontend-routes',
-    '06-security-hardening',
-    '07-performance-optimization',
-    '08-testing',
-    '09-ci-cd',
-    '10-deployment',
+    { id: '', name: 'All Milestones' },
+    { id: '01-initialization', name: 'Initialization' },
+    { id: '02-authentication', name: 'Authentication' },
+    { id: '03-database-schema', name: 'Database Schema' },
+    { id: '04-api-routes', name: 'API Routes' },
+    { id: '05-frontend-routes', name: 'Frontend Routes' },
+    { id: '06-security-hardening', name: 'Security Hardening' },
+    { id: '07-performance-optimization', name: 'Performance Optimization' },
+    { id: '08-testing', name: 'Testing' },
+    { id: '09-ci-cd', name: 'CI/CD' },
+    { id: '10-deployment', name: 'Deployment' },
   ];
-
-  useEffect(() => {
-    loadTemplates();
-  }, [selectedMilestone, searchQuery, filters]);
-
-  const loadTemplates = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (selectedMilestone) params.append('milestone', selectedMilestone);
-      if (searchQuery) params.append('query', searchQuery);
-      if (filters.tags.length > 0) params.append('tags', filters.tags.join(','));
-      if (filters.stack.length > 0) params.append('stack', filters.stack.join(','));
-      if (filters.priority.length > 0) params.append('priority', filters.priority.join(','));
-
-      const response = await fetch(`/api/user-templates/search?${params}`);
-      const data = await response.json();
-      setTemplates(data.results || []);
-    } catch (error) {
-      console.error('Failed to load templates', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="template-browser">
@@ -98,6 +75,10 @@ export function TemplateBrowser() {
 
       {loading ? (
         <div className="loading">Loading templates...</div>
+      ) : templates.length === 0 ? (
+        <div className="empty-state">
+          <p>No templates found. Try adjusting your filters.</p>
+        </div>
       ) : (
         <div className="templates-grid">
           {templates.map((template) => (
@@ -111,18 +92,18 @@ export function TemplateBrowser() {
 
 function TemplateCard({ template }: { template: Template }) {
   return (
-    <div className="template-card">
+    <Link href={`/templates/${template.templateId}`} className="template-card">
       <h3>{template.name}</h3>
       <p>{template.description}</p>
       <div className="template-meta">
-        <span className={`priority priority-${template.priority}`}>
+        <span className={`badge badge-${template.priority}`}>
           {template.priority}
         </span>
-        <span className={`security security-${template.security_level}`}>
+        <span className={`badge security-${template.security_level}`}>
           {template.security_level}
         </span>
         {template.hasCustomization && (
-          <span className="customized-badge">Customized</span>
+          <span className="badge customized">Customized</span>
         )}
       </div>
       <div className="template-tags">
@@ -131,7 +112,10 @@ function TemplateCard({ template }: { template: Template }) {
             {tag}
           </span>
         ))}
+        {template.tags.length > 3 && (
+          <span className="tag">+{template.tags.length - 3}</span>
+        )}
       </div>
-    </div>
+    </Link>
   );
 }

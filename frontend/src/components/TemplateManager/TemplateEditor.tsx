@@ -6,8 +6,17 @@
 
 'use client';
 
+'use client';
+
 import { useState, useEffect } from 'react';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import {
+  useTemplatePreview,
+  useTemplateCustomization,
+  useTemplateValidation,
+  useTemplateTesting,
+} from '@/hooks/useTemplates';
+import { toast } from '@/components/Toast';
+import { useRouter } from 'next/navigation';
 
 interface TemplatePreview {
   templateId: string;
@@ -29,103 +38,73 @@ interface AvailableVariable {
 }
 
 export function TemplateEditor({ templateId }: { templateId: string }) {
-  const { userProfile } = useUserProfile();
-  const [preview, setPreview] = useState<TemplatePreview | null>(null);
-  const [availableVariables, setAvailableVariables] = useState<AvailableVariable[]>([]);
+  const router = useRouter();
+  const { preview, refetch: refetchPreview } = useTemplatePreview(templateId);
+  const { availableVariables } = useTemplateValidation(templateId);
+  const { validation, validate } = useTemplateValidation(templateId);
+  const { testResult, test } = useTemplateTesting(templateId);
+  const { saveCustomization, updateCustomization, deleteCustomization } =
+    useTemplateCustomization(templateId);
+
   const [customVariables, setCustomVariables] = useState<Record<string, any>>({});
   const [customInstructions, setCustomInstructions] = useState('');
-  const [validation, setValidation] = useState<any>(null);
-  const [testResult, setTestResult] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
-    loadTemplate();
-    loadVariables();
-  }, [templateId]);
+    if (preview) {
+      setCustomVariables(preview.customVariables || {});
+      setCustomInstructions(preview.customInstructions || '');
+    }
+  }, [preview]);
 
-  const loadTemplate = async () => {
+  const handleValidate = async () => {
+    await validate(customVariables, customInstructions);
+  };
+
+  const handleTest = async () => {
     try {
-      const response = await fetch(`/api/user-templates/${templateId}/preview`);
-      const data = await response.json();
-      setPreview(data);
-      setCustomVariables(data.customVariables || {});
-      setCustomInstructions(data.customInstructions || '');
+      setTesting(true);
+      await test(customVariables, customInstructions);
     } catch (error) {
-      console.error('Failed to load template', error);
+      toast.error('Test failed');
     } finally {
-      setLoading(false);
+      setTesting(false);
     }
   };
 
-  const loadVariables = async () => {
+  const handleSave = async () => {
     try {
-      const response = await fetch(`/api/user-templates/${templateId}/variables`);
-      const data = await response.json();
-      setAvailableVariables(data.variables || []);
-    } catch (error) {
-      console.error('Failed to load variables', error);
-    }
-  };
+      setSaving(true);
 
-  const validateCustomization = async () => {
-    try {
-      const response = await fetch(`/api/user-templates/${templateId}/validate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      // Validate first
+      const validationResult = await validate(customVariables, customInstructions);
+      if (!validationResult?.valid) {
+        toast.error(`Validation failed: ${validationResult?.errors.map((e) => e.message).join(', ')}`);
+        return;
+      }
+
+      if (preview?.hasCustomization) {
+        await updateCustomization({
           customVariables,
           customInstructions,
-        }),
-      });
-      const data = await response.json();
-      setValidation(data);
-    } catch (error) {
-      console.error('Validation failed', error);
+        });
+      } else {
+        await saveCustomization(customVariables, customInstructions);
+      }
+
+      await refetchPreview();
+      toast.success('Customization saved successfully!');
+      router.push(`/templates/${templateId}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save customization');
+    } finally {
+      setSaving(false);
     }
   };
-
-  const testCustomization = async () => {
-    try {
-      const response = await fetch(`/api/user-templates/${templateId}/test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customVariables,
-          customInstructions,
-        }),
-      });
-      const data = await response.json();
-      setTestResult(data);
-    } catch (error) {
-      console.error('Test failed', error);
-    }
-  };
-
-  const saveCustomization = async () => {
-    try {
-      const response = await fetch(`/api/user-templates/${templateId}/customize`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customVariables,
-          customInstructions,
-        }),
-      });
-      const data = await response.json();
-      setPreview(data.preview);
-      alert('Customization saved successfully!');
-    } catch (error) {
-      console.error('Save failed', error);
-      alert('Failed to save customization');
-    }
-  };
-
-  if (loading) {
-    return <div>Loading template...</div>;
-  }
 
   if (!preview) {
-    return <div>Template not found</div>;
+    return <div className="loading">Loading template...</div>;
   }
 
   return (
@@ -180,11 +159,33 @@ export function TemplateEditor({ templateId }: { templateId: string }) {
       </div>
 
       <div className="actions">
-        <button onClick={validateCustomization}>Validate</button>
-        <button onClick={testCustomization}>Test</button>
-        <button onClick={saveCustomization} className="primary">
-          Save
+        <button onClick={handleValidate} className="btn-secondary">
+          Validate
         </button>
+        <button onClick={handleTest} className="btn-secondary" disabled={testing}>
+          {testing ? 'Testing...' : 'Test'}
+        </button>
+        <button onClick={handleSave} className="btn-primary" disabled={saving}>
+          {saving ? 'Saving...' : 'Save'}
+        </button>
+        {preview.hasCustomization && (
+          <button
+            onClick={async () => {
+              if (confirm('Delete this customization?')) {
+                try {
+                  await deleteCustomization();
+                  toast.success('Customization deleted');
+                  router.push(`/templates/${templateId}`);
+                } catch (err) {
+                  toast.error('Failed to delete customization');
+                }
+              }
+            }}
+            className="btn-danger"
+          >
+            Delete
+          </button>
+        )}
       </div>
 
       {validation && (

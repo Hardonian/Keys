@@ -6,10 +6,13 @@
 
 'use client';
 
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { useTemplates, useRecommendedTemplates } from '@/hooks/useTemplates';
 import { TemplateBrowser } from '@/components/TemplateManager/TemplateBrowser';
 import Link from 'next/link';
+import { toast } from '@/components/Toast';
 
 export default function TemplatesPage() {
   const [selectedMilestone, setSelectedMilestone] = useState<string>('');
@@ -148,6 +151,97 @@ function TemplateCard({ template }: { template: any }) {
 }
 
 function CustomizedTemplatesList() {
-  // TODO: Implement customized templates list
-  return <div>Customized templates list coming soon...</div>;
+  const [customizations, setCustomizations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadCustomizations();
+  }, []);
+
+  const loadCustomizations = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/user-templates/customizations', {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCustomizations(data.customizations || []);
+      }
+    } catch (error) {
+      console.error('Failed to load customizations', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (templateId: string) => {
+    if (!confirm('Delete this customization?')) return;
+
+    try {
+      const response = await fetch(`/api/user-templates/${templateId}/customize`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        await loadCustomizations();
+        toast.success('Customization deleted');
+      }
+    } catch (error) {
+      toast.error('Failed to delete customization');
+    }
+  };
+
+  if (loading) {
+    return <div className="loading">Loading customizations...</div>;
+  }
+
+  if (customizations.length === 0) {
+    return (
+      <div className="empty-state">
+        <h3>No Customizations Yet</h3>
+        <p>Start customizing templates to see them here.</p>
+        <Link href="/templates" className="btn-primary">
+          Browse Templates
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="customized-templates-list">
+      {customizations.map((customization) => (
+        <div key={customization.id} className="customization-card">
+          <div className="card-header">
+            <h3>{customization.template_id}</h3>
+            <span className={`badge ${customization.enabled ? 'enabled' : 'disabled'}`}>
+              {customization.enabled ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
+          <div className="card-meta">
+            <span>Updated: {new Date(customization.updated_at).toLocaleDateString()}</span>
+          </div>
+          <div className="card-actions">
+            <Link
+              href={`/templates/${customization.template_id}`}
+              className="btn-secondary"
+            >
+              View
+            </Link>
+            <Link
+              href={`/templates/${customization.template_id}/customize`}
+              className="btn-secondary"
+            >
+              Edit
+            </Link>
+            <button
+              onClick={() => handleDelete(customization.template_id)}
+              className="btn-danger"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
