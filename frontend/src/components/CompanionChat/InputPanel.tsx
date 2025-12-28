@@ -122,22 +122,29 @@ export function InputPanel({
   };
 
   return (
-    <div className="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pb-safe">
+    <div className="border-t border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm pb-safe" role="region" aria-label="Message input">
       {/* Slider Controls - Collapsible on mobile */}
       <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
         {isMobile && (
           <button
             type="button"
             onClick={() => setShowSliders(!showSliders)}
-            className="w-full flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 py-1"
+            className="w-full flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2"
+            aria-expanded={showSliders}
+            aria-controls="vibe-settings"
           >
             <span>Vibe Settings</span>
-            <span className={`transform transition-transform ${showSliders ? 'rotate-180' : ''}`}>
+            <span className={`transform transition-transform ${showSliders ? 'rotate-180' : ''}`} aria-hidden="true">
               ▼
             </span>
           </button>
         )}
-        <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 ${isMobile && !showSliders ? 'hidden' : 'grid'}`}>
+        <div 
+          id="vibe-settings"
+          className={`grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 ${isMobile && !showSliders ? 'hidden' : 'grid'}`}
+          role="group"
+          aria-label="Vibe configuration settings"
+        >
           <SliderControl
             label="Playfulness"
             value={playfulness}
@@ -168,33 +175,48 @@ export function InputPanel({
       />
 
       {/* Message Input - Mobile optimized */}
-      <form onSubmit={handleSubmit} className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex gap-2">
+      <form 
+        onSubmit={handleSubmit} 
+        className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex gap-2"
+        role="form"
+        aria-label="Message input form"
+      >
         {isPremium && (
           <button
             type="button"
             onClick={handleVoiceInput}
             disabled={loading || isVoiceMode}
-            className="px-3 py-2.5 sm:py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="px-3 py-2.5 sm:py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
             title="Voice input (Premium)"
+            aria-label={isVoiceMode ? 'Stop voice input' : 'Start voice input'}
+            aria-pressed={isVoiceMode}
           >
-            {isVoiceMode ? '🎤' : '🎙️'}
+            <span aria-hidden="true">{isVoiceMode ? '🎤' : '🎙️'}</span>
           </button>
         )}
+        <label htmlFor="message-input" className="sr-only">
+          Type your message
+        </label>
         <input
+          id="message-input"
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={isVoiceMode ? 'Listening...' : 'Ask anything...'}
           className="flex-1 px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
           disabled={loading || isVoiceMode}
+          aria-label="Message input"
+          aria-describedby={isVoiceMode ? 'voice-mode-indicator' : undefined}
         />
+        {isVoiceMode && <span id="voice-mode-indicator" className="sr-only">Voice input mode is active</span>}
         <button
           type="submit"
           disabled={!message.trim() || loading || isVoiceMode}
-          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-medium text-sm sm:text-base disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm hover:shadow"
+          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-medium text-sm sm:text-base disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label={loading ? 'Sending message' : 'Send message'}
         >
           <span className="hidden sm:inline">{loading ? 'Sending...' : 'Send'}</span>
-          <span className="sm:hidden">{loading ? '...' : '→'}</span>
+          <span className="sm:hidden" aria-hidden="true">{loading ? '...' : '→'}</span>
         </button>
       </form>
     </div>

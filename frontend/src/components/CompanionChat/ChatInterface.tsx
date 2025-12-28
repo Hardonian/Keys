@@ -97,9 +97,14 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0" role="region" aria-label="Chat interface">
       {/* Messages Area - Mobile optimized */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-3 sm:px-4 md:px-6 py-4 space-y-3 sm:space-y-4">
+      <div 
+        className="flex-1 overflow-y-auto scrollbar-thin px-3 sm:px-4 md:px-6 py-4 space-y-3 sm:space-y-4"
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages"
+      >
         {messages.length === 0 && (
           <div className="text-center text-slate-600 dark:text-slate-400 mt-4 sm:mt-8 px-4">
             <h2 className="text-xl sm:text-2xl font-bold mb-2 text-slate-900 dark:text-slate-50">
@@ -112,25 +117,25 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
               <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Try these prompts:
               </p>
-              <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 space-y-1.5 list-none">
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-1">•</span>
+              <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 space-y-1.5 list-none" role="list">
+                <li className="flex items-start gap-2" role="listitem">
+                  <span className="text-blue-500 mt-1" aria-hidden="true">•</span>
                   <span>&quot;Draft an RFC for adding SSO to our SaaS app&quot;</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-1">•</span>
+                <li className="flex items-start gap-2" role="listitem">
+                  <span className="text-blue-500 mt-1" aria-hidden="true">•</span>
                   <span>&quot;Design the architecture for a telemetry pipeline&quot;</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-1">•</span>
+                <li className="flex items-start gap-2" role="listitem">
+                  <span className="text-blue-500 mt-1" aria-hidden="true">•</span>
                   <span>&quot;Refactor our monolith into modular boundaries&quot;</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-1">•</span>
+                <li className="flex items-start gap-2" role="listitem">
+                  <span className="text-blue-500 mt-1" aria-hidden="true">•</span>
                   <span>&quot;Create a test plan for this critical module&quot;</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-1">•</span>
+                <li className="flex items-start gap-2" role="listitem">
+                  <span className="text-blue-500 mt-1" aria-hidden="true">•</span>
                   <span>&quot;Propose a weekly evolution cycle to reduce tech debt&quot;</span>
                 </li>
               </ul>
@@ -144,11 +149,13 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
             className={`flex ${
               message.role === 'user' ? 'justify-end' : 'justify-start'
             } animate-in fade-in slide-in-from-bottom-2 duration-300`}
+            role="article"
+            aria-label={`${message.role === 'user' ? 'Your' : 'Assistant'} message`}
           >
             <div
               className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] lg:max-w-[55%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 shadow-sm ${
                 message.role === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-sm'
+                  ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-sm'
                   : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 rounded-bl-sm border border-slate-200 dark:border-slate-700'
               }`}
             >
@@ -156,31 +163,36 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
                 {message.content}
               </p>
               {message.output && (
-                <div className="mt-3 sm:mt-4">
+                <div className="mt-3 sm:mt-4" role="region" aria-label="AI suggestions">
                   <SuggestionCard output={message.output} />
                 </div>
               )}
-              <p className={`text-xs mt-2 ${
-                message.role === 'user' 
-                  ? 'text-blue-100' 
-                  : 'text-slate-500 dark:text-slate-400'
-              }`}>
+              <time 
+                className={`text-xs mt-2 block ${
+                  message.role === 'user' 
+                    ? 'text-blue-100' 
+                    : 'text-slate-500 dark:text-slate-400'
+                }`}
+                dateTime={message.timestamp.toISOString()}
+              >
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
+              </time>
             </div>
           </div>
         ))}
 
         {loading && (
-          <div className="flex justify-start animate-in fade-in">
+          <div className="flex justify-start animate-in fade-in" role="status" aria-live="polite" aria-label="AI is thinking">
             <div className="bg-white dark:bg-slate-800 rounded-2xl rounded-bl-sm px-4 py-3 sm:px-5 sm:py-4 border border-slate-200 dark:border-slate-700 shadow-sm">
               <div className="flex items-center gap-2">
-                <div className="flex gap-1">
+                <div className="flex gap-1" aria-hidden="true">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Thinking...</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <span className="sr-only">AI is </span>Thinking...
+                </p>
               </div>
             </div>
           </div>

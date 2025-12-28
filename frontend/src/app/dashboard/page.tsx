@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
+import { Metadata } from 'next';
 import { RunAnalytics } from '@/components/Admin/RunAnalytics';
 import { ActionHistory } from '@/components/BackgroundAgent/ActionHistory';
 import { ProactiveSuggestions } from '@/components/BackgroundAgent/ProactiveSuggestions';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
+// Note: Metadata export doesn't work with 'use client', but we'll handle SEO via layout
 export default function DashboardPage() {
   // TODO: Get userId from auth session
   const userId = 'demo-user'; // Replace with actual auth
@@ -20,73 +22,77 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-gray-600">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <header className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Dashboard
+          </h1>
+          <p className="mt-2 text-base sm:text-lg text-gray-600 dark:text-gray-400">
             Welcome back{profile?.name ? `, ${profile.name}` : ''}
           </p>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <main id="main-content" className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Analytics */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Analytics</h2>
+          <section className="lg:col-span-2 space-y-4 sm:space-y-6" aria-label="Analytics and activity">
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Analytics</h2>
               <RunAnalytics />
             </div>
 
             {/* Action History */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Recent Activity</h2>
               <ActionHistory userId={userId} limit={10} />
             </div>
-          </div>
+          </section>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <aside className="space-y-4 sm:space-y-6" aria-label="Quick information">
             {/* Proactive Suggestions */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Suggestions</h2>
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Suggestions</h2>
               <ProactiveSuggestions userId={userId} />
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Quick Stats</h2>
-              <div className="space-y-4">
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Quick Stats</h2>
+              <dl className="space-y-4">
                 {profile && (
                   <>
                     <div>
-                      <div className="text-sm text-gray-600">Role</div>
-                      <div className="font-medium capitalize">{profile.role || 'Not set'}</div>
+                      <dt className="text-sm text-gray-600 dark:text-gray-400">Role</dt>
+                      <dd className="font-medium capitalize text-gray-900 dark:text-gray-100 mt-1">{profile.role || 'Not set'}</dd>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600">Vertical</div>
-                      <div className="font-medium capitalize">{profile.vertical || 'Not set'}</div>
+                      <dt className="text-sm text-gray-600 dark:text-gray-400">Vertical</dt>
+                      <dd className="font-medium capitalize text-gray-900 dark:text-gray-100 mt-1">{profile.vertical || 'Not set'}</dd>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600">Stack</div>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {Object.entries(profile.stack || {})
-                          .filter(([, enabled]) => enabled)
-                          .map(([key]) => (
-                            <span
-                              key={key}
-                              className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
-                            >
-                              {key}
-                            </span>
-                          ))}
-                      </div>
+                      <dt className="text-sm text-gray-600 dark:text-gray-400 mb-2">Stack</dt>
+                      <dd>
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(profile.stack || {})
+                            .filter(([, enabled]) => enabled)
+                            .map(([key]) => (
+                              <span
+                                key={key}
+                                className="px-2 py-1 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-800 dark:text-blue-200 text-xs rounded-lg font-medium"
+                              >
+                                {key}
+                              </span>
+                            ))}
+                        </div>
+                      </dd>
                     </div>
                   </>
                 )}
-              </div>
+              </dl>
             </div>
-          </div>
-        </div>
+          </aside>
+        </main>
       </div>
     </div>
   );

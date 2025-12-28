@@ -1,0 +1,17 @@
+# robots.txt for Cursor Venture Companion
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+
+# Allow important pages
+Allow: /
+Allow: /chat
+Allow: /dashboard
+Allow: /profile
+Allow: /templates
+
+# Sitemap location
+Sitemap: https://cursor-venture-companion.com/sitemap.xml

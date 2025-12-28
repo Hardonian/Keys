@@ -38,31 +38,38 @@ export default function ProfileSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading settings...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div className="text-center" role="status" aria-live="polite">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading settings...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile Settings</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <header className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Profile Settings
+          </h1>
+        </header>
 
-        <div className="space-y-8">
+        <main id="main-content" className="space-y-6 sm:space-y-8" role="main">
           {/* Vibe Tuner */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Vibe Configuration</h2>
+          <section className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Vibe Configuration</h2>
             <VibeTuner
               playfulness={vibeConfig?.playfulness || 50}
               revenueFocus={vibeConfig?.revenue_focus || 60}
               investorPerspective={vibeConfig?.investor_perspective || 40}
               onChange={handleVibeChange}
             />
-          </div>
+          </section>
 
           {/* Vibe Presets */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <section className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
             <VibePresets
               userId={userId}
               currentVibe={{
@@ -72,31 +79,31 @@ export default function ProfileSettingsPage() {
               }}
               onLoadPreset={handleLoadPreset}
             />
-          </div>
+          </section>
 
           {/* Profile Info */}
           {profile && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
-              <div className="space-y-4">
+            <section className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Profile Information</h2>
+              <dl className="space-y-4">
                 <div>
-                  <div className="text-sm text-gray-600">Role</div>
-                  <div className="font-medium capitalize">{profile.role || 'Not set'}</div>
+                  <dt className="text-sm text-gray-600 dark:text-gray-400">Role</dt>
+                  <dd className="font-medium capitalize text-gray-900 dark:text-gray-100 mt-1">{profile.role || 'Not set'}</dd>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600">Vertical</div>
-                  <div className="font-medium capitalize">{profile.vertical || 'Not set'}</div>
+                  <dt className="text-sm text-gray-600 dark:text-gray-400">Vertical</dt>
+                  <dd className="font-medium capitalize text-gray-900 dark:text-gray-100 mt-1">{profile.vertical || 'Not set'}</dd>
                 </div>
                 {profile.brand_voice && (
                   <div>
-                    <div className="text-sm text-gray-600">Brand Voice</div>
-                    <div className="font-medium">{profile.brand_voice}</div>
+                    <dt className="text-sm text-gray-600 dark:text-gray-400">Brand Voice</dt>
+                    <dd className="font-medium text-gray-900 dark:text-gray-100 mt-1">{profile.brand_voice}</dd>
                   </div>
                 )}
-              </div>
-            </div>
+              </dl>
+            </section>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
