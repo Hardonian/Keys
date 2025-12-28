@@ -1,0 +1,140 @@
+name: Verify CI/CD Setup
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - '.github/dependabot.yml'
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  verify-secrets:
+    name: Verify Required Secrets
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify Vercel Secrets
+        run: |
+          echo "## 🔍 Verifying GitHub Secrets" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if secrets are accessible (they'll be empty if not set, but won't error)
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "❌ VERCEL_TOKEN is not set" >> $GITHUB_STEP_SUMMARY
+            echo "::error::VERCEL_TOKEN secret is missing"
+          else
+            echo "✅ VERCEL_TOKEN is configured" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "❌ VERCEL_ORG_ID is not set" >> $GITHUB_STEP_SUMMARY
+            echo "::error::VERCEL_ORG_ID secret is missing"
+          else
+            echo "✅ VERCEL_ORG_ID is configured" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "❌ VERCEL_PROJECT_ID is not set" >> $GITHUB_STEP_SUMMARY
+            echo "::error::VERCEL_PROJECT_ID secret is missing"
+          else
+            echo "✅ VERCEL_PROJECT_ID is configured" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Application Secrets" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
+            echo "⚠️ SUPABASE_URL is not set (optional for CI)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ SUPABASE_URL is configured" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ]; then
+            echo "⚠️ NEXT_PUBLIC_SUPABASE_URL is not set (required for builds)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ NEXT_PUBLIC_SUPABASE_URL is configured" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Verify Workflow Files
+        run: |
+          echo "## 📋 Verifying Workflow Files" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          WORKFLOWS=(
+            "ci.yml"
+            "vercel-preview.yml"
+            "vercel-production.yml"
+            "code-review.yml"
+            "pr-status.yml"
+            "dependabot-auto-merge.yml"
+            "docs.yml"
+            "cleanup.yml"
+          )
+          
+          for workflow in "${WORKFLOWS[@]}"; do
+            if [ -f ".github/workflows/$workflow" ]; then
+              echo "✅ $workflow exists" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ $workflow is missing" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration Files" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f ".github/dependabot.yml" ]; then
+            echo "✅ dependabot.yml exists" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ dependabot.yml is missing" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -f ".github/labeler.yml" ]; then
+            echo "✅ labeler.yml exists" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ labeler.yml is missing" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -f "frontend/vercel.json" ]; then
+            echo "✅ frontend/vercel.json exists" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ frontend/vercel.json is missing (optional)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Test Vercel CLI Connection
+        if: secrets.VERCEL_TOKEN != ''
+        run: |
+          echo "## 🔗 Testing Vercel Connection" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          npm install -g vercel@latest
+          
+          # Test authentication
+          if vercel whoami --token="${{ secrets.VERCEL_TOKEN }}" 2>&1 | tee vercel-whoami.txt; then
+            echo "✅ Vercel authentication successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Authenticated as:" >> $GITHUB_STEP_SUMMARY
+            cat vercel-whoami.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Vercel authentication failed" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Invalid VERCEL_TOKEN"
+          fi
+        continue-on-error: true
+
+      - name: Setup Summary
+        run: |
+          echo "## ✅ Setup Verification Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Create a test PR to verify workflows" >> $GITHUB_STEP_SUMMARY
+          echo "2. Check that Vercel preview deploys automatically" >> $GITHUB_STEP_SUMMARY
+          echo "3. Verify code review comments appear" >> $GITHUB_STEP_SUMMARY
+          echo "4. Monitor workflow runs in the Actions tab" >> $GITHUB_STEP_SUMMARY

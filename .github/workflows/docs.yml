@@ -1,0 +1,87 @@
+name: Documentation Updates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '*.md'
+      - 'README.md'
+      - 'QUICK_START.md'
+      - 'FINAL_STATUS.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate-docs:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for broken links
+        run: |
+          echo "Checking for broken markdown links..."
+          # This is a placeholder - you can add a link checker tool here
+          find . -name "*.md" -type f | while read file; do
+            echo "Checking $file"
+          done
+
+      - name: Validate markdown syntax
+        uses: DavidAnson/markdownlint-cli2-action@v15
+        with:
+          globs: |
+            **/*.md
+            !node_modules/**
+            !.git/**
+
+  update-docs-index:
+    name: Update Documentation Index
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate documentation index
+        run: |
+          cat > docs/INDEX.md << 'EOF'
+          # Documentation Index
+          
+          ## Getting Started
+          - [Quick Start Guide](../QUICK_START.md)
+          - [Final Status](../FINAL_STATUS.md)
+          
+          ## API Documentation
+          - [OpenAPI Specification](./api/openapi.yaml)
+          
+          ## Project Structure
+          - Backend: `/backend`
+          - Frontend: `/frontend`
+          - Electron: `/electron`
+          - Tauri: `/tauri`
+          
+          ## CI/CD
+          - GitHub Actions workflows: `/.github/workflows/`
+          - Dependabot configuration: `/.github/dependabot.yml`
+          
+          ---
+          *Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")*
+          EOF
+
+      - name: Commit documentation index
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/INDEX.md
+          git diff --staged --quiet || git commit -m "docs: update documentation index [skip ci]"
+          git push
+        continue-on-error: true

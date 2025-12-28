@@ -1,0 +1,229 @@
+name: Automated Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: Run ESLint Analysis
+        id: eslint-analysis
+        run: |
+          echo "## ESLint Analysis" >> review-comments.md
+          echo "" >> review-comments.md
+          
+          cd backend
+          npm run lint 2>&1 | tee ../backend-lint.txt || true
+          if [ -s ../backend-lint.txt ]; then
+            echo "### Backend Issues" >> ../review-comments.md
+            echo '```' >> ../review-comments.md
+            head -50 ../backend-lint.txt >> ../review-comments.md
+            echo '```' >> ../review-comments.md
+            echo "" >> ../review-comments.md
+          fi
+          
+          cd ../frontend
+          npm run lint 2>&1 | tee ../frontend-lint.txt || true
+          if [ -s ../frontend-lint.txt ]; then
+            echo "### Frontend Issues" >> ../review-comments.md
+            echo '```' >> ../review-comments.md
+            head -50 ../frontend-lint.txt >> ../review-comments.md
+            echo '```' >> ../review-comments.md
+            echo "" >> ../review-comments.md
+          fi
+        continue-on-error: true
+
+      - name: Type Check Analysis
+        id: typecheck-analysis
+        run: |
+          echo "## TypeScript Type Check" >> review-comments.md
+          echo "" >> review-comments.md
+          
+          cd backend
+          npm run type-check 2>&1 | tee ../backend-typecheck.txt || true
+          if [ -s ../backend-typecheck.txt ]; then
+            echo "### Backend Type Errors" >> ../review-comments.md
+            echo '```' >> ../review-comments.md
+            head -50 ../backend-typecheck.txt >> ../review-comments.md
+            echo '```' >> ../review-comments.md
+            echo "" >> ../review-comments.md
+          fi
+          
+          cd ../frontend
+          npm run type-check 2>&1 | tee ../frontend-typecheck.txt || true
+          if [ -s ../frontend-typecheck.txt ]; then
+            echo "### Frontend Type Errors" >> ../review-comments.md
+            echo '```' >> ../review-comments.md
+            head -50 ../frontend-typecheck.txt >> ../review-comments.md
+            echo '```' >> ../review-comments.md
+            echo "" >> ../review-comments.md
+          fi
+        continue-on-error: true
+
+      - name: Security Check
+        id: security-check
+        run: |
+          echo "## Security Analysis" >> review-comments.md
+          echo "" >> review-comments.md
+          
+          # Check for common security issues
+          echo "### Dependency Vulnerabilities" >> review-comments.md
+          echo "Run \`npm audit\` locally or check GitHub Dependabot alerts." >> review-comments.md
+          echo "" >> review-comments.md
+          
+          # Check for hardcoded secrets patterns
+          echo "### Secret Detection" >> review-comments.md
+          if grep -r -E "(api[_-]?key|secret|password|token)\s*[:=]\s*['\"][^'\"]+['\"]" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" . 2>/dev/null | grep -v node_modules | grep -v ".env.example" | head -10 > secrets-check.txt; then
+            echo "⚠️ Potential hardcoded secrets detected:" >> review-comments.md
+            echo '```' >> review-comments.md
+            cat secrets-check.txt >> review-comments.md
+            echo '```' >> review-comments.md
+          else
+            echo "✅ No obvious hardcoded secrets detected." >> review-comments.md
+          fi
+          echo "" >> review-comments.md
+        continue-on-error: true
+
+      - name: Code Quality Metrics
+        id: code-metrics
+        run: |
+          echo "## Code Quality Metrics" >> review-comments.md
+          echo "" >> review-comments.md
+          
+          # Count files changed
+          FILES_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)
+          echo "### Files Changed: $FILES_CHANGED" >> review-comments.md
+          echo "" >> review-comments.md
+          
+          # Count lines changed
+          LINES_ADDED=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{sum+=$1} END {print sum}')
+          LINES_REMOVED=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{sum+=$2} END {print sum}')
+          echo "### Lines Changed:" >> review-comments.md
+          echo "- **Added:** $LINES_ADDED" >> review-comments.md
+          echo "- **Removed:** $LINES_REMOVED" >> review-comments.md
+          echo "" >> review-comments.md
+          
+          # Check for large files
+          echo "### Large Files (>500 lines)" >> review-comments.md
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | while read file; do
+            if [ -f "$file" ]; then
+              LINES=$(wc -l < "$file" 2>/dev/null || echo 0)
+              if [ "$LINES" -gt 500 ]; then
+                echo "- \`$file\`: $LINES lines" >> review-comments.md
+              fi
+            fi
+          done
+          echo "" >> review-comments.md
+        continue-on-error: true
+
+      - name: Test Coverage Check
+        id: coverage-check
+        run: |
+          echo "## Test Coverage" >> review-comments.md
+          echo "" >> review-comments.md
+          
+          cd backend
+          if npm run test:coverage 2>&1 | tee ../backend-coverage.txt; then
+            if grep -q "Coverage" ../backend-coverage.txt; then
+              echo "### Backend Coverage" >> ../review-comments.md
+              echo '```' >> ../review-comments.md
+              grep -A 5 "Coverage" ../backend-coverage.txt >> ../review-comments.md || true
+              echo '```' >> ../review-comments.md
+            fi
+          fi
+          
+          cd ../frontend
+          if npm run test:coverage 2>&1 | tee ../frontend-coverage.txt; then
+            if grep -q "Coverage" ../frontend-coverage.txt; then
+              echo "### Frontend Coverage" >> ../review-comments.md
+              echo '```' >> ../review-comments.md
+              grep -A 5 "Coverage" ../frontend-coverage.txt >> ../review-comments.md || true
+              echo '```' >> ../review-comments.md
+            fi
+          fi
+          echo "" >> ../review-comments.md
+        continue-on-error: true
+
+      - name: Post Review Comment
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const prNumber = context.payload.pull_request.number;
+            
+            let reviewBody = '';
+            if (fs.existsSync('review-comments.md')) {
+              reviewBody = fs.readFileSync('review-comments.md', 'utf8');
+            } else {
+              reviewBody = '## ✅ Code Review Complete\n\nAll checks passed!';
+            }
+            
+            // Add header
+            const header = `## 🤖 Automated Code Review
+            
+            This is an automated review of your PR. Please address any issues before merging.
+            
+            ---
+            
+            `;
+            
+            const footer = `
+            
+            ---
+            *Review generated by [GitHub Actions](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})*
+            `;
+            
+            const fullComment = header + reviewBody + footer;
+            
+            // Find existing review comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('Automated Code Review')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: fullComment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: fullComment
+              });
+            }

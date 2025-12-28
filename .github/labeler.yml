@@ -1,0 +1,59 @@
+# Labeler configuration for automatic PR labeling
+# https://github.com/actions/labeler
+
+backend:
+  - backend/**/*
+  - '**/*backend*'
+  - '**/backend/**'
+
+frontend:
+  - frontend/**/*
+  - '**/*frontend*'
+  - '**/frontend/**'
+
+electron:
+  - electron/**/*
+  - '**/*electron*'
+
+tauri:
+  - tauri/**/*
+  - '**/*tauri*'
+
+ci-cd:
+  - .github/workflows/**/*
+  - .github/dependabot.yml
+  - '**/*.github/**'
+
+documentation:
+  - docs/**/*
+  - '**/*.md'
+  - README.md
+  - QUICK_START.md
+  - FINAL_STATUS.md
+
+dependencies:
+  - '**/package.json'
+  - '**/package-lock.json'
+  - '**/yarn.lock'
+  - '**/pnpm-lock.yaml'
+
+security:
+  - '**/.github/workflows/security*'
+  - '**/security*'
+  - '**/*security*'
+
+database:
+  - backend/supabase/**/*
+  - '**/*migration*'
+  - '**/*.sql'
+
+api:
+  - docs/api/**/*
+  - backend/src/**/*api*
+  - backend/src/**/*route*
+
+testing:
+  - '**/__tests__/**'
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - '**/vitest.config.*'

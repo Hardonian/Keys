@@ -1,0 +1,208 @@
+name: PR Status Summary
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  workflow_run:
+    workflows: ["CI", "Code Review", "Vercel Preview Deployment"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: read
+
+jobs:
+  pr-status-summary:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event.workflow_run.event == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get PR Status
+        id: pr-status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request?.number || 
+                            context.payload.workflow_run?.pull_requests?.[0]?.number;
+            
+            if (!prNumber) {
+              console.log('No PR number found');
+              return;
+            }
+            
+            // Get all check runs for this PR
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request?.head?.sha || 
+                   context.payload.workflow_run?.head_sha,
+            });
+            
+            // Get workflow runs
+            const { data: workflowRuns } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head_sha: context.payload.pull_request?.head?.sha || 
+                       context.payload.workflow_run?.head_sha,
+              per_page: 10,
+            });
+            
+            // Organize statuses
+            const statuses = {
+              ci: { status: 'pending', url: '', name: 'CI' },
+              codeReview: { status: 'pending', url: '', name: 'Code Review' },
+              vercelPreview: { status: 'pending', url: '', name: 'Vercel Preview' },
+              security: { status: 'pending', url: '', name: 'Security Scan' },
+            };
+            
+            // Check CI status
+            const ciRun = workflowRuns.workflow_runs.find(run => 
+              run.name === 'CI' && run.head_sha === (context.payload.pull_request?.head?.sha || context.payload.workflow_run?.head_sha)
+            );
+            if (ciRun) {
+              statuses.ci.status = ciRun.conclusion || ciRun.status;
+              statuses.ci.url = ciRun.html_url;
+            }
+            
+            // Check Code Review status
+            const reviewRun = workflowRuns.workflow_runs.find(run => 
+              run.name === 'Automated Code Review' && run.head_sha === (context.payload.pull_request?.head?.sha || context.payload.workflow_run?.head_sha)
+            );
+            if (reviewRun) {
+              statuses.codeReview.status = reviewRun.conclusion || reviewRun.status;
+              statuses.codeReview.url = reviewRun.html_url;
+            }
+            
+            // Check Vercel Preview status
+            const vercelRun = workflowRuns.workflow_runs.find(run => 
+              run.name === 'Vercel Preview Deployment' && run.head_sha === (context.payload.pull_request?.head?.sha || context.payload.workflow_run?.head_sha)
+            );
+            if (vercelRun) {
+              statuses.vercelPreview.status = vercelRun.conclusion || vercelRun.status;
+              statuses.vercelPreview.url = vercelRun.html_url;
+            }
+            
+            // Check Security status
+            const securityCheck = checkRuns.check_runs.find(run => 
+              run.name.includes('Snyk') || run.name.includes('Security')
+            );
+            if (securityCheck) {
+              statuses.security.status = securityCheck.conclusion || securityCheck.status;
+              statuses.security.url = securityCheck.html_url;
+            }
+            
+            // Get PR comments to find preview URL
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const previewComment = comments.find(comment => 
+              comment.body.includes('Vercel Preview Deployment')
+            );
+            
+            let previewUrl = '';
+            if (previewComment) {
+              const urlMatch = previewComment.body.match(/https:\/\/[^ ]*\.vercel\.app/);
+              if (urlMatch) {
+                previewUrl = urlMatch[0];
+              }
+            }
+            
+            return {
+              prNumber,
+              statuses,
+              previewUrl,
+            };
+
+      - name: Generate Status Table
+        id: generate-table
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request?.number || 
+                            context.payload.workflow_run?.pull_requests?.[0]?.number;
+            
+            if (!prNumber) return;
+            
+            // Get status from previous step
+            const statuses = {
+              ci: { status: 'pending', url: '', name: 'CI' },
+              codeReview: { status: 'pending', url: '', name: 'Code Review' },
+              vercelPreview: { status: 'pending', url: '', name: 'Vercel Preview' },
+              security: { status: 'pending', url: '', name: 'Security Scan' },
+            };
+            
+            const getStatusIcon = (status) => {
+              if (status === 'success' || status === 'completed') return '✅';
+              if (status === 'failure' || status === 'cancelled') return '❌';
+              if (status === 'in_progress' || status === 'queued') return '🔄';
+              return '⏳';
+            };
+            
+            const getStatusText = (status) => {
+              if (status === 'success' || status === 'completed') return 'Passed';
+              if (status === 'failure' || status === 'cancelled') return 'Failed';
+              if (status === 'in_progress' || status === 'queued') return 'Running';
+              return 'Pending';
+            };
+            
+            let table = `## 📊 PR Status Summary
+            
+            | Check | Status | Details |
+            |-------|--------|---------|`;
+            
+            for (const [key, check] of Object.entries(statuses)) {
+              const icon = getStatusIcon(check.status);
+              const text = getStatusText(check.status);
+              const link = check.url ? `[View](${check.url})` : '-';
+              table += `\n| ${icon} ${check.name} | ${text} | ${link} |`;
+            }
+            
+            // Add preview URL if available
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const previewComment = comments.find(comment => 
+              comment.body.includes('Vercel Preview Deployment')
+            );
+            
+            if (previewComment) {
+              const urlMatch = previewComment.body.match(/https:\/\/[^ ]*\.vercel\.app/);
+              if (urlMatch) {
+                table += `\n\n### 🚀 Preview Deployment\n\n**URL:** ${urlMatch[0]}`;
+              }
+            }
+            
+            table += `\n\n---\n*Last updated: ${new Date().toISOString()}*`;
+            
+            // Find existing status comment
+            const botComments = comments.filter(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('PR Status Summary')
+            );
+            
+            if (botComments.length > 0) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComments[0].id,
+                body: table
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: table
+              });
+            }
