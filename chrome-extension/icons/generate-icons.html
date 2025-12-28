@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Extension Icons</title>
+</head>
+<body>
+  <h1>Template Manager Icons</h1>
+  <p>This page generates the required icon files.</p>
+  
+  <canvas id="icon16" width="16" height="16"></canvas>
+  <canvas id="icon48" width="48" height="48"></canvas>
+  <canvas id="icon128" width="128" height="128"></canvas>
+  
+  <script>
+    function generateIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      
+      // Background
+      ctx.fillStyle = '#007bff';
+      ctx.fillRect(0, 0, size, size);
+      
+      // Template icon (document with lines)
+      ctx.fillStyle = '#ffffff';
+      const padding = size * 0.15;
+      const docWidth = size - padding * 2;
+      const docHeight = size - padding * 2;
+      
+      // Document shape
+      ctx.fillRect(padding, padding, docWidth, docHeight);
+      
+      // Lines representing template
+      ctx.fillStyle = '#007bff';
+      const lineHeight = docHeight / 6;
+      const linePadding = padding + docWidth * 0.2;
+      const lineWidth = docWidth * 0.6;
+      
+      for (let i = 0; i < 4; i++) {
+        ctx.fillRect(linePadding, padding + lineHeight * (i + 1), lineWidth, lineHeight * 0.3);
+      }
+      
+      // Download link
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `icon${size}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+    
+    // Generate all icons
+    setTimeout(() => {
+      generateIcon(document.getElementById('icon16'), 16);
+      setTimeout(() => {
+        generateIcon(document.getElementById('icon48'), 48);
+        setTimeout(() => {
+          generateIcon(document.getElementById('icon128'), 128);
+        }, 500);
+      }, 500);
+    }, 500);
+  </script>
+</body>
+</html>

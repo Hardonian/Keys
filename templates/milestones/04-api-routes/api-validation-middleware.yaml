@@ -1,0 +1,107 @@
+id: api-validation-middleware
+milestone: 04-api-routes
+name: Request Validation Middleware
+description: Input validation middleware using Zod for type-safe request validation
+priority: high
+dependencies: [api-route-structure]
+tags: [api, validation, middleware, security]
+stack: [express, fastify, typescript]
+security_level: required
+optimization_level: optional
+
+content: |
+  import { Request, Response, NextFunction } from 'express';
+  import { ZodSchema, ZodError } from 'zod';
+
+  /**
+   * Request Validation Middleware
+   * 
+   * SECURITY CONSIDERATIONS:
+   * - Validates all input before processing
+   * - Prevents injection attacks through type checking
+   * - Sanitizes input automatically via Zod coercion
+   * - Returns clear error messages without exposing internals
+   * - Validates request size to prevent DoS
+   * 
+   * OPTIMIZATION:
+   * - Zod schemas are compiled once and reused
+   * - Consider caching validation results for idempotent requests
+   * - Early validation prevents unnecessary processing
+   */
+  export function validateRequest(schema: {
+    body?: ZodSchema;
+    query?: ZodSchema;
+    params?: ZodSchema;
+  }) {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        // Validate request body
+        if (schema.body) {
+          req.body = await schema.body.parseAsync(req.body);
+        }
+
+        // Validate query parameters
+        if (schema.query) {
+          req.query = await schema.query.parseAsync(req.query);
+        }
+
+        // Validate route parameters
+        if (schema.params) {
+          req.params = await schema.params.parseAsync(req.params);
+        }
+
+        next();
+      } catch (error) {
+        if (error instanceof ZodError) {
+          res.status(400).json({
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Invalid request data',
+              details: error.errors.map(err => ({
+                path: err.path.join('.'),
+                message: err.message,
+              })),
+            },
+            requestId: req.headers['x-request-id'],
+          });
+          return;
+        }
+
+        // Unexpected error
+        console.error('Validation middleware error:', error);
+        res.status(500).json({
+          error: {
+            code: 'INTERNAL_ERROR',
+            message: 'Validation error',
+          },
+          requestId: req.headers['x-request-id'],
+        });
+      }
+    };
+  }
+
+  /**
+   * Example usage:
+   * 
+   * import { z } from 'zod';
+   * 
+   * const createUserSchema = {
+   *   body: z.object({
+   *     email: z.string().email(),
+   *     password: z.string().min(8),
+   *     name: z.string().min(1).max(100),
+   *   }),
+   * };
+   * 
+   * router.post('/users', validateRequest(createUserSchema), createUserHandler);
+   */
+
+variables:
+  - name: framework
+    description: Web framework being used
+    required: false
+    default: "express"
+    examples:
+      - "express"
+      - "fastify"
+      - "nextjs"

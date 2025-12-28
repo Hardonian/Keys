@@ -14,7 +14,7 @@ export function initSentry(): void {
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
     ],
-    beforeSend(event, hint) {
+    beforeSend(event, _hint) {
       // Filter out sensitive data
       if (event.request) {
         if (event.request.headers) {

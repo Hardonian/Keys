@@ -1,0 +1,196 @@
+id: init-project-structure
+milestone: 01-initialization
+name: Project Structure Setup
+description: Comprehensive prompt for scaffolding project structure with best practices
+priority: high
+dependencies: []
+tags: [structure, scaffolding, foundation, setup]
+stack: [node, typescript, monorepo, fullstack]
+security_level: optional
+optimization_level: optional
+
+# Mega Prompt Template - Static base that gets modified dynamically
+mega_prompt: |
+  You are an expert full-stack developer specializing in secure, optimized, and maintainable code scaffolding.
+
+  ## Your Role
+  Role: {{user_role|default:developer}}
+  Experience Level: {{experience_level|default:intermediate}}
+  Project Type: {{project_type|default:fullstack}}
+  
+  ## Project Context
+  {{#if company_context}}
+  Company Context: {{company_context}}
+  {{/if}}
+  
+  {{#if brand_voice}}
+  Brand Voice: {{brand_voice}}
+  {{/if}}
+
+  ## Task: Project Structure Setup
+  
+  Your task is to scaffold a complete project structure following industry best practices for:
+  - Code organization and maintainability
+  - Type safety and error handling
+  - Security best practices
+  - Performance optimization
+  - Testing infrastructure
+  - CI/CD readiness
+  
+  ## Tech Stack Requirements
+  
+  {{#if stack.typescript}}
+  - TypeScript with strict mode enabled
+  - Path aliases configured for clean imports
+  - Type definitions for all dependencies
+  {{/if}}
+  
+  {{#if stack.monorepo}}
+  - Monorepo structure with workspaces
+  - Shared packages and utilities
+  - Independent versioning per package
+  {{/if}}
+  
+  {{#if stack.frontend}}
+  - Frontend framework: {{stack.frontend_framework|default:Next.js}}
+  - Styling: {{stack.styling|default:Tailwind CSS}}
+  - State management: {{stack.state_management|default:Zustand}}
+  {{/if}}
+  
+  {{#if stack.backend}}
+  - Backend framework: {{stack.backend_framework|default:Express}}
+  - API style: {{stack.api_style|default:REST}}
+  - Database: {{stack.database|default:PostgreSQL}}
+  {{/if}}
+
+  ## Structure Requirements
+  
+  1. **Root Level**
+     - Clear separation of concerns (frontend/, backend/, shared/)
+     - Configuration files properly organized
+     - Environment variable management
+     - Documentation structure (README.md, docs/)
+  
+  2. **Frontend Structure** (if applicable)
+     - Component-based architecture
+     - Feature-based folder organization
+     - Shared utilities and hooks
+     - Type definitions
+     - Test files co-located
+  
+  3. **Backend Structure** (if applicable)
+     - Layered architecture (routes/, services/, middleware/, utils/)
+     - Domain-driven organization
+     - Error handling infrastructure
+     - Logging and monitoring setup
+     - Database migration structure
+  
+  4. **Shared Code**
+     - Type definitions
+     - Utility functions
+     - Constants and configuration
+     - Validation schemas
+
+  ## Security Considerations
+  
+  {{#if security_focus}}
+  - Environment variables never committed
+  - Secrets management strategy
+  - Input validation at boundaries
+  - Secure defaults for all configurations
+  - Security headers configured
+  {{/if}}
+
+  ## Performance Considerations
+  
+  {{#if performance_focus}}
+  - Code splitting configured
+  - Lazy loading where appropriate
+  - Caching strategy defined
+  - Database indexing plan
+  - Bundle size optimization
+  {{/if}}
+
+  ## Quality Assurance
+  
+  - Linting configured (ESLint)
+  - Formatting configured (Prettier)
+  - Type checking (TypeScript strict)
+  - Testing framework setup
+  - Pre-commit hooks configured
+  - CI/CD pipeline structure
+
+  ## Output Format
+  
+  Provide:
+  1. Complete directory structure (tree format)
+  2. Key configuration files with explanations
+  3. Package.json dependencies with versions
+  4. Setup instructions
+  5. Next steps for development
+
+  ## Style Guidelines
+  
+  {{#if style.concise}}
+  Be concise and to the point. Focus on essential structure.
+  {{/if}}
+  
+  {{#if style.detailed}}
+  Provide comprehensive details, explanations, and rationale for each decision.
+  {{/if}}
+  
+  {{#if style.technical}}
+  Use technical terminology. Include implementation details and best practices.
+  {{/if}}
+
+  {{#if custom_instructions}}
+  Additional Instructions: {{custom_instructions}}
+  {{/if}}
+
+variables:
+  - name: user_role
+    description: User's role (founder, pm, engineer, etc.)
+    required: false
+    default: "developer"
+  
+  - name: experience_level
+    description: Experience level (beginner, intermediate, advanced)
+    required: false
+    default: "intermediate"
+  
+  - name: project_type
+    description: Type of project (fullstack, frontend, backend, api)
+    required: false
+    default: "fullstack"
+  
+  - name: company_context
+    description: Company or project context
+    required: false
+  
+  - name: brand_voice
+    description: Brand voice or coding style preferences
+    required: false
+  
+  - name: stack
+    description: Tech stack configuration object
+    required: true
+    type: object
+  
+  - name: security_focus
+    description: Whether to emphasize security
+    required: false
+    default: true
+  
+  - name: performance_focus
+    description: Whether to emphasize performance
+    required: false
+    default: true
+  
+  - name: style
+    description: Output style preferences
+    required: false
+    type: object
+  
+  - name: custom_instructions
+    description: Additional custom instructions
+    required: false

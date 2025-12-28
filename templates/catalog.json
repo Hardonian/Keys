@@ -1,0 +1,495 @@
+{
+  "version": "1.0.0",
+  "description": "Template catalog for project scaffolding milestones",
+  "milestones": {
+    "01-initialization": {
+      "name": "Project Initialization",
+      "description": "Foundation setup: project structure, dependencies, configuration",
+      "templates": [
+        {
+          "id": "init-project-structure",
+          "name": "Project Structure Setup",
+          "description": "Creates standard monorepo/full-stack project structure",
+          "priority": "high",
+          "dependencies": [],
+          "tags": ["structure", "scaffolding", "foundation"],
+          "stack": ["node", "typescript", "monorepo"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "init-env-config",
+          "name": "Environment Configuration",
+          "description": "Sets up environment variable management and validation",
+          "priority": "high",
+          "dependencies": [],
+          "tags": ["config", "environment", "secrets"],
+          "stack": ["node", "typescript"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "init-typescript-config",
+          "name": "TypeScript Configuration",
+          "description": "TypeScript setup with strict mode and path aliases",
+          "priority": "high",
+          "dependencies": [],
+          "tags": ["typescript", "config", "types"],
+          "stack": ["typescript"],
+          "security_level": "optional",
+          "optimization_level": "recommended"
+        },
+        {
+          "id": "init-logging",
+          "name": "Logging Infrastructure",
+          "description": "Structured logging with request IDs and log levels",
+          "priority": "medium",
+          "dependencies": ["init-project-structure"],
+          "tags": ["logging", "observability", "debugging"],
+          "stack": ["node", "typescript"],
+          "security_level": "recommended",
+          "optimization_level": "optional"
+        }
+      ]
+    },
+    "02-authentication": {
+      "name": "Authentication & Authorization",
+      "description": "User authentication, authorization, and session management",
+      "templates": [
+        {
+          "id": "auth-jwt-middleware",
+          "name": "JWT Authentication Middleware",
+          "description": "Express middleware for JWT token verification",
+          "priority": "high",
+          "dependencies": ["init-project-structure"],
+          "tags": ["auth", "jwt", "middleware", "security"],
+          "stack": ["express", "node", "typescript"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "auth-rbac-middleware",
+          "name": "Role-Based Access Control",
+          "description": "RBAC middleware for route protection",
+          "priority": "high",
+          "dependencies": ["auth-jwt-middleware"],
+          "tags": ["auth", "rbac", "authorization", "security"],
+          "stack": ["express", "node", "typescript"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "auth-session-management",
+          "name": "Session Management",
+          "description": "Session handling with secure cookies and refresh tokens",
+          "priority": "medium",
+          "dependencies": ["auth-jwt-middleware"],
+          "tags": ["auth", "session", "cookies", "security"],
+          "stack": ["express", "node", "typescript"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "auth-oauth-providers",
+          "name": "OAuth Provider Integration",
+          "description": "OAuth 2.0 integration for Google, GitHub, etc.",
+          "priority": "medium",
+          "dependencies": ["auth-jwt-middleware"],
+          "tags": ["auth", "oauth", "social-login"],
+          "stack": ["express", "node", "typescript"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        }
+      ]
+    },
+    "03-database-schema": {
+      "name": "Database Schema & RLS",
+      "description": "Database tables, relationships, migrations, and Row Level Security",
+      "templates": [
+        {
+          "id": "db-migration-structure",
+          "name": "Migration System",
+          "description": "Database migration structure and versioning",
+          "priority": "high",
+          "dependencies": ["init-project-structure"],
+          "tags": ["database", "migrations", "schema"],
+          "stack": ["postgresql", "supabase", "prisma"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "db-rls-policies",
+          "name": "Row Level Security Policies",
+          "description": "RLS policies for multi-tenant and user-scoped data",
+          "priority": "high",
+          "dependencies": ["db-migration-structure", "auth-jwt-middleware"],
+          "tags": ["database", "rls", "security", "multi-tenant"],
+          "stack": ["postgresql", "supabase"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "db-indexes-optimization",
+          "name": "Database Indexes",
+          "description": "Performance indexes for common query patterns",
+          "priority": "medium",
+          "dependencies": ["db-migration-structure"],
+          "tags": ["database", "indexes", "performance"],
+          "stack": ["postgresql", "supabase"],
+          "security_level": "optional",
+          "optimization_level": "required"
+        },
+        {
+          "id": "db-constraints-validation",
+          "name": "Database Constraints",
+          "description": "Foreign keys, unique constraints, check constraints",
+          "priority": "high",
+          "dependencies": ["db-migration-structure"],
+          "tags": ["database", "constraints", "validation", "integrity"],
+          "stack": ["postgresql", "supabase"],
+          "security_level": "recommended",
+          "optimization_level": "optional"
+        }
+      ]
+    },
+    "04-api-routes": {
+      "name": "API Routes & Middleware",
+      "description": "REST/GraphQL endpoints, middleware stack, validation",
+      "templates": [
+        {
+          "id": "api-route-structure",
+          "name": "API Route Structure",
+          "description": "Standard REST API route organization",
+          "priority": "high",
+          "dependencies": ["init-project-structure"],
+          "tags": ["api", "routes", "rest"],
+          "stack": ["express", "fastify", "typescript"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "api-validation-middleware",
+          "name": "Request Validation Middleware",
+          "description": "Input validation using Zod or similar",
+          "priority": "high",
+          "dependencies": ["api-route-structure"],
+          "tags": ["api", "validation", "middleware", "security"],
+          "stack": ["express", "fastify", "typescript"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "api-error-handling",
+          "name": "Error Handling Middleware",
+          "description": "Centralized error handling and error responses",
+          "priority": "high",
+          "dependencies": ["api-route-structure"],
+          "tags": ["api", "error-handling", "middleware"],
+          "stack": ["express", "fastify", "typescript"],
+          "security_level": "recommended",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "api-rate-limiting",
+          "name": "Rate Limiting Middleware",
+          "description": "API rate limiting with Redis or in-memory store",
+          "priority": "high",
+          "dependencies": ["api-route-structure"],
+          "tags": ["api", "rate-limiting", "security", "middleware"],
+          "stack": ["express", "fastify", "redis"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "api-pagination",
+          "name": "Pagination Utilities",
+          "description": "Cursor-based and offset pagination helpers",
+          "priority": "medium",
+          "dependencies": ["api-route-structure"],
+          "tags": ["api", "pagination", "performance"],
+          "stack": ["express", "fastify", "typescript"],
+          "security_level": "optional",
+          "optimization_level": "required"
+        }
+      ]
+    },
+    "05-frontend-routes": {
+      "name": "Frontend Routes & Components",
+      "description": "Frontend routing, components, state management",
+      "templates": [
+        {
+          "id": "frontend-route-structure",
+          "name": "Frontend Route Structure",
+          "description": "File-based or config-based routing setup",
+          "priority": "high",
+          "dependencies": ["init-project-structure"],
+          "tags": ["frontend", "routing", "pages"],
+          "stack": ["nextjs", "react", "vue", "svelte"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "frontend-auth-context",
+          "name": "Authentication Context/Provider",
+          "description": "Auth state management for frontend",
+          "priority": "high",
+          "dependencies": ["frontend-route-structure", "auth-jwt-middleware"],
+          "tags": ["frontend", "auth", "context", "state"],
+          "stack": ["react", "nextjs"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "frontend-protected-routes",
+          "name": "Protected Route Components",
+          "description": "Route guards and protected route components",
+          "priority": "high",
+          "dependencies": ["frontend-auth-context"],
+          "tags": ["frontend", "auth", "routing", "security"],
+          "stack": ["react", "nextjs", "vue"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "frontend-api-client",
+          "name": "API Client Setup",
+          "description": "Typed API client with interceptors and error handling",
+          "priority": "high",
+          "dependencies": ["frontend-route-structure"],
+          "tags": ["frontend", "api", "http", "typescript"],
+          "stack": ["react", "nextjs", "vue", "typescript"],
+          "security_level": "recommended",
+          "optimization_level": "recommended"
+        }
+      ]
+    },
+    "06-security-hardening": {
+      "name": "Security Hardening",
+      "description": "Security headers, CSRF protection, input sanitization",
+      "templates": [
+        {
+          "id": "security-headers",
+          "name": "Security Headers Middleware",
+          "description": "Helmet.js or equivalent security headers",
+          "priority": "high",
+          "dependencies": ["init-project-structure"],
+          "tags": ["security", "headers", "middleware"],
+          "stack": ["express", "fastify", "node"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "security-csrf-protection",
+          "name": "CSRF Protection",
+          "description": "CSRF token generation and validation",
+          "priority": "high",
+          "dependencies": ["security-headers"],
+          "tags": ["security", "csrf", "middleware"],
+          "stack": ["express", "fastify"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "security-input-sanitization",
+          "name": "Input Sanitization",
+          "description": "XSS prevention through input sanitization",
+          "priority": "high",
+          "dependencies": ["api-validation-middleware"],
+          "tags": ["security", "xss", "sanitization", "validation"],
+          "stack": ["express", "fastify", "node"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "security-cors-config",
+          "name": "CORS Configuration",
+          "description": "Proper CORS setup with origin whitelisting",
+          "priority": "high",
+          "dependencies": ["security-headers"],
+          "tags": ["security", "cors", "middleware"],
+          "stack": ["express", "fastify"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        }
+      ]
+    },
+    "07-performance-optimization": {
+      "name": "Performance Optimization",
+      "description": "Caching, compression, lazy loading, CDN configuration",
+      "templates": [
+        {
+          "id": "perf-caching-strategy",
+          "name": "Caching Strategy",
+          "description": "Redis caching layer with TTL and invalidation",
+          "priority": "medium",
+          "dependencies": ["api-route-structure"],
+          "tags": ["performance", "caching", "redis"],
+          "stack": ["express", "fastify", "redis"],
+          "security_level": "optional",
+          "optimization_level": "required"
+        },
+        {
+          "id": "perf-compression",
+          "name": "Response Compression",
+          "description": "Gzip/Brotli compression middleware",
+          "priority": "medium",
+          "dependencies": ["api-route-structure"],
+          "tags": ["performance", "compression", "middleware"],
+          "stack": ["express", "fastify"],
+          "security_level": "optional",
+          "optimization_level": "required"
+        },
+        {
+          "id": "perf-database-query-optimization",
+          "name": "Database Query Optimization",
+          "description": "Query optimization patterns and connection pooling",
+          "priority": "medium",
+          "dependencies": ["db-migration-structure"],
+          "tags": ["performance", "database", "queries"],
+          "stack": ["postgresql", "supabase"],
+          "security_level": "optional",
+          "optimization_level": "required"
+        },
+        {
+          "id": "perf-frontend-code-splitting",
+          "name": "Frontend Code Splitting",
+          "description": "Lazy loading and code splitting for frontend",
+          "priority": "medium",
+          "dependencies": ["frontend-route-structure"],
+          "tags": ["performance", "frontend", "code-splitting"],
+          "stack": ["react", "nextjs", "vue"],
+          "security_level": "optional",
+          "optimization_level": "required"
+        }
+      ]
+    },
+    "08-testing": {
+      "name": "Testing & Quality Assurance",
+      "description": "Unit, integration, E2E tests, test utilities",
+      "templates": [
+        {
+          "id": "test-setup",
+          "name": "Test Infrastructure Setup",
+          "description": "Vitest/Jest configuration and test utilities",
+          "priority": "high",
+          "dependencies": ["init-project-structure"],
+          "tags": ["testing", "setup", "infrastructure"],
+          "stack": ["vitest", "jest", "typescript"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "test-api-integration",
+          "name": "API Integration Tests",
+          "description": "Supertest or similar API testing setup",
+          "priority": "high",
+          "dependencies": ["test-setup", "api-route-structure"],
+          "tags": ["testing", "api", "integration"],
+          "stack": ["vitest", "jest", "supertest"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "test-database-fixtures",
+          "name": "Database Test Fixtures",
+          "description": "Test database setup and teardown utilities",
+          "priority": "medium",
+          "dependencies": ["test-setup", "db-migration-structure"],
+          "tags": ["testing", "database", "fixtures"],
+          "stack": ["vitest", "jest", "postgresql"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "test-frontend-components",
+          "name": "Frontend Component Tests",
+          "description": "React Testing Library or equivalent setup",
+          "priority": "high",
+          "dependencies": ["test-setup", "frontend-route-structure"],
+          "tags": ["testing", "frontend", "components"],
+          "stack": ["react", "vitest", "testing-library"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        }
+      ]
+    },
+    "09-ci-cd": {
+      "name": "CI/CD Setup",
+      "description": "GitHub Actions, deployment pipelines, quality gates",
+      "templates": [
+        {
+          "id": "cicd-github-actions",
+          "name": "GitHub Actions Workflow",
+          "description": "CI pipeline with tests, linting, type checking",
+          "priority": "high",
+          "dependencies": ["test-setup"],
+          "tags": ["cicd", "github-actions", "ci"],
+          "stack": ["github", "node", "typescript"],
+          "security_level": "recommended",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "cicd-quality-gates",
+          "name": "Quality Gates",
+          "description": "Pre-commit hooks, linting, type checking",
+          "priority": "medium",
+          "dependencies": ["test-setup"],
+          "tags": ["cicd", "quality", "linting"],
+          "stack": ["husky", "lint-staged", "eslint"],
+          "security_level": "optional",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "cicd-security-scanning",
+          "name": "Security Scanning",
+          "description": "Dependency vulnerability scanning in CI",
+          "priority": "high",
+          "dependencies": ["cicd-github-actions"],
+          "tags": ["cicd", "security", "scanning"],
+          "stack": ["github", "dependabot", "snyk"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        }
+      ]
+    },
+    "10-deployment": {
+      "name": "Deployment Configuration",
+      "description": "Docker, environment configs, monitoring setup",
+      "templates": [
+        {
+          "id": "deploy-docker",
+          "name": "Docker Configuration",
+          "description": "Dockerfile and docker-compose setup",
+          "priority": "medium",
+          "dependencies": ["init-project-structure"],
+          "tags": ["deployment", "docker", "containers"],
+          "stack": ["docker", "node"],
+          "security_level": "recommended",
+          "optimization_level": "required"
+        },
+        {
+          "id": "deploy-env-management",
+          "name": "Environment Management",
+          "description": "Environment-specific configuration management",
+          "priority": "high",
+          "dependencies": ["init-env-config"],
+          "tags": ["deployment", "environment", "config"],
+          "stack": ["node", "docker"],
+          "security_level": "required",
+          "optimization_level": "optional"
+        },
+        {
+          "id": "deploy-monitoring",
+          "name": "Monitoring & Observability",
+          "description": "Error tracking, logging, metrics setup",
+          "priority": "medium",
+          "dependencies": ["init-logging"],
+          "tags": ["deployment", "monitoring", "observability"],
+          "stack": ["sentry", "datadog", "prometheus"],
+          "security_level": "recommended",
+          "optimization_level": "optional"
+        }
+      ]
+    }
+  }
+}

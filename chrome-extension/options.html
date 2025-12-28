@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Template Manager - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <header>
+      <h1>Template Manager Settings</h1>
+    </header>
+
+    <div class="settings-section">
+      <h2>API Configuration</h2>
+      <div class="setting-item">
+        <label for="api-base-url">API Base URL</label>
+        <input type="text" id="api-base-url" placeholder="http://localhost:3001" />
+        <p class="setting-description">Base URL for the template API</p>
+      </div>
+
+      <div class="setting-item">
+        <label for="auth-token">Authentication Token</label>
+        <input type="password" id="auth-token" placeholder="Your API token" />
+        <p class="setting-description">Bearer token for API authentication</p>
+      </div>
+
+      <button id="test-connection" class="btn-secondary">Test Connection</button>
+      <div id="connection-status" class="status-message"></div>
+    </div>
+
+    <div class="settings-section">
+      <h2>Sync Settings</h2>
+      <div class="setting-item">
+        <label>
+          <input type="checkbox" id="auto-sync" />
+          Auto-sync templates
+        </label>
+        <p class="setting-description">Automatically sync templates every hour</p>
+      </div>
+
+      <div class="setting-item">
+        <label>
+          <input type="checkbox" id="show-notifications" />
+          Show notifications
+        </label>
+        <p class="setting-description">Show notifications for sync and updates</p>
+      </div>
+
+      <button id="sync-now" class="btn-secondary">Sync Now</button>
+    </div>
+
+    <div class="settings-section">
+      <h2>Export/Import</h2>
+      <div class="setting-item">
+        <button id="export-btn" class="btn-primary">Export Customizations</button>
+        <p class="setting-description">Download your template customizations</p>
+      </div>
+
+      <div class="setting-item">
+        <label for="import-file">Import Customizations</label>
+        <input type="file" id="import-file" accept=".json,.yaml" />
+        <button id="import-btn" class="btn-secondary" disabled>Import</button>
+        <p class="setting-description">Import template customizations from file</p>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h2>Keyboard Shortcuts</h2>
+      <div class="shortcuts-list">
+        <div class="shortcut-item">
+          <span class="shortcut-key">Ctrl+Shift+T</span>
+          <span class="shortcut-desc">Open Template Manager</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-key">Ctrl+Shift+Q</span>
+          <span class="shortcut-desc">Quick Template Search</span>
+        </div>
+      </div>
+      <p class="setting-description">
+        <a href="chrome://extensions/shortcuts" target="_blank">Customize shortcuts</a>
+      </p>
+    </div>
+
+    <div class="settings-actions">
+      <button id="save-btn" class="btn-primary">Save Settings</button>
+      <button id="reset-btn" class="btn-secondary">Reset to Defaults</button>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

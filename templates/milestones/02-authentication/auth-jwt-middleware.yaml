@@ -1,0 +1,188 @@
+id: auth-jwt-middleware
+milestone: 02-authentication
+name: JWT Authentication Middleware
+description: Express middleware for JWT token verification with secure token extraction and user context attachment
+priority: high
+dependencies: []
+tags: [auth, jwt, middleware, security]
+stack: [express, node, typescript]
+security_level: required
+optimization_level: optional
+
+content: |
+  import { Request, Response, NextFunction } from 'express';
+  {{auth_import}}
+  {{db_import}}
+
+  export interface AuthenticatedRequest extends Request {
+    userId?: string;
+    user?: {
+      id: string;
+      email?: string;
+      role?: string;
+    };
+  }
+
+  /**
+   * JWT Authentication Middleware
+   * 
+   * SECURITY CONSIDERATIONS:
+   * - Validates Bearer token format
+   * - Verifies token signature and expiration
+   * - Extracts user context securely
+   * - Handles errors without leaking sensitive information
+   * - Adds request ID for traceability
+   * 
+   * OPTIMIZATION:
+   * - Token verification can be cached (consider Redis for high-traffic apps)
+   * - Consider token refresh mechanism to reduce re-authentication
+   */
+  export async function authMiddleware(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const authHeader = req.headers.authorization;
+
+      // Validate Bearer token format
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ 
+          error: {
+            code: 'AUTHENTICATION_ERROR',
+            message: 'Missing or invalid authorization header',
+          },
+          requestId: req.headers['x-request-id'],
+        });
+        return;
+      }
+
+      const token = authHeader.substring(7);
+
+      // Verify token
+      let decoded: any;
+      try {
+        decoded = {{auth_verify}};
+      } catch (error) {
+        res.status(401).json({ 
+          error: {
+            code: 'AUTHENTICATION_ERROR',
+            message: 'Invalid or expired token',
+          },
+          requestId: req.headers['x-request-id'],
+        });
+        return;
+      }
+
+      // Optional: Verify user still exists in database
+      {{db_create_client}}
+      const userResult = await {{db_query}}('SELECT id, email, role FROM users WHERE id = $1', [decoded.userId]);
+      
+      if (!userResult.rows || userResult.rows.length === 0) {
+        res.status(401).json({ 
+          error: {
+            code: 'AUTHENTICATION_ERROR',
+            message: 'User not found',
+          },
+          requestId: req.headers['x-request-id'],
+        });
+        return;
+      }
+
+      const user = userResult.rows[0];
+
+      // Attach user info to request
+      req.userId = user.id;
+      req.user = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      };
+
+      next();
+    } catch (error) {
+      console.error('Auth middleware error:', error);
+      res.status(500).json({ 
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Authentication error',
+        },
+        requestId: req.headers['x-request-id'],
+      });
+    }
+  }
+
+  /**
+   * Optional Auth Middleware
+   * 
+   * Doesn't fail if no token, but attaches user if present.
+   * Useful for public endpoints that have optional user context.
+   */
+  export async function optionalAuthMiddleware(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const authHeader = req.headers.authorization;
+
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        try {
+          const decoded = {{auth_verify}};
+          {{db_create_client}}
+          const userResult = await {{db_query}}('SELECT id, email, role FROM users WHERE id = $1', [decoded.userId]);
+          
+          if (userResult.rows && userResult.rows.length > 0) {
+            const user = userResult.rows[0];
+            req.userId = user.id;
+            req.user = {
+              id: user.id,
+              email: user.email,
+              role: user.role,
+            };
+          }
+        } catch (error) {
+          // Continue without auth on error
+        }
+      }
+
+      next();
+    } catch (error) {
+      // Continue without auth on error
+      next();
+    }
+  }
+
+variables:
+  - name: auth_import
+    description: Import statement for authentication library
+    required: true
+    default: "import jwt from 'jsonwebtoken';"
+    examples:
+      - "import jwt from 'jsonwebtoken';"
+      - "import { createClient } from '@supabase/supabase-js';"
+  
+  - name: db_import
+    description: Database client import
+    required: true
+    default: "import { Pool } from 'pg';"
+    examples:
+      - "import { Pool } from 'pg';"
+      - "import { createClient } from '@supabase/supabase-js';"
+  
+  - name: db_create_client
+    description: Database client initialization
+    required: true
+    default: "const pool = new Pool({ connectionString: process.env.DATABASE_URL });"
+    examples:
+      - "const pool = new Pool({ connectionString: process.env.DATABASE_URL });"
+      - "const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);"
+  
+  - name: db_query
+    description: Database query method
+    required: true
+    default: "pool.query"
+    examples:
+      - "pool.query"
+      - "supabase.from('users').select('*').eq('id', $1)"

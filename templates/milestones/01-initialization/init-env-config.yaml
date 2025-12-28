@@ -1,0 +1,144 @@
+id: init-env-config
+milestone: 01-initialization
+name: Environment Configuration
+description: Environment variable management and validation with Zod
+priority: high
+dependencies: []
+tags: [config, environment, secrets]
+stack: [node, typescript]
+security_level: required
+optimization_level: optional
+
+content: |
+  import { z } from 'zod';
+  import dotenv from 'dotenv';
+
+  // Load environment variables
+  dotenv.config();
+
+  /**
+   * Environment Configuration Schema
+   * 
+   * SECURITY CONSIDERATIONS:
+   * - Validates all required environment variables at startup
+   * - Prevents runtime errors from missing config
+   * - Type-safe access to environment variables
+   * - Never commit .env files to version control
+   * - Use different values for different environments
+   * 
+   * OPTIMIZATION:
+   * - Validation happens once at startup
+   * - Type-safe access prevents runtime lookups
+   */
+
+  const envSchema = z.object({
+    // Server Configuration
+    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+    PORT: z.string().regex(/^\d+$/).transform(Number).default('3001'),
+    
+    // Database
+    DATABASE_URL: z.string().url().optional(),
+    {{db_env_vars}}
+    
+    // Authentication
+    JWT_SECRET: z.string().min(32).optional(),
+    {{auth_env_vars}}
+    
+    // External Services
+    {{external_service_vars}}
+    
+    // Security
+    CORS_ORIGINS: z.string().default('http://localhost:3000'),
+    SESSION_SECRET: z.string().min(32).optional(),
+    
+    // Optional: Monitoring & Observability
+    SENTRY_DSN: z.string().url().optional(),
+    LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
+  });
+
+  type Env = z.infer<typeof envSchema>;
+
+  let env: Env;
+
+  /**
+   * Validate and return environment variables
+   */
+  export function validateEnv(): Env {
+    try {
+      env = envSchema.parse(process.env);
+      return env;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error('❌ Invalid environment variables:');
+        error.errors.forEach((err) => {
+          console.error(`  - ${err.path.join('.')}: ${err.message}`);
+        });
+        process.exit(1);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Get validated environment variables
+   * Call validateEnv() first during application startup
+   */
+  export function getEnv(): Env {
+    if (!env) {
+      throw new Error('Environment not validated. Call validateEnv() first.');
+    }
+    return env;
+  }
+
+  /**
+   * Type-safe environment variable access
+   */
+  export const ENV = (() => {
+    validateEnv();
+    return getEnv();
+  })();
+
+variables:
+  - name: db_env_vars
+    description: Database-specific environment variables
+    required: false
+    default: |
+      SUPABASE_URL: z.string().url().optional(),
+      SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+    examples:
+      - |
+        SUPABASE_URL: z.string().url().optional(),
+        SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+      - |
+        POSTGRES_HOST: z.string().optional(),
+        POSTGRES_PORT: z.string().regex(/^\d+$/).optional(),
+        POSTGRES_USER: z.string().optional(),
+        POSTGRES_PASSWORD: z.string().optional(),
+        POSTGRES_DB: z.string().optional(),
+  
+  - name: auth_env_vars
+    description: Authentication-specific environment variables
+    required: false
+    default: |
+      JWT_EXPIRES_IN: z.string().default('7d'),
+    examples:
+      - |
+        JWT_EXPIRES_IN: z.string().default('7d'),
+        REFRESH_TOKEN_SECRET: z.string().min(32).optional(),
+      - |
+        OAUTH_GOOGLE_CLIENT_ID: z.string().optional(),
+        OAUTH_GOOGLE_CLIENT_SECRET: z.string().optional(),
+  
+  - name: external_service_vars
+    description: External service API keys and configuration
+    required: false
+    default: |
+      REDIS_URL: z.string().url().optional(),
+    examples:
+      - |
+        REDIS_URL: z.string().url().optional(),
+        OPENAI_API_KEY: z.string().optional(),
+      - |
+        AWS_ACCESS_KEY_ID: z.string().optional(),
+        AWS_SECRET_ACCESS_KEY: z.string().optional(),
+        AWS_REGION: z.string().optional(),

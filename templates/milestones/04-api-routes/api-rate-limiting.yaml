@@ -1,0 +1,149 @@
+id: api-rate-limiting
+milestone: 04-api-routes
+name: Rate Limiting Middleware
+description: API rate limiting with Redis or in-memory store to prevent abuse
+priority: high
+dependencies: [api-route-structure]
+tags: [api, rate-limiting, security, middleware]
+stack: [express, fastify, redis]
+security_level: required
+optimization_level: optional
+
+content: |
+  import { Request, Response, NextFunction } from 'express';
+  import rateLimit from 'express-rate-limit';
+  import RedisStore from 'rate-limit-redis';
+  import Redis from 'ioredis';
+
+  /**
+   * Rate Limiting Middleware
+   * 
+   * SECURITY CONSIDERATIONS:
+   * - Prevents brute force attacks
+   * - Mitigates DDoS attacks
+   * - Protects against API abuse
+   * - Different limits for authenticated vs anonymous users
+   * - IP-based and user-based limiting
+   * 
+   * OPTIMIZATION:
+   * - Use Redis for distributed rate limiting
+   * - Consider sliding window vs fixed window
+   * - Cache rate limit status to reduce Redis calls
+   */
+
+  // Redis client for distributed rate limiting (optional)
+  const redisClient = process.env.REDIS_URL 
+    ? new Redis(process.env.REDIS_URL)
+    : null;
+
+  /**
+   * General API rate limiter
+   * 100 requests per 15 minutes per IP
+   */
+  export const apiRateLimiter = rateLimit({
+    store: redisClient ? new RedisStore({
+      client: redisClient,
+      prefix: 'rl:api:',
+    }) : undefined,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: {
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many requests, please try again later.',
+      },
+    },
+    standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
+    legacyHeaders: false, // Disable `X-RateLimit-*` headers
+    // Skip rate limiting for successful requests in some cases
+    skip: (req: Request) => {
+      // Skip if user is admin (implement your own logic)
+      return (req as any).user?.role === 'admin';
+    },
+  });
+
+  /**
+   * Strict rate limiter for authentication endpoints
+   * 5 requests per 15 minutes per IP
+   */
+  export const authRateLimiter = rateLimit({
+    store: redisClient ? new RedisStore({
+      client: redisClient,
+      prefix: 'rl:auth:',
+    }) : undefined,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 login attempts per windowMs
+    message: {
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many authentication attempts, please try again later.',
+      },
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true, // Don't count successful requests
+  });
+
+  /**
+   * User-specific rate limiter (requires authentication)
+   * 1000 requests per hour per user
+   */
+  export const userRateLimiter = rateLimit({
+    store: redisClient ? new RedisStore({
+      client: redisClient,
+      prefix: 'rl:user:',
+    }) : undefined,
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 1000, // Limit each user to 1000 requests per hour
+    keyGenerator: (req: Request) => {
+      // Use user ID if authenticated, otherwise fall back to IP
+      return (req as any).userId || req.ip || 'unknown';
+    },
+    message: {
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Rate limit exceeded for your account.',
+      },
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  /**
+   * Custom rate limiter factory
+   */
+  export function createRateLimiter(options: {
+    windowMs: number;
+    max: number;
+    prefix?: string;
+    message?: string;
+    skip?: (req: Request) => boolean;
+  }) {
+    return rateLimit({
+      store: redisClient ? new RedisStore({
+        client: redisClient,
+        prefix: options.prefix || 'rl:custom:',
+      }) : undefined,
+      windowMs: options.windowMs,
+      max: options.max,
+      message: options.message || {
+        error: {
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Rate limit exceeded.',
+        },
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+      skip: options.skip,
+    });
+  }
+
+variables:
+  - name: redis_url_env
+    description: Environment variable name for Redis URL
+    required: false
+    default: "REDIS_URL"
+    examples:
+      - "REDIS_URL"
+      - "UPSTASH_REDIS_URL"
+      - "REDIS_CONNECTION_STRING"

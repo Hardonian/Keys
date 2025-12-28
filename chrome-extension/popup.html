@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Template Manager</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <h1>Template Manager</h1>
+      <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
+    </header>
+
+    <div class="popup-tabs">
+      <button class="tab-btn active" data-tab="browse">Browse</button>
+      <button class="tab-btn" data-tab="customized">My Templates</button>
+      <button class="tab-btn" data-tab="quick">Quick Insert</button>
+    </div>
+
+    <!-- Browse Tab -->
+    <div class="tab-content active" id="browse-tab">
+      <div class="search-section">
+        <input type="text" id="search-input" placeholder="Search templates..." />
+        <select id="milestone-filter">
+          <option value="">All Milestones</option>
+          <option value="01-initialization">Initialization</option>
+          <option value="02-authentication">Authentication</option>
+          <option value="03-database-schema">Database Schema</option>
+          <option value="04-api-routes">API Routes</option>
+          <option value="05-frontend-routes">Frontend Routes</option>
+          <option value="06-security-hardening">Security</option>
+          <option value="07-performance-optimization">Performance</option>
+          <option value="08-testing">Testing</option>
+          <option value="09-ci-cd">CI/CD</option>
+          <option value="10-deployment">Deployment</option>
+        </select>
+      </div>
+      <div id="templates-list" class="templates-list"></div>
+    </div>
+
+    <!-- Customized Tab -->
+    <div class="tab-content" id="customized-tab">
+      <div id="customized-list" class="templates-list"></div>
+    </div>
+
+    <!-- Quick Insert Tab -->
+    <div class="tab-content" id="quick-tab">
+      <div class="quick-insert">
+        <input type="text" id="quick-search" placeholder="Search template..." />
+        <div id="quick-results" class="quick-results"></div>
+        <div class="quick-actions">
+          <button id="insert-btn" class="primary-btn" disabled>Insert Prompt</button>
+          <button id="copy-btn" class="secondary-btn" disabled>Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template Detail Modal -->
+    <div id="template-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modal-title"></h2>
+        <div id="modal-body"></div>
+        <div class="modal-actions">
+          <button id="customize-btn" class="primary-btn">Customize</button>
+          <button id="use-btn" class="secondary-btn">Use Template</button>
+          <button id="test-btn" class="secondary-btn">Test</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

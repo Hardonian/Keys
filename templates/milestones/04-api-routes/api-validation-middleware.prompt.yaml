@@ -1,0 +1,218 @@
+id: api-validation-middleware
+milestone: 04-api-routes
+name: Request Validation Middleware
+description: Comprehensive prompt for implementing type-safe request validation middleware
+priority: high
+dependencies: [api-route-structure]
+tags: [api, validation, middleware, security]
+stack: [express, fastify, typescript]
+security_level: required
+optimization_level: optional
+
+mega_prompt: |
+  You are an expert backend developer specializing in API security and type safety.
+
+  ## Your Role
+  Role: {{user_role|default:backend-engineer}}
+  Framework: {{framework|default:Express}}
+  Validation Library: {{validation_library|default:Zod}}
+  
+  ## Project Context
+  {{#if company_context}}
+  Company Context: {{company_context}}
+  {{/if}}
+
+  ## Task: Request Validation Middleware Implementation
+  
+  Implement a production-ready request validation middleware that:
+  - Validates all incoming request data (body, query, params)
+  - Provides type-safe validation with clear error messages
+  - Prevents injection attacks through type checking
+  - Sanitizes input automatically
+  - Returns consistent error format
+  - Includes request ID for traceability
+
+  ## Framework-Specific Requirements
+  
+  {{#if framework.express}}
+  ### Express.js Implementation
+  
+  - Use Express Request/Response/NextFunction types
+  - Middleware signature: `(req, res, next) => Promise<void>`
+  - Extend request types with validated data
+  - Use async/await for validation
+  {{/if}}
+  
+  {{#if framework.fastify}}
+  ### Fastify Implementation
+  
+  - Use Fastify schema validation
+  - Leverage Fastify's built-in validation
+  - Use Fastify's type inference
+  {{/if}}
+
+  ## Validation Library Requirements
+  
+  {{#if validation_library.zod}}
+  ### Zod Implementation
+  
+  - Use Zod schemas for type-safe validation
+  - Support nested objects and arrays
+  - Use Zod's coercion for type conversion
+  - Leverage Zod's error formatting
+  - Export schemas for reuse
+  {{/if}}
+  
+  {{#if validation_library.yup}}
+  ### Yup Implementation
+  
+  - Use Yup schemas for validation
+  - Support async validation where needed
+  - Use Yup's error formatting
+  {{/if}}
+  
+  {{#if validation_library.joi}}
+  ### Joi Implementation
+  
+  - Use Joi schemas for validation
+  - Support Joi's validation options
+  - Use Joi's error formatting
+  {{/if}}
+
+  ## Security Requirements (CRITICAL)
+  
+  1. **Input Validation**
+     - Validate ALL input before processing
+     - Reject invalid data immediately
+     - Never trust client input
+     - Validate data types strictly
+     - Check required fields
+  
+  2. **Sanitization**
+     - Remove potentially dangerous characters
+     - Normalize data formats
+     - Trim whitespace
+     - Handle null/undefined gracefully
+  
+  3. **Error Handling**
+     - Never expose internal implementation details
+     - Provide clear, actionable error messages
+     - Include field-level error details
+     - Use consistent error format
+     - Log validation failures for monitoring
+  
+  4. **Type Safety**
+     - Use TypeScript for compile-time safety
+     - Runtime validation for runtime safety
+     - Type inference from schemas
+     - Export types for route handlers
+
+  ## Implementation Requirements
+  
+  1. **Middleware Factory Function**
+     - Function name: `validateRequest`
+     - Accepts schema object: `{ body?, query?, params? }`
+     - Returns middleware function
+     - Validates each part independently
+     - Stops on first validation error
+  
+  2. **Error Response Format**
+     ```json
+     {
+       "error": {
+         "code": "VALIDATION_ERROR",
+         "message": "Invalid request data",
+         "details": [
+           {
+             "path": "email",
+             "message": "Invalid email format"
+           }
+         ]
+       },
+       "requestId": "..."
+     }
+     ```
+  
+  3. **Type Definitions**
+     - Export middleware type
+     - Export schema type helpers
+     - Export error types
+     - Type-safe request extension
+
+  ## Performance Considerations
+  
+  {{#if use_caching}}
+  - Cache compiled schemas for reuse
+  - Use schema compilation for better performance
+  {{/if}}
+  
+  - Early validation prevents unnecessary processing
+  - Fail fast on invalid input
+  - Consider request size limits
+
+  ## Code Quality Requirements
+  
+  - TypeScript strict mode
+  - Comprehensive error handling
+  - Request ID logging
+  - Unit tests for validation logic
+  - Integration tests with invalid data
+  - Documentation with examples
+
+  ## Example Usage Pattern
+  
+  ```typescript
+  import { z } from 'zod';
+  
+  const createUserSchema = {
+    body: z.object({
+      email: z.string().email(),
+      password: z.string().min(8),
+      name: z.string().min(1).max(100),
+    }),
+  };
+  
+  router.post('/users', validateRequest(createUserSchema), createUserHandler);
+  ```
+
+  ## Output Format
+  
+  Provide:
+  1. Complete middleware implementation
+  2. Type definitions
+  3. Error handling utilities
+  4. Usage examples for common patterns
+  5. Test examples
+  6. Security considerations documentation
+
+  {{#if custom_instructions}}
+  Additional Instructions: {{custom_instructions}}
+  {{/if}}
+
+variables:
+  - name: user_role
+    description: User's role
+    required: false
+    default: "backend-engineer"
+  
+  - name: framework
+    description: Framework being used (express, fastify)
+    required: true
+  
+  - name: validation_library
+    description: Validation library (zod, yup, joi)
+    required: true
+    default: "zod"
+  
+  - name: use_caching
+    description: Whether to cache compiled schemas
+    required: false
+    default: false
+  
+  - name: company_context
+    description: Company or project context
+    required: false
+  
+  - name: custom_instructions
+    description: Additional custom instructions
+    required: false

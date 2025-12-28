@@ -1,5 +1,6 @@
 import axios from 'axios';
-import type { AgentOutput } from '../types/index.js';
+// AgentOutput type imported but not used - kept for future use
+// import type { AgentOutput } from '../types/index.js';
 
 export interface MindStudioAgent {
   agentName: string;

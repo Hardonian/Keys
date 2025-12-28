@@ -1,0 +1,97 @@
+id: db-rls-policies
+milestone: 03-database-schema
+name: Row Level Security Policies
+description: PostgreSQL RLS policies for multi-tenant and user-scoped data access control
+priority: high
+dependencies: [db-migration-structure, auth-jwt-middleware]
+tags: [database, rls, security, multi-tenant]
+stack: [postgresql, supabase]
+security_level: required
+optimization_level: optional
+
+content: |
+  -- Row Level Security (RLS) Policies
+  -- 
+  -- SECURITY CONSIDERATIONS:
+  -- - Enable RLS on all tables containing user data
+  -- - Use service role key only for admin operations
+  -- - Policies should be restrictive by default
+  -- - Test policies thoroughly with different user contexts
+  -- - Consider performance impact of policy evaluation
+  --
+  -- OPTIMIZATION:
+  -- - Index columns used in policy WHERE clauses
+  -- - Use security definer functions for complex policies
+  -- - Consider policy caching for frequently accessed data
+
+  -- Enable RLS on table
+  ALTER TABLE {{table_name}} ENABLE ROW LEVEL SECURITY;
+
+  -- Policy: Users can only see their own records
+  CREATE POLICY "Users can view own {{table_name}}"
+    ON {{table_name}}
+    FOR SELECT
+    USING (auth.uid() = user_id);
+
+  -- Policy: Users can insert their own records
+  CREATE POLICY "Users can insert own {{table_name}}"
+    ON {{table_name}}
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+  -- Policy: Users can update their own records
+  CREATE POLICY "Users can update own {{table_name}}"
+    ON {{table_name}}
+    FOR UPDATE
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+  -- Policy: Users can delete their own records
+  CREATE POLICY "Users can delete own {{table_name}}"
+    ON {{table_name}}
+    FOR DELETE
+    USING (auth.uid() = user_id);
+
+  -- Optional: Multi-tenant policy (if using organization/team scoping)
+  -- CREATE POLICY "Users can view organization {{table_name}}"
+  --   ON {{table_name}}
+  --   FOR SELECT
+  --   USING (
+  --     auth.uid() = user_id OR
+  --     EXISTS (
+  --       SELECT 1 FROM organization_members
+  --       WHERE organization_id = {{table_name}}.organization_id
+  --       AND user_id = auth.uid()
+  --     )
+  --   );
+
+  -- Optional: Admin override policy (use with caution)
+  -- CREATE POLICY "Admins can manage all {{table_name}}"
+  --   ON {{table_name}}
+  --   FOR ALL
+  --   USING (
+  --     EXISTS (
+  --       SELECT 1 FROM users
+  --       WHERE id = auth.uid()
+  --       AND role = 'admin'
+  --     )
+  --   );
+
+  -- Create index on user_id for policy performance
+  CREATE INDEX IF NOT EXISTS idx_{{table_name}}_user_id 
+    ON {{table_name}}(user_id);
+
+  -- Optional: Create index on organization_id if using multi-tenant
+  -- CREATE INDEX IF NOT EXISTS idx_{{table_name}}_organization_id 
+  --   ON {{table_name}}(organization_id);
+
+variables:
+  - name: table_name
+    description: Name of the table to apply RLS policies to
+    required: true
+    default: "user_data"
+    examples:
+      - "profiles"
+      - "documents"
+      - "projects"
+      - "user_settings"

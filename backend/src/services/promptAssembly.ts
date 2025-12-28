@@ -3,6 +3,7 @@ import type { UserProfile, PromptAtom, VibeConfig, PromptAssemblyResult } from '
 import type { InputFilter } from '../types/filters.js';
 import { sliderToAtomName } from '../utils/sliderInterpolation.js';
 import { inputReformatter } from './inputReformatter.js';
+import { scaffoldTemplateService } from './scaffoldTemplateService.js';
 import { getCache, setCache } from '../cache/redis.js';
 import { logger } from '../utils/logger.js';
 
@@ -17,6 +18,13 @@ export async function assemblePrompt(
   vibeConfig: Partial<VibeConfig>,
   inputFilter?: InputFilter
 ): Promise<PromptAssemblyResult> {
+  // Check if this is a scaffold task
+  const isScaffoldTask = isScaffoldingTask(taskDescription);
+  
+  if (isScaffoldTask) {
+    return assembleScaffoldPrompt(userId, taskDescription, vibeConfig, inputFilter);
+  }
+
   // Create cache key based on inputs
   const cacheKey = `prompt:${userId}:${JSON.stringify({
     task: taskDescription.substring(0, 100), // First 100 chars for cache key
@@ -122,13 +130,11 @@ export async function assemblePrompt(
   const baseSystemPrompt = composeSystemPrompt(weightedAtoms);
 
   // 7. Apply input filters if provided (reformat input and update system prompt)
-  let finalTaskDescription = taskDescription;
   let finalSystemPrompt = baseSystemPrompt;
   let finalUserPrompt = composeUserPrompt(taskDescription, profile, vibeConfig);
 
   if (inputFilter) {
     const reformatted = await inputReformatter.reformatInput(taskDescription, inputFilter);
-    finalTaskDescription = reformatted.reformattedInput;
     // Merge filter-based system prompt with atom-based system prompt
     finalSystemPrompt = `${baseSystemPrompt}\n\n${reformatted.systemPrompt}`;
     finalUserPrompt = reformatted.userPrompt;
@@ -267,4 +273,139 @@ function extractConstraints(
   }
 
   return constraints;
+}
+
+/**
+ * Detect if task is a scaffolding task
+ */
+function isScaffoldingTask(taskDescription: string): boolean {
+  const lowerTask = taskDescription.toLowerCase();
+  const scaffoldKeywords = [
+    'scaffold',
+    'setup',
+    'initialize',
+    'create structure',
+    'project setup',
+    'boilerplate',
+    'template',
+    'generate',
+    'create routes',
+    'create middleware',
+    'database schema',
+    'rls policies',
+    'api routes',
+    'frontend routes',
+    'authentication setup',
+    'security headers',
+    'rate limiting',
+  ];
+
+  return scaffoldKeywords.some((keyword) => lowerTask.includes(keyword));
+}
+
+  /**
+   * Assemble prompt for scaffolding tasks using template system
+   * Uses user's customized templates if available, otherwise base templates
+   */
+async function assembleScaffoldPrompt(
+  userId: string,
+  taskDescription: string,
+  vibeConfig: Partial<VibeConfig>,
+  inputFilter?: InputFilter
+): Promise<PromptAssemblyResult> {
+  // Import user template service dynamically to avoid circular dependency
+  const { userTemplateService } = await import('./userTemplateService.js');
+
+  // Load user profile
+  const { data: profile, error: profileError } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (profileError || !profile) {
+    throw new Error('User profile not found');
+  }
+
+  // Get recommended templates
+  const recommendedTemplates = scaffoldTemplateService.getRecommendedTemplates(
+    profile,
+    taskDescription
+  );
+
+  // Use user's customized templates if available
+  // For each template, get user's customized version or fall back to base
+  const templatePrompts: string[] = [];
+  const templateIds: string[] = [];
+
+  for (const template of recommendedTemplates) {
+    try {
+      const userPrompt = await userTemplateService.getUserTemplatePrompt(
+        userId,
+        template.id,
+        taskDescription,
+        inputFilter
+      );
+      templatePrompts.push(userPrompt.prompt);
+      templateIds.push(template.id);
+    } catch (error) {
+      // Fallback to base template if customization fails
+      logger.warn(`Failed to get customized template ${template.id}, using base`, error as Error);
+      const basePrompt = scaffoldTemplateService.modifyMegaPrompt(template, {
+        userProfile: profile,
+        inputFilter,
+        customInstructions: vibeConfig.custom_instructions,
+      });
+      templatePrompts.push(basePrompt);
+      templateIds.push(template.id);
+    }
+  }
+
+  // Compose system prompt from user's customized templates
+  const composedSystemPrompt = templatePrompts.join('\n\n---\n\n') + '\n\n## Final Instructions\n\n' +
+    `Always prioritize:\n` +
+    `1. Security best practices\n` +
+    `2. Performance optimization\n` +
+    `3. Code quality\n` +
+    `4. Maintainability\n`;
+
+  // Compose user prompt
+  const composedUserPrompt = composeUserPrompt(taskDescription, profile, vibeConfig);
+
+  // Apply additional input filter formatting if needed
+  let finalSystemPrompt = composedSystemPrompt;
+  let finalUserPrompt = composedUserPrompt;
+
+  if (inputFilter) {
+    const reformatted = await inputReformatter.reformatInput(composedUserPrompt, inputFilter);
+    finalSystemPrompt = `${composedSystemPrompt}\n\n${reformatted.systemPrompt}`;
+    finalUserPrompt = reformatted.userPrompt;
+  }
+
+  // Return in PromptAssemblyResult format
+  return {
+    systemPrompt: finalSystemPrompt,
+    userPrompt: finalUserPrompt,
+    context: {
+      userRole: profile.role,
+      userVertical: profile.vertical,
+      userStack: profile.stack as Record<string, boolean>,
+      executionConstraints: {
+        templates: recommendedTemplates.map((t) => ({
+          id: t.id,
+          name: t.name,
+          milestone: t.milestone,
+        })),
+        templateIds,
+      },
+    },
+    selectedAtomIds: templateIds,
+    blendRecipe: recommendedTemplates.map((t, index) => ({
+      id: t.id,
+      name: t.name,
+      weight: t.priority === 'high' ? 1.0 : t.priority === 'medium' ? 0.7 : 0.5,
+      influence:
+        index < 2 ? 'primary' : index < 4 ? 'secondary' : ('modifier' as const),
+    })),
+  };
 }

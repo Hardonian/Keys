@@ -1,0 +1,200 @@
+id: auth-jwt-middleware
+milestone: 02-authentication
+name: JWT Authentication Middleware
+description: Comprehensive prompt for implementing secure JWT authentication middleware
+priority: high
+dependencies: []
+tags: [auth, jwt, middleware, security]
+stack: [express, fastify, nextjs, typescript]
+security_level: required
+optimization_level: optional
+
+mega_prompt: |
+  You are an expert security engineer and backend developer specializing in authentication and authorization systems.
+
+  ## Your Role
+  Role: {{user_role|default:backend-engineer}}
+  Security Focus: High
+  Framework: {{framework|default:Express}}
+  
+  ## Project Context
+  {{#if company_context}}
+  Company Context: {{company_context}}
+  {{/if}}
+
+  ## Task: JWT Authentication Middleware Implementation
+  
+  Implement a production-ready JWT authentication middleware that:
+  - Validates tokens securely
+  - Handles errors gracefully
+  - Provides user context to routes
+  - Supports optional authentication
+  - Includes proper logging and monitoring
+  
+  ## Framework-Specific Requirements
+  
+  {{#if framework.express}}
+  ### Express.js Implementation
+  
+  - Use Express Request/Response/NextFunction types
+  - Extend Request interface with user context
+  - Use async/await for token verification
+  - Proper error handling with consistent error format
+  {{/if}}
+  
+  {{#if framework.fastify}}
+  ### Fastify Implementation
+  
+  - Use Fastify plugin pattern
+  - Leverage Fastify's request lifecycle hooks
+  - Use Fastify's type system for request decoration
+  {{/if}}
+  
+  {{#if framework.nextjs}}
+  ### Next.js Implementation
+  
+  - Use Next.js middleware pattern
+  - Support both API routes and middleware
+  - Handle edge runtime considerations
+  {{/if}}
+
+  ## Security Requirements (CRITICAL)
+  
+  1. **Token Validation**
+     - Verify Bearer token format
+     - Validate token signature
+     - Check token expiration
+     - Verify token issuer (if applicable)
+     - Validate token audience (if applicable)
+  
+  2. **Error Handling**
+     - Never leak sensitive information in error messages
+     - Use consistent error response format
+     - Log security events for monitoring
+     - Include request ID for traceability
+  
+  3. **User Context**
+     - Extract user ID securely
+     - Attach minimal user data to request
+     - Verify user still exists in database (optional but recommended)
+     - Handle user deletion/disablement gracefully
+  
+  4. **Performance**
+     {{#if use_caching}}
+     - Cache token verification results (Redis)
+     - TTL based on token expiration
+     - Invalidate on user changes
+     {{/if}}
+     {{#unless use_caching}}
+     - Consider caching for high-traffic endpoints
+     {{/unless}}
+
+  ## Database Integration
+  
+  {{#if database.supabase}}
+  ### Supabase Integration
+  
+  - Use Supabase Auth client for token verification
+  - Leverage Supabase user metadata
+  - Support RLS policies
+  - Use service role key for admin operations only
+  {{/if}}
+  
+  {{#if database.postgresql}}
+  ### PostgreSQL Integration
+  
+  - Query user table for verification
+  - Use connection pooling
+  - Implement proper error handling
+  - Consider read replicas for scalability
+  {{/if}}
+  
+  {{#if database.mongodb}}
+  ### MongoDB Integration
+  
+  - Query user collection
+  - Use proper indexing on user queries
+  - Handle connection errors
+  {{/if}}
+
+  ## Implementation Requirements
+  
+  1. **Core Middleware Function**
+     - Function name: `authMiddleware`
+     - Type: `(req, res, next) => Promise<void>`
+     - Extends request with: `userId`, `user` object
+     - Returns 401 on authentication failure
+     - Calls `next()` on success
+  
+  2. **Optional Auth Middleware**
+     - Function name: `optionalAuthMiddleware`
+     - Same signature as authMiddleware
+     - Does not fail if no token present
+     - Attaches user if token valid
+     - Useful for public endpoints with optional user context
+  
+  3. **Type Definitions**
+     - Extend framework's Request type
+     - Include userId: string
+     - Include user: { id, email, role?, ... }
+     - Export types for use in routes
+
+  ## Code Quality Requirements
+  
+  - TypeScript strict mode
+  - Comprehensive error handling
+  - Request ID logging
+  - Performance monitoring hooks
+  - Unit tests for middleware
+  - Integration tests with test tokens
+
+  ## Example Usage Pattern
+  
+  ```typescript
+  // Protected route
+  router.get('/profile', authMiddleware, getProfileHandler);
+  
+  // Optional auth route
+  router.get('/posts', optionalAuthMiddleware, getPostsHandler);
+  ```
+
+  ## Output Format
+  
+  Provide:
+  1. Complete middleware implementation
+  2. Type definitions
+  3. Error handling utilities
+  4. Usage examples
+  5. Test examples
+  6. Security considerations documentation
+
+  {{#if custom_instructions}}
+  Additional Instructions: {{custom_instructions}}
+  {{/if}}
+
+variables:
+  - name: user_role
+    description: User's role
+    required: false
+    default: "backend-engineer"
+  
+  - name: framework
+    description: Framework being used (express, fastify, nextjs)
+    required: true
+  
+  - name: database
+    description: Database being used (supabase, postgresql, mongodb)
+    required: true
+  
+  - name: use_caching
+    description: Whether to use token verification caching
+    required: false
+    default: false
+  
+  - name: company_context
+    description: Company or project context
+    required: false
+  
+  - name: custom_instructions
+    description: Additional custom instructions
+    required: false
