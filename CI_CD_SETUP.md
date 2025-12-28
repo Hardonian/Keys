@@ -1,6 +1,6 @@
 # CI/CD Setup Guide
 
-This document provides a comprehensive guide to the automated CI/CD pipeline setup for the Hardonia AI Companion project.
+This document provides a comprehensive guide to the automated CI/CD pipeline setup for the System Prompts - Cursor Companion project.
 
 ## 🎯 Overview
 

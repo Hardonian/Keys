@@ -7,7 +7,7 @@ pub fn run() {
         .setup(|app| {
             // Initialize app
             let window = app.get_window("main").unwrap();
-            window.set_title("Cursor Venture Companion").unwrap();
+            window.set_title("System Prompts").unwrap();
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

@@ -1,7 +1,7 @@
 {
-  "name": "hardonia-ai-companion",
+  "name": "system-prompts-cursor-companion",
   "version": "1.0.0",
-  "description": "Personalized AI Companion Agent - Cursor for business operators",
+  "description": "System Prompts - Cursor business and development operations companion",
   "private": true,
   "workspaces": [
     "frontend",

@@ -1,4 +1,4 @@
-# Hardonia AI Companion - Backend
+# System Prompts - Cursor Companion - Backend
 
 ## Background Event Loop Service
 

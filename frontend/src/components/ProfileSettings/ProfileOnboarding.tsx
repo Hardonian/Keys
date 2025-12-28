@@ -51,9 +51,9 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
       case 'welcome':
         return (
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Welcome to Cursor Venture Companion</h2>
+            <h2 className="text-2xl font-bold mb-4">Welcome to System Prompts</h2>
             <p className="text-gray-600 mb-6">
-              Your AI cofounder for the entire product lifecycle: ideation, specification, implementation, DevOps, and continuous evolution.
+              Your Cursor business and development operations companion for ideation, specification, implementation, DevOps, and continuous evolution.
             </p>
             <button
               onClick={nextStep}

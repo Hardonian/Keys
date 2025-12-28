@@ -2,7 +2,7 @@
 
 ## 🎉 Congratulations!
 
-Your CI/CD pipeline is now fully configured and ready to use. All workflows have been created and optimized for your Hardonia AI Companion project.
+Your CI/CD pipeline is now fully configured and ready to use. All workflows have been created and optimized for your System Prompts - Cursor Companion project.
 
 ## 📦 What's Been Set Up
 

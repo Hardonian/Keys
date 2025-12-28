@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "Cursor Venture Companion",
+    "productName": "System Prompts",
     "version": "1.0.0"
   },
   "tauri": {
@@ -41,7 +41,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Cursor Venture Companion",
+        "title": "System Prompts",
         "width": 1200,
         "height": 800
       }

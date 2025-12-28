@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Cursor Venture Companion',
-  description: 'AI cofounder for the entire product lifecycle',
+  title: 'System Prompts - Cursor Companion',
+  description: 'Cursor business and development operations companion',
   manifest: '/manifest.json',
   themeColor: '#2563eb',
   viewport: {
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Venture Companion',
+    title: 'System Prompts',
   },
   icons: {
     icon: '/icon-192.png',
@@ -38,7 +38,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#2563eb" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Venture Companion" />
+        <meta name="apple-mobile-web-app-title" content="System Prompts" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className={inter.className}>

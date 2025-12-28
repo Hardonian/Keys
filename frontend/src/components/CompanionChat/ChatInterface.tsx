@@ -103,10 +103,10 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
         {messages.length === 0 && (
           <div className="text-center text-slate-600 dark:text-slate-400 mt-4 sm:mt-8 px-4">
             <h2 className="text-xl sm:text-2xl font-bold mb-2 text-slate-900 dark:text-slate-50">
-              Welcome to Cursor Venture Companion
+              Welcome to System Prompts
             </h2>
             <p className="text-sm sm:text-base mb-4 max-w-2xl mx-auto">
-              Your AI cofounder for ideation, specification, implementation, and operations.
+              Your Cursor business and development operations companion.
             </p>
             <div className="text-left max-w-2xl mx-auto mt-6 space-y-2">
               <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">

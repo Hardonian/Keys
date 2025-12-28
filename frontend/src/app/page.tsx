@@ -4,9 +4,9 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="max-w-2xl text-center">
-        <h1 className="text-4xl font-bold mb-4">Hardonia AI Companion</h1>
+        <h1 className="text-4xl font-bold mb-4">System Prompts</h1>
         <p className="text-xl text-gray-600 mb-8">
-          Your personalized agent that learns your preferences and helps you get things done.
+          Cursor business and development operations companion
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
           <Link

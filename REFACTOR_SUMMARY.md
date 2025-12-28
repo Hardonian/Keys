@@ -1,8 +1,8 @@
-# Cursor Venture Companion Refactor Summary
+# System Prompts - Cursor Companion Refactor Summary
 
 ## Overview
 
-Successfully refactored the project from a Shopify/e-commerce focused platform to a **platform-agnostic "Cursor Venture Companion"** that supports the entire venture and project lifecycle.
+Successfully refactored the project from a Shopify/e-commerce focused platform to a **platform-agnostic "System Prompts - Cursor Companion"** that supports business and development operations.
 
 ## Main Changes
 
@@ -91,7 +91,7 @@ Successfully refactored the project from a Shopify/e-commerce focused platform t
 ### 6. Frontend Components Updated
 
 #### UI Copy & Positioning
-- **Chat page**: "Cursor Venture Companion" with venture lifecycle positioning
+- **Chat page**: "System Prompts" with business and development operations positioning
 - **InputPanel**: Updated placeholder examples (RFCs, architecture, test plans)
 - **ChatInterface**: Welcome message with example prompts
 - **EventFeed**: Updated icons and colors for new event sources

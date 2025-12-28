@@ -1,7 +1,7 @@
 {
-  "name": "Cursor Venture Companion",
-  "short_name": "Venture Companion",
-  "description": "AI cofounder for the entire product lifecycle",
+  "name": "System Prompts - Cursor Companion",
+  "short_name": "System Prompts",
+  "description": "Cursor business and development operations companion",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

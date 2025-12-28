@@ -23,10 +23,10 @@ export default function ChatPage() {
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
       <header className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10 shadow-sm">
         <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-50">
-          Cursor Venture Companion
+          System Prompts
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-          Your AI cofounder for the entire product lifecycle
+          Cursor business and development operations companion
         </p>
       </header>
       <div className="flex-1 overflow-hidden min-h-0">

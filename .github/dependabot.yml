@@ -9,7 +9,7 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "hardonia-ai"
+      - "system-prompts"
     labels:
       - "dependencies"
       - "backend"
@@ -35,7 +35,7 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "hardonia-ai"
+      - "system-prompts"
     labels:
       - "dependencies"
       - "frontend"
@@ -61,7 +61,7 @@ updates:
       time: "09:00"
     open-pull-requests-limit: 3
     reviewers:
-      - "hardonia-ai"
+      - "system-prompts"
     labels:
       - "dependencies"
       - "root"

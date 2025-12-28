@@ -1,4 +1,4 @@
--- Seed initial prompt atoms for Cursor Venture Companion
+-- Seed initial prompt atoms for System Prompts - Cursor Companion
 
 -- Tone Atoms
 INSERT INTO prompt_atoms (name, category, system_prompt, target_roles, target_verticals, success_rate, compatible_atoms) VALUES

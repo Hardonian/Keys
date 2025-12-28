@@ -1,8 +1,8 @@
-# Cursor Venture Companion
+# System Prompts - Cursor Companion
 
-**AI cofounder for the entire product lifecycle**
+**Cursor business and development operations companion**
 
-Cursor Venture Companion is a platform-agnostic AI assistant that helps you through every stage of venture and project development:
+System Prompts is a platform-agnostic AI assistant that helps you through every stage of business and development operations:
 
 - **Ideation & Specification**: From ideas → problem statements, personas, RFCs, architecture docs
 - **Implementation**: Scaffold projects, modules, tests, CI/CD, infrastructure templates

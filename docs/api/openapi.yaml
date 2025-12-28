@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Cursor Venture Companion API
+  title: System Prompts - Cursor Companion API
   version: 1.0.0
-  description: API for Cursor Venture Companion - AI cofounder for the entire product lifecycle
+  description: API for System Prompts - Cursor business and development operations companion
 
 servers:
   - url: http://localhost:3001
