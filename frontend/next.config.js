@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  env: {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  },
+  // Environment variables are automatically available via process.env in Next.js
+  // No need to explicitly list them in env object unless you want to override
   // PWA configuration
   async headers() {
     return [
@@ -33,8 +30,18 @@ const nextConfig = {
       },
     ];
   },
-  // Enable static exports for desktop app
-  output: process.env.NEXT_OUTPUT || undefined,
+  // Enable static exports for desktop app (only if NEXT_OUTPUT is set)
+  ...(process.env.NEXT_OUTPUT && { output: process.env.NEXT_OUTPUT }),
+  // Optimize images
+  images: {
+    domains: [],
+    formats: ['image/avif', 'image/webp'],
+  },
+  // Suppress build warnings for missing environment variables during build
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 }
 
 module.exports = nextConfig
