@@ -61,6 +61,20 @@ export class ScaffoldTemplateService {
   private templates: Map<string, ScaffoldTemplate> = new Map();
   private catalog: any;
 
+  /**
+   * Get all loaded templates (for testing)
+   */
+  getAllTemplates(): Map<string, ScaffoldTemplate> {
+    return this.templates;
+  }
+
+  /**
+   * Get all template IDs
+   */
+  getAllTemplateIds(): string[] {
+    return Array.from(this.templates.keys());
+  }
+
   constructor() {
     this.loadCatalog();
     this.loadTemplates();

@@ -1,0 +1,14 @@
+{
+  "name": "template-test-framework",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "tsx run-tests.ts",
+    "test:comprehensive": "tsx comprehensive-test.ts",
+    "test:single": "tsx test-single-template.ts"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "tsx": "^4.7.0"
+  }
+}
