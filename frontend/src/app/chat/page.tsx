@@ -3,6 +3,9 @@
 import { ChatInterface } from '@/components/CompanionChat/ChatInterface';
 import { useVibeConfig } from '@/hooks/useVibeConfig';
 
+// Force dynamic rendering since this page uses Supabase
+export const dynamic = 'force-dynamic';
+
 // Note: Metadata export doesn't work with 'use client', but we'll handle SEO via layout
 export default function ChatPage() {
   // TODO: Get userId from auth session

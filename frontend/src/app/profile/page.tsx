@@ -4,6 +4,9 @@ import { ProfileOnboarding } from '@/components/ProfileSettings/ProfileOnboardin
 import { useRouter } from 'next/navigation';
 import { profileService } from '@/services/profileService';
 
+// Force dynamic rendering since this page uses Supabase
+export const dynamic = 'force-dynamic';
+
 export default function ProfilePage() {
   const router = useRouter();
   // TODO: Get userId from auth session

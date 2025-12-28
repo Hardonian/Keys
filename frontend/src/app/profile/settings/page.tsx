@@ -6,6 +6,9 @@ import { VibePresets } from '@/components/ProfileSettings/VibePresets';
 import { useVibeConfig } from '@/hooks/useVibeConfig';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
+// Force dynamic rendering since this page uses Supabase
+export const dynamic = 'force-dynamic';
+
 export default function ProfileSettingsPage() {
   // TODO: Get userId from auth session
   const userId = 'demo-user'; // Replace with actual auth

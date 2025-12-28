@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Metadata } from 'next';
 import { RunAnalytics } from '@/components/Admin/RunAnalytics';
 import { ActionHistory } from '@/components/BackgroundAgent/ActionHistory';
 import { ProactiveSuggestions } from '@/components/BackgroundAgent/ProactiveSuggestions';
 import { useUserProfile } from '@/hooks/useUserProfile';
+
+// Force dynamic rendering since this page uses Supabase
+export const dynamic = 'force-dynamic';
 
 // Note: Metadata export doesn't work with 'use client', but we'll handle SEO via layout
 export default function DashboardPage() {
