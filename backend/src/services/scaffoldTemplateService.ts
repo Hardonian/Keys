@@ -8,7 +8,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import type { UserProfile } from '../types/index.js';
 import type { InputFilter } from '../types/filters.js';
 import { logger } from '../utils/logger.js';
@@ -280,7 +280,7 @@ export class ScaffoldTemplateService {
     }
 
     // Merge all variables
-    const allVariables = {
+    const allVariables: Record<string, any> = {
       ...profileVariables,
       ...variables,
       custom_instructions: customInstructions,
@@ -289,8 +289,8 @@ export class ScaffoldTemplateService {
     };
 
     // Apply input filter modifications
-    if (inputFilter) {
-      allVariables.style = {
+    if (inputFilter && inputFilter.style) {
+      (allVariables as Record<string, any>).style = {
         concise: inputFilter.style === 'concise',
         detailed: inputFilter.style === 'detailed',
         technical: inputFilter.style === 'technical',

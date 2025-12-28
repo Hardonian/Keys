@@ -3,7 +3,6 @@
  */
 
 import { useState, useCallback } from 'react';
-import { templateService } from '@/services/templateService';
 
 export interface SharedTemplate {
   id: string;
@@ -14,6 +13,7 @@ export interface SharedTemplate {
   is_public: boolean;
   shared_with_user_ids: string[];
   shared_with_team_ids: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   custom_variables: Record<string, any>;
   custom_instructions?: string;
   usage_count: number;

@@ -6,9 +6,7 @@
 
 'use client';
 
-'use client';
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTemplates } from '@/hooks/useTemplates';
 import Link from 'next/link';
 
@@ -66,8 +64,8 @@ export function TemplateBrowser() {
         >
           <option value="">All Milestones</option>
           {milestones.map((milestone) => (
-            <option key={milestone} value={milestone}>
-              {milestone.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+            <option key={milestone.id} value={milestone.id}>
+              {milestone.name}
             </option>
           ))}
         </select>

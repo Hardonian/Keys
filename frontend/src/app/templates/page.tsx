@@ -6,8 +6,6 @@
 
 'use client';
 
-'use client';
-
 import { useState, useEffect } from 'react';
 import { useTemplates, useRecommendedTemplates } from '@/hooks/useTemplates';
 import { TemplateBrowser } from '@/components/TemplateManager/TemplateBrowser';
@@ -19,6 +17,7 @@ export default function TemplatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<'browse' | 'recommended' | 'customized'>('browse');
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { templates, loading: templatesLoading } = useTemplates({
     query: searchQuery,
     milestone: selectedMilestone ? [selectedMilestone] : undefined,
@@ -137,7 +136,7 @@ export default function TemplatesPage() {
   );
 }
 
-function TemplateCard({ template }: { template: any }) {
+function TemplateCard({ template }: { template: { templateId: string; name: string; description: string; priority: string; milestone: string } }) {
   return (
     <Link href={`/templates/${template.templateId}`} className="template-card">
       <h3>{template.name}</h3>
@@ -150,8 +149,19 @@ function TemplateCard({ template }: { template: any }) {
   );
 }
 
+interface CustomizationItem {
+  id: string;
+  templateId: string;
+  template_id?: string;
+  templateName?: string;
+  milestone: string;
+  updatedAt?: string;
+  updated_at?: string;
+  enabled?: boolean;
+}
+
 function CustomizedTemplatesList() {
-  const [customizations, setCustomizations] = useState<any[]>([]);
+  const [customizations, setCustomizations] = useState<CustomizationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -168,8 +178,8 @@ function CustomizedTemplatesList() {
         const data = await response.json();
         setCustomizations(data.customizations || []);
       }
-    } catch (error) {
-      console.error('Failed to load customizations', error);
+    } catch {
+      // Failed to load customizations
     } finally {
       setLoading(false);
     }
@@ -186,7 +196,7 @@ function CustomizedTemplatesList() {
         await loadCustomizations();
         toast.success('Customization deleted');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete customization');
     }
   };
@@ -212,17 +222,19 @@ function CustomizedTemplatesList() {
       {customizations.map((customization) => (
         <div key={customization.id} className="customization-card">
           <div className="card-header">
-            <h3>{customization.template_id}</h3>
-            <span className={`badge ${customization.enabled ? 'enabled' : 'disabled'}`}>
-              {customization.enabled ? 'Enabled' : 'Disabled'}
-            </span>
+            <h3>{customization.template_id || customization.templateId}</h3>
+            {customization.enabled !== undefined && (
+              <span className={`badge ${customization.enabled ? 'enabled' : 'disabled'}`}>
+                {customization.enabled ? 'Enabled' : 'Disabled'}
+              </span>
+            )}
           </div>
           <div className="card-meta">
-            <span>Updated: {new Date(customization.updated_at).toLocaleDateString()}</span>
+            <span>Updated: {new Date((customization.updated_at || customization.updatedAt || Date.now()) as number).toLocaleDateString()}</span>
           </div>
           <div className="card-actions">
             <Link
-              href={`/templates/${customization.template_id}`}
+              href={`/templates/${customization.template_id || customization.templateId}`}
               className="btn-secondary"
             >
               View
@@ -234,7 +246,7 @@ function CustomizedTemplatesList() {
               Edit
             </Link>
             <button
-              onClick={() => handleDelete(customization.template_id)}
+              onClick={() => handleDelete(customization.template_id || customization.templateId)}
               className="btn-danger"
             >
               Delete

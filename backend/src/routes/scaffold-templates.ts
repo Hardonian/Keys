@@ -14,6 +14,7 @@ router.use(authMiddleware);
  * GET /scaffold-templates
  * List available scaffold templates with filtering
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const listTemplatesSchema = z.object({
   milestone: z.string().array().optional(),
   stack: z.string().array().optional(),
@@ -102,7 +103,7 @@ router.get(
       stack: template.stack,
       security_level: template.security_level,
       optimization_level: template.optimization_level,
-      content: template.content,
+      mega_prompt: template.mega_prompt,
       variables: template.variables,
     });
   })
@@ -178,7 +179,7 @@ router.post(
         name: t.name,
         milestone: t.milestone,
       })),
-      adaptedContent: result.adaptedContent,
+      modifiedPrompts: result.modifiedPrompts,
     });
   })
 );
@@ -187,6 +188,7 @@ router.post(
  * GET /scaffold-templates/recommended
  * Get recommended templates for a task
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const recommendedSchema = z.object({
   taskDescription: z.string().min(1),
 });

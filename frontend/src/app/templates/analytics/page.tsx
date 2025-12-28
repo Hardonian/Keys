@@ -9,8 +9,15 @@
 import { useState, useEffect } from 'react';
 import { templateService } from '@/services/templateService';
 
+interface AnalyticsStats {
+  total_uses: number;
+  templates_used: number;
+  average_success_rate: number;
+  top_templates: Array<{ template_id: string; usage_count: number; success_rate: number }>;
+}
+
 export default function TemplateAnalyticsPage() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AnalyticsStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,7 +65,7 @@ export default function TemplateAnalyticsPage() {
       <div className="top-templates">
         <h2>Most Used Templates</h2>
         <div className="templates-list">
-          {stats.top_templates.map((template: any) => (
+          {stats.top_templates.map((template) => (
             <div key={template.template_id} className="template-stat-item">
               <span className="template-name">{template.template_id}</span>
               <span className="usage-count">{template.usage_count} uses</span>

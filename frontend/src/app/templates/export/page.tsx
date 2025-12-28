@@ -19,7 +19,7 @@ export default function ExportTemplatesPage() {
     try {
       await downloadExport(format);
       toast.success(`Export downloaded as ${format.toUpperCase()}`);
-    } catch (error) {
+    } catch {
       toast.error('Failed to export customizations');
     }
   };
@@ -49,7 +49,7 @@ export default function ExportTemplatesPage() {
       }
 
       setImportFile(null);
-    } catch (error) {
+    } catch {
       toast.error('Failed to import customizations. Check file format.');
     } finally {
       setImporting(false);

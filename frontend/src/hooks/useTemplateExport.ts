@@ -10,6 +10,7 @@ export function useTemplateExport() {
   const [error, setError] = useState<Error | null>(null);
 
   const exportCustomizations = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (format: 'json' | 'yaml' | 'csv' = 'json', templateIds?: string[]) => {
       try {
         setLoading(true);
@@ -29,6 +30,7 @@ export function useTemplateExport() {
 
   const importCustomizations = useCallback(
     async (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       exportData: any,
       options: { overwriteExisting?: boolean; skipErrors?: boolean } = {}
     ) => {

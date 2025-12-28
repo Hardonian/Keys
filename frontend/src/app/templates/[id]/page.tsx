@@ -6,9 +6,7 @@
 
 'use client';
 
-'use client';
-
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
   useTemplatePreview,
   useTemplateCustomization,
@@ -16,8 +14,9 @@ import {
   useTemplateTesting,
   useTemplateHistory,
 } from '@/hooks/useTemplates';
+import type { TemplatePreview } from '@/services/templateService';
 import { TemplateEditor } from '@/components/TemplateManager/TemplateEditor';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { toast } from '@/components/Toast';
 import { TemplateComparison } from '@/components/TemplateManager/TemplateComparison';
@@ -28,14 +27,15 @@ export default function TemplateDetailPage() {
   const templateId = params.id as string;
 
   const { preview, loading: previewLoading } = useTemplatePreview(templateId);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { saveCustomization, updateCustomization, deleteCustomization } = useTemplateCustomization(templateId);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { validation, availableVariables, validate } = useTemplateValidation(templateId);
   const { testResult, test } = useTemplateTesting(templateId);
 
-  const [customVariables, setCustomVariables] = useState<Record<string, any>>({});
-  const [customInstructions, setCustomInstructions] = useState('');
   const [activeTab, setActiveTab] = useState<'preview' | 'customize' | 'test' | 'history' | 'compare'>('preview');
-  const [comparison, setComparison] = useState<any>(null);
+  const [comparison, setComparison] = useState<{ added?: string[]; removed?: string[]; changed?: Array<{ line: string; old: string; new: string }>; similarity?: number } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loadingComparison, setLoadingComparison] = useState(false);
 
   if (previewLoading) {
@@ -76,7 +76,6 @@ export default function TemplateDetailPage() {
             preview={preview}
             comparison={comparison}
             setComparison={setComparison}
-            loadingComparison={loadingComparison}
             setLoadingComparison={setLoadingComparison}
           />
         </div>
@@ -104,7 +103,6 @@ export default function TemplateDetailPage() {
       {activeTab === 'test' && (
         <div className="test-tab">
           <TestTemplateView
-            templateId={templateId}
             testResult={testResult}
             onTest={test}
           />
@@ -121,14 +119,15 @@ export default function TemplateDetailPage() {
 }
 
 function TestTemplateView({
-  templateId,
   testResult,
   onTest,
 }: {
-  templateId: string;
-  testResult: any;
-  onTest: (vars: Record<string, any>, instructions?: string) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  templateId?: string;
+  testResult: { success: boolean; renderedPrompt?: string; validationResult?: { errors: Array<{ message: string }> }; metadata?: { variablesUsed: string[]; promptLength: number; conditionalsEvaluated: number } } | null;
+  onTest: (vars: Record<string, unknown>, instructions?: string) => Promise<unknown>;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [customVariables, setCustomVariables] = useState<Record<string, any>>({});
   const [customInstructions, setCustomInstructions] = useState('');
   const [testing, setTesting] = useState(false);
@@ -137,7 +136,7 @@ function TestTemplateView({
     try {
       setTesting(true);
       await onTest(customVariables, customInstructions);
-    } catch (error) {
+    } catch {
       toast.error('Test failed');
     } finally {
       setTesting(false);
@@ -192,14 +191,14 @@ function TestTemplateView({
               <div className="test-metadata">
                 <p>
                   <strong>Variables Used:</strong>{' '}
-                  {testResult.metadata.variablesUsed.join(', ') || 'None'}
+                  {testResult.metadata?.variablesUsed.join(', ') || 'None'}
                 </p>
                 <p>
-                  <strong>Prompt Length:</strong> {testResult.metadata.promptLength} characters
+                  <strong>Prompt Length:</strong> {testResult.metadata?.promptLength || 0} characters
                 </p>
                 <p>
                   <strong>Conditionals Evaluated:</strong>{' '}
-                  {testResult.metadata.conditionalsEvaluated}
+                  {testResult.metadata?.conditionalsEvaluated || 0}
                 </p>
               </div>
             </div>
@@ -208,7 +207,7 @@ function TestTemplateView({
               <p>❌ Template test failed</p>
               {testResult.validationResult?.errors && (
                 <div className="errors">
-                  {testResult.validationResult.errors.map((err: any, i: number) => (
+                  {testResult.validationResult.errors.map((err: { message: string }, i: number) => (
                     <div key={i} className="error">
                       {err.message}
                     </div>
@@ -228,35 +227,44 @@ function CompareView({
   preview,
   comparison,
   setComparison,
-  loadingComparison,
   setLoadingComparison,
-}: any) {
-  const loadComparison = async () => {
+}: {
+  templateId: string;
+  preview: TemplatePreview | null;
+  comparison: { added?: string[]; removed?: string[]; changed?: Array<{ line: string; old: string; new: string }>; similarity?: number } | null;
+  setComparison: (comp: { added?: string[]; removed?: string[]; changed?: Array<{ line: string; old: string; new: string }>; similarity?: number } | null) => void;
+  setLoadingComparison: (loading: boolean) => void;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadComparison = useCallback(async () => {
     if (!preview?.hasCustomization) {
       toast.info('No customization to compare');
       return;
     }
 
     try {
+      setIsLoading(true);
       setLoadingComparison(true);
       const result = await templateService.comparePrompts(
         templateId,
         preview.customVariables || {},
         preview.customInstructions
       );
-      setComparison(result);
-    } catch (error) {
+      setComparison(result.comparison);
+    } catch {
       toast.error('Failed to load comparison');
     } finally {
+      setIsLoading(false);
       setLoadingComparison(false);
     }
-  };
+  }, [templateId, preview, setComparison, setLoadingComparison]);
 
   useEffect(() => {
     if (preview?.hasCustomization && !comparison) {
       loadComparison();
     }
-  }, [preview]);
+  }, [preview, comparison, loadComparison]);
 
   if (!preview?.hasCustomization) {
     return (
@@ -269,7 +277,7 @@ function CompareView({
     );
   }
 
-  if (loadingComparison) {
+  if (isLoading) {
     return <div className="loading">Loading comparison...</div>;
   }
 
@@ -287,7 +295,7 @@ function CompareView({
     <TemplateComparison
       basePrompt={preview.basePrompt}
       customizedPrompt={preview.customizedPrompt || ''}
-      comparison={comparison.comparison}
+      comparison={comparison}
     />
   );
 }

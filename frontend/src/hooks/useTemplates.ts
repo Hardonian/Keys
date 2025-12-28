@@ -22,10 +22,6 @@ export function useTemplates(filters: SearchFilters = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    loadTemplates();
-  }, [JSON.stringify(filters)]);
-
   const loadTemplates = useCallback(async () => {
     try {
       setLoading(true);
@@ -37,7 +33,11 @@ export function useTemplates(filters: SearchFilters = {}) {
     } finally {
       setLoading(false);
     }
-  }, [JSON.stringify(filters)]);
+  }, [filters]);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
 
   return {
     templates,
@@ -51,14 +51,6 @@ export function useTemplatePreview(templateId: string | null) {
   const [preview, setPreview] = useState<TemplatePreview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    if (!templateId) {
-      setLoading(false);
-      return;
-    }
-    loadPreview();
-  }, [templateId]);
 
   const loadPreview = useCallback(async () => {
     if (!templateId) return;
@@ -89,6 +81,7 @@ export function useTemplateCustomization(templateId: string | null) {
   const [error, setError] = useState<Error | null>(null);
 
   const saveCustomization = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (customVariables: Record<string, any>, customInstructions?: string) => {
       if (!templateId) return;
 
@@ -111,6 +104,7 @@ export function useTemplateCustomization(templateId: string | null) {
 
   const updateCustomization = useCallback(
     async (updates: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customVariables?: Record<string, any>;
       customInstructions?: string;
       enabled?: boolean;
@@ -164,13 +158,8 @@ export function useTemplateCustomization(templateId: string | null) {
 export function useTemplateValidation(templateId: string | null) {
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [availableVariables, setAvailableVariables] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (templateId) {
-      loadVariables();
-    }
-  }, [templateId]);
 
   const loadVariables = useCallback(async () => {
     if (!templateId) return;
@@ -183,7 +172,14 @@ export function useTemplateValidation(templateId: string | null) {
     }
   }, [templateId]);
 
+  useEffect(() => {
+    if (templateId) {
+      loadVariables();
+    }
+  }, [templateId, loadVariables]);
+
   const validate = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (customVariables: Record<string, any>, customInstructions?: string) => {
       if (!templateId) return null;
 
@@ -217,8 +213,10 @@ export function useTemplateTesting(templateId: string | null) {
 
   const test = useCallback(
     async (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customVariables: Record<string, any>,
       customInstructions?: string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inputFilter?: any,
       taskDescription?: string
     ) => {
@@ -349,10 +347,6 @@ export function useRecommendedTemplates(options: {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    loadRecommended();
-  }, [JSON.stringify(options)]);
-
   const loadRecommended = useCallback(async () => {
     try {
       setLoading(true);
@@ -364,7 +358,11 @@ export function useRecommendedTemplates(options: {
     } finally {
       setLoading(false);
     }
-  }, [JSON.stringify(options)]);
+  }, [options]);
+
+  useEffect(() => {
+    loadRecommended();
+  }, [loadRecommended]);
 
   return {
     templates,

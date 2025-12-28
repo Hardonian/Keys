@@ -9,7 +9,6 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useTemplatePreview, useTemplateCustomization, useTemplateValidation, useTemplateTesting } from '@/hooks/useTemplates';
-import { templateService } from '@/services/templateService';
 
 export default function TemplateCustomizePage() {
   const params = useParams();
@@ -21,7 +20,7 @@ export default function TemplateCustomizePage() {
   const { validation, availableVariables, validate } = useTemplateValidation(templateId);
   const { testResult, test, loading: testing } = useTemplateTesting(templateId);
 
-  const [customVariables, setCustomVariables] = useState<Record<string, any>>({});
+  const [customVariables, setCustomVariables] = useState<Record<string, unknown>>({});
   const [customInstructions, setCustomInstructions] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

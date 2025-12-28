@@ -12,10 +12,10 @@ interface ComparisonProps {
   basePrompt: string;
   customizedPrompt: string;
   comparison?: {
-    added: string[];
-    removed: string[];
-    changed: Array<{ line: string; old: string; new: string }>;
-    similarity: number;
+    added?: string[];
+    removed?: string[];
+    changed?: Array<{ line: string; old: string; new: string }>;
+    similarity?: number;
   };
 }
 
@@ -45,16 +45,16 @@ export function TemplateComparison({ basePrompt, customizedPrompt, comparison }:
       {comparison && (
         <div className="comparison-stats">
           <div className="stat">
-            <strong>Similarity:</strong> {(comparison.similarity * 100).toFixed(1)}%
+            <strong>Similarity:</strong> {comparison.similarity ? (comparison.similarity * 100).toFixed(1) : 'N/A'}%
           </div>
           <div className="stat">
-            <strong>Added:</strong> {comparison.added.length} lines
+            <strong>Added:</strong> {comparison.added?.length || 0} lines
           </div>
           <div className="stat">
-            <strong>Removed:</strong> {comparison.removed.length} lines
+            <strong>Removed:</strong> {comparison.removed?.length || 0} lines
           </div>
           <div className="stat">
-            <strong>Changed:</strong> {comparison.changed.length} lines
+            <strong>Changed:</strong> {comparison.changed?.length || 0} lines
           </div>
         </div>
       )}
@@ -72,7 +72,7 @@ export function TemplateComparison({ basePrompt, customizedPrompt, comparison }:
         </div>
       ) : (
         <div className="diff-view">
-          {comparison?.changed.map((change, i) => (
+          {comparison?.changed?.map((change, i) => (
             <div key={i} className="diff-item">
               <div className="diff-line">{change.line}</div>
               <div className="diff-old">
@@ -83,7 +83,7 @@ export function TemplateComparison({ basePrompt, customizedPrompt, comparison }:
               </div>
             </div>
           ))}
-          {comparison?.added.length > 0 && (
+          {comparison && comparison.added && comparison.added.length > 0 && (
             <div className="diff-added">
               <h4>Added Lines</h4>
               {comparison.added.map((line, i) => (
@@ -91,7 +91,7 @@ export function TemplateComparison({ basePrompt, customizedPrompt, comparison }:
               ))}
             </div>
           )}
-          {comparison?.removed.length > 0 && (
+          {comparison && comparison.removed && comparison.removed.length > 0 && (
             <div className="diff-removed">
               <h4>Removed Lines</h4>
               {comparison.removed.map((line, i) => (

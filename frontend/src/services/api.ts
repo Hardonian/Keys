@@ -20,8 +20,7 @@ const api = axios.create({
 api.interceptors.request.use(async (config) => {
   // Get auth token from Supabase session
   try {
-    const { createClient } = await import('@/services/supabaseClient');
-    const supabase = createClient();
+    const { supabase } = await import('@/services/supabaseClient');
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session?.access_token) {

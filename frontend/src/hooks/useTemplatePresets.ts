@@ -10,6 +10,7 @@ export interface Preset {
   description?: string;
   category: string;
   template_ids: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   custom_variables: Record<string, any>;
   custom_instructions?: string;
   is_system_preset: boolean;
@@ -56,6 +57,7 @@ export function useTemplatePresets() {
       description?: string;
       category: string;
       templateIds: string[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customVariables?: Record<string, any>;
       customInstructions?: string;
     }) => {

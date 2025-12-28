@@ -6,8 +6,6 @@
 
 'use client';
 
-'use client';
-
 import { useState, useEffect } from 'react';
 import {
   useTemplatePreview,
@@ -18,25 +16,6 @@ import {
 import { toast } from '@/components/Toast';
 import { useRouter } from 'next/navigation';
 
-interface TemplatePreview {
-  templateId: string;
-  name: string;
-  basePrompt: string;
-  customizedPrompt?: string;
-  hasCustomization: boolean;
-  customVariables?: Record<string, any>;
-  customInstructions?: string;
-}
-
-interface AvailableVariable {
-  name: string;
-  description: string;
-  type?: string;
-  required: boolean;
-  default?: string;
-  examples?: string[];
-}
-
 export function TemplateEditor({ templateId }: { templateId: string }) {
   const router = useRouter();
   const { preview, refetch: refetchPreview } = useTemplatePreview(templateId);
@@ -46,6 +25,7 @@ export function TemplateEditor({ templateId }: { templateId: string }) {
   const { saveCustomization, updateCustomization, deleteCustomization } =
     useTemplateCustomization(templateId);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [customVariables, setCustomVariables] = useState<Record<string, any>>({});
   const [customInstructions, setCustomInstructions] = useState('');
   const [saving, setSaving] = useState(false);
@@ -66,7 +46,7 @@ export function TemplateEditor({ templateId }: { templateId: string }) {
     try {
       setTesting(true);
       await test(customVariables, customInstructions);
-    } catch (error) {
+    } catch {
       toast.error('Test failed');
     } finally {
       setTesting(false);
@@ -120,32 +100,36 @@ export function TemplateEditor({ templateId }: { templateId: string }) {
 
       <div className="variables-section">
         <h3>Custom Variables</h3>
-        {availableVariables.map((variable) => (
-          <div key={variable.name} className="variable-input">
-            <label>
-              {variable.name}
-              {variable.required && <span className="required">*</span>}
-            </label>
-            <input
-              type="text"
-              value={customVariables[variable.name] || variable.default || ''}
-              onChange={(e) =>
-                setCustomVariables({
-                  ...customVariables,
-                  [variable.name]: e.target.value,
-                })
-              }
-            />
-            {variable.description && (
-              <p className="variable-description">{variable.description}</p>
-            )}
-            {variable.examples && (
-              <p className="variable-examples">
-                Examples: {variable.examples.join(', ')}
-              </p>
-            )}
-          </div>
-        ))}
+        {availableVariables.map((variable) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const v = variable as any;
+          return (
+            <div key={v.name} className="variable-input">
+              <label>
+                {v.name}
+                {v.required && <span className="required">*</span>}
+              </label>
+              <input
+                type="text"
+                value={customVariables[v.name] || v.default || ''}
+                onChange={(e) =>
+                  setCustomVariables({
+                    ...customVariables,
+                    [v.name]: e.target.value,
+                  })
+                }
+              />
+              {v.description && (
+                <p className="variable-description">{v.description}</p>
+              )}
+              {v.examples && (
+                <p className="variable-examples">
+                  Examples: {v.examples.join(', ')}
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="instructions-section">
@@ -176,7 +160,7 @@ export function TemplateEditor({ templateId }: { templateId: string }) {
                   await deleteCustomization();
                   toast.success('Customization deleted');
                   router.push(`/templates/${templateId}`);
-                } catch (err) {
+                } catch {
                   toast.error('Failed to delete customization');
                 }
               }
@@ -193,7 +177,7 @@ export function TemplateEditor({ templateId }: { templateId: string }) {
           <h4>Validation Result</h4>
           {validation.errors.length > 0 && (
             <div className="errors">
-              {validation.errors.map((error: any, i: number) => (
+              {validation.errors.map((error: { message: string }, i: number) => (
                 <div key={i} className="error">
                   {error.message}
                 </div>

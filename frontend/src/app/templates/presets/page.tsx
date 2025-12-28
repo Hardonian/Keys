@@ -6,9 +6,7 @@
 
 'use client';
 
-'use client';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/components/Toast';
 
 interface Preset {
@@ -17,6 +15,7 @@ interface Preset {
   description?: string;
   category: string;
   template_ids: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   custom_variables: Record<string, any>;
   custom_instructions?: string;
   is_system_preset: boolean;
@@ -30,11 +29,7 @@ export default function TemplatePresetsPage() {
   const [applying, setApplying] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('');
 
-  useEffect(() => {
-    loadPresets();
-  }, [categoryFilter]);
-
-  const loadPresets = async () => {
+  const loadPresets = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -63,7 +58,11 @@ export default function TemplatePresetsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryFilter]);
+
+  useEffect(() => {
+    loadPresets();
+  }, [loadPresets]);
 
   const handleApply = async (presetId: string) => {
     try {

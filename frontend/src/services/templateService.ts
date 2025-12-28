@@ -5,7 +5,6 @@
  */
 
 import api from './api';
-import type { UserProfile } from '@/types';
 
 export interface Template {
   templateId: string;
@@ -27,6 +26,7 @@ export interface TemplatePreview {
   basePrompt: string;
   customizedPrompt?: string;
   hasCustomization: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customVariables?: Record<string, any>;
   customInstructions?: string;
 }
@@ -36,6 +36,7 @@ export interface Customization {
   user_id: string;
   template_id: string;
   milestone: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   custom_variables: Record<string, any>;
   custom_instructions?: string;
   enabled: boolean;
@@ -79,6 +80,7 @@ export interface HistoryEntry {
   customization_id: string;
   user_id: string;
   template_id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   custom_variables: Record<string, any>;
   custom_instructions?: string;
   enabled: boolean;
@@ -167,6 +169,7 @@ export const templateService = {
   // Validate customization
   async validateCustomization(
     templateId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     customVariables: Record<string, any>,
     customInstructions?: string
   ): Promise<ValidationResult> {
@@ -193,8 +196,10 @@ export const templateService = {
   // Test template
   async testTemplate(
     templateId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     customVariables: Record<string, any>,
     customInstructions?: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFilter?: any,
     taskDescription?: string
   ): Promise<TestResult> {
@@ -210,6 +215,7 @@ export const templateService = {
   // Compare prompts
   async comparePrompts(
     templateId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     customVariables: Record<string, any>,
     customInstructions?: string
   ): Promise<{
@@ -233,6 +239,7 @@ export const templateService = {
   // Save customization
   async saveCustomization(
     templateId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     customVariables: Record<string, any>,
     customInstructions?: string
   ): Promise<{ customization: Customization; preview: TemplatePreview }> {
@@ -247,6 +254,7 @@ export const templateService = {
   async updateCustomization(
     templateId: string,
     updates: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customVariables?: Record<string, any>;
       customInstructions?: string;
       enabled?: boolean;
@@ -287,8 +295,11 @@ export const templateService = {
     entry2: HistoryEntry;
     diff: {
       variables: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         added: Record<string, any>;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         removed: Record<string, any>;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         changed: Array<{ key: string; oldValue: any; newValue: any }>;
       };
       instructions: {
@@ -372,6 +383,7 @@ export const templateService = {
   async generatePrompt(
     templateId: string,
     taskDescription: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputFilter?: any
   ): Promise<{
     prompt: string;
@@ -387,6 +399,7 @@ export const templateService = {
   },
 
   // Export customizations
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async exportCustomizations(format: 'json' | 'yaml' | 'csv' = 'json'): Promise<any> {
     const response = await api.get(`/user-templates/export?format=${format}`, {
       responseType: format === 'json' ? 'json' : 'text',
@@ -396,6 +409,7 @@ export const templateService = {
 
   // Import customizations
   async importCustomizations(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     exportData: any,
     options: {
       overwriteExisting?: boolean;

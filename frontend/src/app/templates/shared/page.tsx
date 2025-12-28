@@ -6,10 +6,7 @@
 
 'use client';
 
-'use client';
-
-import { useState, useEffect } from 'react';
-import { templateService } from '@/services/templateService';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/components/Toast';
 import Link from 'next/link';
 
@@ -22,6 +19,7 @@ interface SharedTemplate {
   is_public: boolean;
   usage_count: number;
   rating_average?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   custom_variables: Record<string, any>;
   custom_instructions?: string;
   created_at: string;
@@ -33,11 +31,7 @@ export default function SharedTemplatesPage() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'public' | 'mine'>('all');
 
-  useEffect(() => {
-    loadSharedTemplates();
-  }, [filter]);
-
-  const loadSharedTemplates = async () => {
+  const loadSharedTemplates = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -73,7 +67,11 @@ export default function SharedTemplatesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    loadSharedTemplates();
+  }, [loadSharedTemplates]);
 
   const handleClone = async (sharedId: string) => {
     try {

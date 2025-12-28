@@ -43,7 +43,7 @@ export default function ShareTemplatePage() {
       await shareTemplate(templateId, shareOptions);
       toast.success('Template shared successfully!');
       router.push('/templates/shared');
-    } catch (error) {
+    } catch {
       toast.error('Failed to share template');
     }
   };

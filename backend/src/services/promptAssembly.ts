@@ -130,13 +130,11 @@ export async function assemblePrompt(
   const baseSystemPrompt = composeSystemPrompt(weightedAtoms);
 
   // 7. Apply input filters if provided (reformat input and update system prompt)
-  let finalTaskDescription = taskDescription;
   let finalSystemPrompt = baseSystemPrompt;
   let finalUserPrompt = composeUserPrompt(taskDescription, profile, vibeConfig);
 
   if (inputFilter) {
     const reformatted = await inputReformatter.reformatInput(taskDescription, inputFilter);
-    finalTaskDescription = reformatted.reformattedInput;
     // Merge filter-based system prompt with atom-based system prompt
     finalSystemPrompt = `${baseSystemPrompt}\n\n${reformatted.systemPrompt}`;
     finalUserPrompt = reformatted.userPrompt;
@@ -364,7 +362,7 @@ async function assembleScaffoldPrompt(
   }
 
   // Compose system prompt from user's customized templates
-  const systemPrompt = templatePrompts.join('\n\n---\n\n') + '\n\n## Final Instructions\n\n' +
+  const composedSystemPrompt = templatePrompts.join('\n\n---\n\n') + '\n\n## Final Instructions\n\n' +
     `Always prioritize:\n` +
     `1. Security best practices\n` +
     `2. Performance optimization\n` +
@@ -372,31 +370,17 @@ async function assembleScaffoldPrompt(
     `4. Maintainability\n`;
 
   // Compose user prompt
-  const userPrompt = composeUserPrompt(taskDescription, profile, vibeConfig);
+  const composedUserPrompt = composeUserPrompt(taskDescription, profile, vibeConfig);
 
   // Apply additional input filter formatting if needed
-  let finalSystemPrompt = systemPrompt;
-  let finalUserPrompt = userPrompt;
+  let finalSystemPrompt = composedSystemPrompt;
+  let finalUserPrompt = composedUserPrompt;
 
   if (inputFilter) {
-    const reformatted = await inputReformatter.reformatInput(userPrompt, inputFilter);
-    finalSystemPrompt = `${systemPrompt}\n\n${reformatted.systemPrompt}`;
+    const reformatted = await inputReformatter.reformatInput(composedUserPrompt, inputFilter);
+    finalSystemPrompt = `${composedSystemPrompt}\n\n${reformatted.systemPrompt}`;
     finalUserPrompt = reformatted.userPrompt;
   }
-
-    // Apply additional input filter formatting if needed
-    let finalSystemPrompt = scaffoldResult.systemPrompt;
-    let finalUserPrompt = scaffoldResult.userPrompt;
-
-    if (inputFilter) {
-      const reformatted = await inputReformatter.reformatInput(
-        scaffoldResult.userPrompt,
-        inputFilter
-      );
-      // Merge filter-based system prompt additions
-      finalSystemPrompt = `${scaffoldResult.systemPrompt}\n\n${reformatted.systemPrompt}`;
-      finalUserPrompt = reformatted.userPrompt;
-    }
 
   // Return in PromptAssemblyResult format
   return {
