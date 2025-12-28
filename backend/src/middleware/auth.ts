@@ -27,7 +27,13 @@ export async function authMiddleware(
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'Missing or invalid authorization header' });
+      res.status(401).json({ 
+        error: {
+          code: 'AUTHENTICATION_ERROR',
+          message: 'Missing or invalid authorization header',
+        },
+        requestId: req.headers['x-request-id'],
+      });
       return;
     }
 
@@ -40,7 +46,13 @@ export async function authMiddleware(
     } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      res.status(401).json({ error: 'Invalid or expired token' });
+      res.status(401).json({ 
+        error: {
+          code: 'AUTHENTICATION_ERROR',
+          message: 'Invalid or expired token',
+        },
+        requestId: req.headers['x-request-id'],
+      });
       return;
     }
 
@@ -55,7 +67,13 @@ export async function authMiddleware(
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    res.status(500).json({ error: 'Authentication error' });
+    res.status(500).json({ 
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Authentication error',
+      },
+      requestId: req.headers['x-request-id'],
+    });
   }
 }
 

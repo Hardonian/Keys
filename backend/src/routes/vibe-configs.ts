@@ -1,5 +1,12 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import { z } from 'zod';
+import { asyncHandler } from '../middleware/errorHandler.js';
+import { validateBody, validateParams } from '../middleware/validation.js';
+import { createVibeConfigSchema, updateVibeConfigSchema } from '../validation/schemas.js';
+import { NotFoundError, DatabaseError } from '../types/errors.js';
+import { logger } from '../utils/logger.js';
+import { getCache, setCache, deleteCache, cacheKeys } from '../cache/redis.js';
 
 const router = Router();
 const supabase = createClient(
@@ -7,9 +14,21 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-router.get('/:userId', async (req, res) => {
-  try {
+// Get user's vibe config
+router.get(
+  '/:userId',
+  validateParams(z.object({ userId: z.string().min(1) })),
+  asyncHandler(async (req, res) => {
     const { userId } = req.params;
+    const requestId = req.headers['x-request-id'] as string;
+
+    // Try cache first
+    const cacheKey = cacheKeys.vibeConfig(userId);
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      logger.debug('Vibe config cache hit', { userId, requestId });
+      return res.json(cached);
+    }
 
     const { data, error } = await supabase
       .from('vibe_configs')
@@ -20,7 +39,7 @@ router.get('/:userId', async (req, res) => {
       .single();
 
     if (error && error.code !== 'PGRST116') {
-      return res.status(404).json({ error: 'Vibe config not found' });
+      throw new DatabaseError('Failed to fetch vibe config', { error: error.message });
     }
 
     // Create default if not found
@@ -32,7 +51,7 @@ router.get('/:userId', async (req, res) => {
         investor_perspective: 40,
         auto_suggest: true,
         approval_required: true,
-        logging_level: 'standard',
+        logging_level: 'standard' as const,
       };
 
       const { data: newData, error: createError } = await supabase
@@ -42,70 +61,90 @@ router.get('/:userId', async (req, res) => {
         .single();
 
       if (createError) {
-        return res.status(400).json({ error: createError.message });
+        throw new DatabaseError('Failed to create default vibe config', {
+          error: createError.message,
+        });
       }
 
+      await setCache(cacheKey, newData, 300);
+      logger.info('Default vibe config created', { userId, requestId });
       return res.json(newData);
     }
 
+    await setCache(cacheKey, data, 300);
+    logger.info('Vibe config fetched', { userId, requestId });
     res.json(data);
-  } catch (error) {
-    console.error('Error fetching vibe config:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+  })
+);
 
-router.patch('/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const updates = req.body;
+// Create vibe config
+router.post(
+  '/',
+  validateBody(createVibeConfigSchema),
+  asyncHandler(async (req, res) => {
+    const config = req.body;
+    const userId = (req as any).userId || config.user_id;
+    const requestId = req.headers['x-request-id'] as string;
 
-    // Get existing config
-    const { data: existing } = await supabase
-      .from('vibe_configs')
-      .select('id')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (!existing) {
-      // Create new config
-      const newConfig = {
-        user_id: userId,
-        ...updates,
-      };
-
-      const { data, error } = await supabase
-        .from('vibe_configs')
-        .insert(newConfig)
-        .select()
-        .single();
-
-      if (error) {
-        return res.status(400).json({ error: error.message });
-      }
-
-      return res.json(data);
+    if (!userId) {
+      return res.status(400).json({ error: 'user_id is required' });
     }
 
-    // Update existing
     const { data, error } = await supabase
       .from('vibe_configs')
-      .update(updates)
-      .eq('id', existing.id)
+      .insert({ ...config, user_id: userId })
       .select()
       .single();
 
     if (error) {
-      return res.status(400).json({ error: error.message });
+      logger.error('Error creating vibe config', new Error(error.message), {
+        userId,
+        requestId,
+      });
+      throw new DatabaseError('Failed to create vibe config', { error: error.message });
     }
 
+    await deleteCache(cacheKeys.vibeConfig(userId));
+    logger.info('Vibe config created', { userId, requestId });
+    res.status(201).json(data);
+  })
+);
+
+// Update vibe config
+router.patch(
+  '/:userId',
+  validateParams(z.object({ userId: z.string().min(1) })),
+  validateBody(updateVibeConfigSchema),
+  asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    const updates = req.body;
+    const requestId = req.headers['x-request-id'] as string;
+
+    const { data, error } = await supabase
+      .from('vibe_configs')
+      .update(updates)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .select()
+      .single();
+
+    if (error) {
+      logger.error('Error updating vibe config', new Error(error.message), {
+        userId,
+        requestId,
+      });
+      throw new DatabaseError('Failed to update vibe config', { error: error.message });
+    }
+
+    if (!data) {
+      throw new NotFoundError('Vibe config');
+    }
+
+    await deleteCache(cacheKeys.vibeConfig(userId));
+    logger.info('Vibe config updated', { userId, requestId });
     res.json(data);
-  } catch (error) {
-    console.error('Error updating vibe config:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+  })
+);
 
 export { router as vibeConfigsRouter };

@@ -15,7 +15,7 @@ export function EventFeed({ userId, maxEvents = 50 }: EventFeedProps) {
 
   if (loading) {
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="p-4 text-center text-slate-500 dark:text-slate-400">
         <p>Loading events...</p>
       </div>
     );
@@ -23,7 +23,7 @@ export function EventFeed({ userId, maxEvents = 50 }: EventFeedProps) {
 
   if (error) {
     return (
-      <div className="p-4 text-center text-red-500">
+      <div className="p-4 text-center text-red-500 dark:text-red-400">
         <p>Error loading events: {error.message}</p>
       </div>
     );
@@ -31,7 +31,7 @@ export function EventFeed({ userId, maxEvents = 50 }: EventFeedProps) {
 
   if (!events || events.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="p-4 text-center text-slate-500 dark:text-slate-400">
         <p>No events yet. Events will appear here as they occur.</p>
       </div>
     );
@@ -61,19 +61,19 @@ export function EventFeed({ userId, maxEvents = 50 }: EventFeedProps) {
   const getEventColor = (source: BackgroundEvent['source']) => {
     switch (source) {
       case 'code_repo':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
       case 'issue_tracker':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300';
       case 'ci_cd':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300';
       case 'infra':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300';
       case 'metrics':
-        return 'bg-indigo-100 text-indigo-800';
+        return 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300';
       case 'schedule':
-        return 'bg-pink-100 text-pink-800';
+        return 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300';
     }
   };
 
@@ -82,7 +82,7 @@ export function EventFeed({ userId, maxEvents = 50 }: EventFeedProps) {
       {displayEvents.map((event) => (
         <div
           key={event.id}
-          className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+          className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
         >
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3 flex-1">
@@ -96,27 +96,27 @@ export function EventFeed({ userId, maxEvents = 50 }: EventFeedProps) {
                   >
                     {event.source}
                   </span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-slate-900 dark:text-slate-50">
                     {event.event_type}
                   </span>
                 </div>
                 {event.event_data && (
-                  <p className="text-sm text-gray-600 truncate">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 truncate">
                     {JSON.stringify(event.event_data).substring(0, 100)}
                     {JSON.stringify(event.event_data).length > 100 ? '...' : ''}
                   </p>
                 )}
                 <div className="flex items-center gap-4 mt-2">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     {formatRelativeTime(event.created_at)}
                   </span>
                   {event.suggestion_generated && (
-                    <span className="text-xs text-primary-600 font-medium">
+                    <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                       ✓ Suggestion generated
                     </span>
                   )}
                   {event.user_actioned && (
-                    <span className="text-xs text-green-600 font-medium">
+                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">
                       ✓ Actioned
                     </span>
                   )}
