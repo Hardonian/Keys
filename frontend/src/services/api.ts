@@ -17,8 +17,20 @@ const api = axios.create({
 });
 
 // Add auth token to requests
-api.interceptors.request.use((config) => {
-  // TODO: Add auth token from Supabase session
+api.interceptors.request.use(async (config) => {
+  // Get auth token from Supabase session
+  try {
+    const { createClient } = await import('@/services/supabaseClient');
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
+    }
+  } catch (error) {
+    console.warn('Failed to get auth token:', error);
+  }
+  
   return config;
 });
 
