@@ -237,18 +237,52 @@ export class CodeRepoAdapter {
     try {
       // GitHub Actions
       if (this.provider === 'github') {
-        const sha = commit || 'HEAD';
-        const url = `https://api.github.com/repos/${this.repoUrl}/commits/${sha}/check-runs`;
-        const response = await axios.get(url, {
+        const sha = commit || await this.getLatestCommit(branch);
+        if (!sha) return null;
+
+        // Get check runs for the commit
+        const checkRunsUrl = `https://api.github.com/repos/${this.repoUrl}/commits/${sha}/check-runs`;
+        const checkRunsResponse = await axios.get(checkRunsUrl, {
           headers: {
             Authorization: `Bearer ${this.apiKey}`,
             Accept: 'application/vnd.github.v3+json',
           },
         });
 
-        const checkRuns = response.data.check_runs || [];
-        const latestRun = checkRuns[0];
+        const checkRuns = checkRunsResponse.data.check_runs || [];
+        
+        // Also check workflow runs
+        const workflowsUrl = `https://api.github.com/repos/${this.repoUrl}/actions/runs?branch=${branch}&per_page=1`;
+        const workflowsResponse = await axios.get(workflowsUrl, {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
 
+        const workflowRuns = workflowsResponse.data.workflow_runs || [];
+        const latestWorkflow = workflowRuns[0];
+
+        // Prefer workflow run if available, otherwise use check runs
+        if (latestWorkflow) {
+          const status = latestWorkflow.conclusion === 'success' ? 'success' :
+                        latestWorkflow.conclusion === 'failure' ? 'failure' :
+                        latestWorkflow.status === 'completed' ? 'error' : 'pending';
+          
+          return {
+            id: latestWorkflow.id.toString(),
+            status,
+            branch,
+            commit: latestWorkflow.head_sha,
+            workflow: latestWorkflow.name,
+            started_at: latestWorkflow.created_at,
+            completed_at: latestWorkflow.updated_at,
+            logs_url: latestWorkflow.html_url,
+          };
+        }
+
+        // Fallback to check runs
+        const latestRun = checkRuns.find((run: any) => run.status === 'completed') || checkRuns[0];
         if (!latestRun) {
           return null;
         }
@@ -271,6 +305,101 @@ export class CodeRepoAdapter {
     } catch (error) {
       console.error('Error checking build status:', error);
       return null;
+    }
+  }
+
+  /**
+   * Get latest commit SHA for a branch
+   */
+  private async getLatestCommit(branch: string): Promise<string | null> {
+    if (!this.apiKey || !this.repoUrl) {
+      return null;
+    }
+
+    try {
+      if (this.provider === 'github') {
+        const url = `https://api.github.com/repos/${this.repoUrl}/commits/${branch}`;
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
+        return response.data.sha || null;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting latest commit:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get repository information
+   */
+  async getRepository(): Promise<{ name: string; defaultBranch: string; language: string } | null> {
+    if (!this.apiKey || !this.repoUrl) {
+      return null;
+    }
+
+    try {
+      if (this.provider === 'github') {
+        const url = `https://api.github.com/repos/${this.repoUrl}`;
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
+
+        return {
+          name: response.data.name,
+          defaultBranch: response.data.default_branch,
+          language: response.data.language || 'unknown',
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting repository info:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get workflow runs for a repository
+   */
+  async getWorkflowRuns(limit: number = 10): Promise<BuildStatus[]> {
+    if (!this.apiKey || !this.repoUrl) {
+      return [];
+    }
+
+    try {
+      if (this.provider === 'github') {
+        const url = `https://api.github.com/repos/${this.repoUrl}/actions/runs?per_page=${limit}`;
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
+
+        return response.data.workflow_runs.map((run: any) => ({
+          id: run.id.toString(),
+          status: run.conclusion === 'success' ? 'success' :
+                 run.conclusion === 'failure' ? 'failure' :
+                 run.status === 'completed' ? 'error' : 'pending',
+          branch: run.head_branch,
+          commit: run.head_sha,
+          workflow: run.name,
+          started_at: run.created_at,
+          completed_at: run.updated_at,
+          logs_url: run.html_url,
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error getting workflow runs:', error);
+      return [];
     }
   }
 

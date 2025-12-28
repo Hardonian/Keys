@@ -150,7 +150,7 @@ export interface AgentOutput {
 // Task Intent Types
 export interface TaskIntent {
   task: string;
-  artifact_type?: string;  -- 'rfc', 'adr', 'test_plan', 'changelog', 'incident_report', 'roadmap'
+  artifact_type?: 'rfc' | 'adr' | 'test_plan' | 'changelog' | 'incident_report' | 'roadmap';
   context?: string;
   tools?: string[];
 }

@@ -25,12 +25,18 @@ export function SliderControl({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-gray-700">{label}</label>
-        <span className="text-sm text-gray-500">{value}</span>
+      <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+        <label className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
+          {label}
+        </label>
+        <span className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 min-w-[2.5rem] text-right">
+          {value}
+        </span>
       </div>
       {description && (
-        <p className="text-xs text-gray-500 mb-2">{description}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 hidden sm:block">
+          {description}
+        </p>
       )}
       <div className="relative">
         <input
@@ -40,30 +46,38 @@ export function SliderControl({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+          className="w-full h-2 sm:h-2.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer slider-thumb"
           style={{
-            background: `linear-gradient(to right, #0ea5e9 0%, #0ea5e9 ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`,
+            background: `linear-gradient(to right, rgb(37, 99, 235) 0%, rgb(37, 99, 235) ${percentage}%, rgb(226, 232, 240) ${percentage}%, rgb(226, 232, 240) 100%)`,
           }}
         />
         <style jsx>{`
-          .slider::-webkit-slider-thumb {
+          .slider-thumb::-webkit-slider-thumb {
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: #0ea5e9;
+            background: rgb(37, 99, 235);
             cursor: pointer;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            transition: transform 0.1s ease;
           }
-          .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+          .slider-thumb::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+          }
+          .slider-thumb::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: #0ea5e9;
+            background: rgb(37, 99, 235);
             cursor: pointer;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            transition: transform 0.1s ease;
+          }
+          .slider-thumb::-moz-range-thumb:hover {
+            transform: scale(1.1);
           }
         `}</style>
       </div>
