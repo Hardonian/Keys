@@ -4,8 +4,8 @@ CREATE TABLE prompt_atoms (
   created_at TIMESTAMP DEFAULT NOW(),
   
   -- Metadata
-  name TEXT NOT NULL,  -- e.g., "tone.playful", "stack.shopify", "channel.tiktok"
-  category TEXT NOT NULL,  -- 'tone', 'stack', 'channel', 'constraint', 'example'
+  name TEXT NOT NULL,  -- e.g., "tone.playful", "stack.web_app", "perspective.founder", "phase.implementation"
+  category TEXT NOT NULL,  -- 'tone', 'stack', 'perspective', 'phase', 'domain', 'constraint', 'example', 'goal', 'risk'
   version INT DEFAULT 1,
   
   -- Content

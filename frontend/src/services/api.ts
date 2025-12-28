@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type {
-  CompanionInput,
+  // CompanionInput imported but not used - kept for future use
   PromptAssembly,
   AgentOutput,
   UserProfile,
@@ -27,12 +27,14 @@ export const apiService = {
   async assemblePrompt(
     userId: string,
     taskDescription: string,
-    vibeConfig: Partial<VibeConfig>
+    vibeConfig: Partial<VibeConfig>,
+    inputFilter?: import('@/types/filters').InputFilter
   ): Promise<PromptAssembly> {
     const response = await api.post('/assemble-prompt', {
       userId,
       taskDescription,
       vibeConfig,
+      inputFilter,
     });
     return response.data;
   },
@@ -90,6 +92,39 @@ export const apiService = {
       feedback,
       detail,
     });
+  },
+
+  // Input Filters
+  async reformatInput(
+    input: string,
+    filter: import('@/types/filters').InputFilter
+  ): Promise<import('@/types/filters').ReformattedInput> {
+    const response = await api.post('/input-filters/reformat', {
+      input,
+      filter,
+    });
+    return response.data;
+  },
+
+  async transcribeVoice(
+    audioData: string,
+    format: 'webm' | 'mp3' | 'wav' | 'm4a',
+    language?: string
+  ): Promise<{ transcription: import('@/types/filters').TranscriptionResult }> {
+    const response = await api.post('/input-filters/transcribe', {
+      audioData,
+      format,
+      language,
+    });
+    return response.data;
+  },
+
+  async getPremiumFeatures(): Promise<{
+    features: import('@/types/filters').PremiumFeatures;
+    tokenUsage: { limit: number; remaining: number };
+  }> {
+    const response = await api.get('/input-filters/premium');
+    return response.data;
   },
 };
 

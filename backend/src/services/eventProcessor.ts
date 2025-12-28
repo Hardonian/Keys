@@ -105,11 +105,16 @@ async function shouldGenerateSuggestion(eventRecord: any, userId: string): Promi
   const eventType = eventRecord.event_type;
 
   const suggestionWorthyEvents = [
-    'shopify.product.created',
-    'shopify.product.updated',
-    'shopify.collection.created',
-    'shopify.inventory.low',
-    'shopify.order.created',
+    'repo.pr.opened',
+    'repo.pr.merged',
+    'repo.pr.stale',
+    'repo.build.failed',
+    'repo.dependency.outdated',
+    'issue.created',
+    'issue.stale',
+    'metric.regression',
+    'incident.opened',
+    'doc.outdated',
     'supabase.schema.changed',
     'supabase.table.created',
     'supabase.column.added',
@@ -123,25 +128,37 @@ function eventToTaskDescription(eventRecord: any): string {
   const eventData = eventRecord.event_data || {};
 
   switch (true) {
-    case eventType.includes('shopify.product.created'):
-      return `A new product "${eventData.title || 'product'}" was created in Shopify. Generate a TikTok hook and brief for promoting this product.`;
+    case eventType.includes('repo.pr.opened'):
+      return `A new pull request #${eventData.number || 'N/A'} "${eventData.title || 'PR'}" was opened. Generate a review checklist, suggest test coverage, and identify potential issues.`;
 
-    case eventType.includes('shopify.product.updated'):
-      return `Product "${eventData.title || 'product'}" was updated in Shopify. Suggest updated marketing copy and promotional content.`;
+    case eventType.includes('repo.pr.stale'):
+      return `Pull request #${eventData.number || 'N/A'} "${eventData.title || 'PR'}" has been stale for over a week. Suggest either closing it, splitting it into smaller PRs, or refreshing the specification.`;
 
-    case eventType.includes('shopify.collection.created'):
-      return `A new collection was created in Shopify. Generate marketing content and promotional strategies for this collection.`;
+    case eventType.includes('repo.build.failed'):
+      return `Build failed for branch "${eventData.branch || 'unknown'}". Analyze the failure, suggest fixes, and propose code changes if needed.`;
 
-    case eventType.includes('shopify.inventory.low'):
-      return `Product inventory is running low. Suggest restocking strategies, customer communication, and promotional tactics.`;
+    case eventType.includes('repo.dependency.outdated'):
+      return `Dependencies are outdated. Suggest an update plan, check for breaking changes, and propose a migration strategy.`;
 
-    case eventType.includes('shopify.order.created'):
-      return `A new order was placed. Suggest follow-up marketing and customer engagement strategies.`;
+    case eventType.includes('issue.created'):
+      return `A new issue was created: "${eventData.title || 'issue'}". Suggest a solution approach, break it down into tasks, or propose an RFC if it's a significant change.`;
+
+    case eventType.includes('issue.stale'):
+      return `Issue "${eventData.title || 'issue'}" has been stale. Suggest either closing it, updating the spec, or breaking it into smaller issues.`;
+
+    case eventType.includes('metric.regression'):
+      return `A metric regression was detected: ${eventData.metric || 'unknown'}. Analyze the cause, review recent changes, and propose remediation steps.`;
+
+    case eventType.includes('incident.opened'):
+      return `An incident was opened: "${eventData.title || 'incident'}". Suggest an investigation plan, propose fixes, and draft a postmortem template.`;
+
+    case eventType.includes('doc.outdated'):
+      return `Documentation appears outdated. Review the codebase, identify gaps, and suggest documentation updates.`;
 
     case eventType.includes('supabase.schema.changed'):
     case eventType.includes('supabase.table.created'):
     case eventType.includes('supabase.column.added'):
-      return `Database schema was changed. Generate documentation and migration notes for the changes.`;
+      return `Database schema was changed. Generate documentation, migration notes, and update API documentation for the changes.`;
 
     default:
       return `Event ${eventType} occurred. Suggest next steps and actions based on this event.`;

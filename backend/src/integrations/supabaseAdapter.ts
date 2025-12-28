@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import type { PostgresTable, PostgresColumn } from '@supabase/postgres-meta/dist/types';
 
 export interface SupabaseSchemaChange {
   type: 'table.created' | 'table.updated' | 'table.deleted' | 'column.added' | 'column.updated' | 'column.deleted' | 'migration.pending';

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { StackSelector } from './StackSelector';
 import { VibeTuner } from './VibeTuner';
-import { PerspectiveToggle } from './PerspectiveToggle';
+// PerspectiveToggle imported but not used - kept for future use
 import type { UserProfile } from '@/types';
 
 interface ProfileOnboardingProps {
@@ -19,8 +19,6 @@ const STEPS = [
   'brand',
   'complete',
 ] as const;
-
-type Step = typeof STEPS[number];
 
 export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps) {
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -53,9 +51,9 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
       case 'welcome':
         return (
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Welcome to Hardonia AI Companion</h2>
+            <h2 className="text-2xl font-bold mb-4">Welcome to Cursor Venture Companion</h2>
             <p className="text-gray-600 mb-6">
-              Your personalized agent that learns your preferences and helps you get things done.
+              Your AI cofounder for the entire product lifecycle: ideation, specification, implementation, DevOps, and continuous evolution.
             </p>
             <button
               onClick={nextStep}
@@ -71,7 +69,7 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
           <div>
             <h2 className="text-xl font-bold mb-4">Tell us about your role</h2>
             <div className="space-y-3">
-              {(['operator', 'marketer', 'builder', 'educator', 'founder'] as const).map(
+              {(['founder', 'pm', 'staff_engineer', 'devops', 'cfo', 'investor'] as const).map(
                 (role) => (
                   <button
                     key={role}
@@ -85,24 +83,23 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <span className="font-medium capitalize">{role}</span>
+                    <span className="font-medium capitalize">{role.replace('_', ' ')}</span>
                   </button>
                 )
               )}
             </div>
             <div className="mt-6">
-              <label className="block text-sm font-medium mb-2">Vertical</label>
+              <label className="block text-sm font-medium mb-2">Project Type</label>
               <select
                 value={profile.vertical || ''}
-                onChange={(e) => updateProfile({ vertical: e.target.value as any })}
+                onChange={(e) => updateProfile({ vertical: e.target.value as UserProfile['vertical'] })}
                 className="w-full p-2 border border-gray-300 rounded-lg"
               >
                 <option value="">Select...</option>
-                <option value="ecommerce">E-commerce</option>
-                <option value="edtech">EdTech</option>
-                <option value="saas">SaaS</option>
+                <option value="software">Software / SaaS</option>
                 <option value="agency">Agency</option>
-                <option value="finance">Finance</option>
+                <option value="internal_tools">Internal Tools</option>
+                <option value="content">Content Platform</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -112,10 +109,10 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
       case 'stack':
         return (
           <div>
-            <h2 className="text-xl font-bold mb-4">What's in your tech stack?</h2>
+            <h2 className="text-xl font-bold mb-4">What&apos;s in your tech stack?</h2>
             <StackSelector
-              stack={profile.stack || {}}
-              onChange={(stack) => updateProfile({ stack })}
+              stack={(profile.stack || {}) as Record<string, boolean>}
+              onChange={(stack) => updateProfile({ stack: stack as UserProfile['stack'] })}
             />
           </div>
         );
@@ -133,7 +130,7 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
                 updateProfile({
                   tone: vibe.playfulness > 70 ? 'playful' : vibe.playfulness < 30 ? 'serious' : 'balanced',
                   kpi_focus: vibe.revenueFocus > 70 ? 'revenue' : 'growth',
-                  perspective: vibe.investorPerspective > 70 ? 'cfo' : 'operator',
+                  perspective: vibe.investorPerspective > 70 ? 'cfo' : 'founder',
                 });
               }}
             />
@@ -167,7 +164,7 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
                   onChange={(e) => updateProfile({ company_context: e.target.value })}
                   className="w-full p-2 border border-gray-300 rounded-lg"
                   rows={4}
-                  placeholder="E.g., '$2M ARR SaaS, 5 person team'"
+                  placeholder="E.g., '$2M ARR SaaS, 5 person team, building developer tools'"
                 />
               </div>
             </div>
@@ -177,9 +174,9 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
       case 'complete':
         return (
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">You're all set!</h2>
+            <h2 className="text-2xl font-bold mb-4">You&apos;re all set!</h2>
             <p className="text-gray-600 mb-6">
-              Your profile has been created. Let's start using your AI companion.
+              Your profile has been created. Let&apos;s start using your AI companion.
             </p>
             <button
               onClick={handleComplete}

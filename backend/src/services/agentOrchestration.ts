@@ -1,4 +1,5 @@
 import { llmService } from './llmService.js';
+import { calculateCost } from '../utils/costCalculator.js';
 import type { PromptAssemblyResult, AgentOutput, TaskIntent } from '../types/index.js';
 
 export async function orchestrateAgent(
@@ -13,9 +14,10 @@ export async function orchestrateAgent(
 
   // Generate content using LLM
   const response = await llmService.generate({
-    systemPrompt: assembledPrompt.systemPrompt,
-    userPrompt: assembledPrompt.userPrompt,
+    provider: 'openai',
     model: 'gpt-4-turbo-preview',
+    messages: [{ role: 'user', content: assembledPrompt.userPrompt }],
+    systemPrompt: assembledPrompt.systemPrompt,
     temperature: 0.7,
     maxTokens: 2000,
   });
@@ -32,8 +34,8 @@ export async function orchestrateAgent(
     editableFields: getEditableFields(outputType),
     generatedAt: new Date().toISOString(),
     modelUsed: response.model,
-    tokensUsed: response.tokensUsed,
-    costUsd: response.costUsd,
+    tokensUsed: response.tokensUsed ?? 0,
+    costUsd: calculateCost(response.provider, response.model, response.tokensUsed ?? 0),
   };
 }
 

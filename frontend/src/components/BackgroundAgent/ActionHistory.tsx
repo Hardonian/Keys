@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/services/supabaseClient';
-import { formatDateTime, formatRelativeTime } from '@/utils/format';
+import { formatRelativeTime } from '@/utils/format';
 import type { AgentRun } from '@/types';
 
 interface ActionHistoryProps {

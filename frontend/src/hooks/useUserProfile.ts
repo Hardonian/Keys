@@ -16,6 +16,10 @@ export function useUserProfile(userId: string | null) {
     async function fetchProfile() {
       try {
         setLoading(true);
+        if (!userId) {
+          setLoading(false);
+          return;
+        }
         const data = await profileService.getProfile(userId);
         setProfile(data);
         setError(null);

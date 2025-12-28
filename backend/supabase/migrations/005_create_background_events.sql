@@ -5,8 +5,8 @@ CREATE TABLE background_events (
   created_at TIMESTAMP DEFAULT NOW(),
   
   -- Event Metadata
-  event_type TEXT,  -- 'shopify.product.created', 'supabase.schema.changed'
-  source TEXT,  -- 'shopify', 'supabase', 'calendar', 'manual'
+  event_type TEXT,  -- 'repo.pr.opened', 'repo.build.failed', 'issue.created', 'metric.regression', 'incident.opened'
+  source TEXT,  -- 'code_repo', 'issue_tracker', 'ci_cd', 'infra', 'metrics', 'manual', 'schedule'
   event_data JSONB,
   event_timestamp TIMESTAMP,
   

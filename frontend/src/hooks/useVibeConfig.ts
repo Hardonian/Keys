@@ -34,7 +34,7 @@ export function useVibeConfig(userId: string | null) {
         } else {
           // Create default vibe config
           const defaultConfig: Partial<VibeConfig> = {
-            user_id: userId,
+            user_id: userId || undefined,
             playfulness: 50,
             revenue_focus: 60,
             investor_perspective: 40,

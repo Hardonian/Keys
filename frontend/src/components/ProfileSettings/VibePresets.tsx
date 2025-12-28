@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/services/supabaseClient';
-import type { VibeConfig } from '@/types';
+// VibeConfig imported but not directly used - kept for type reference
 
 interface VibePreset {
   id: string;
@@ -35,6 +35,7 @@ export function VibePresets({
 
   useEffect(() => {
     fetchPresets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   async function fetchPresets() {
@@ -60,7 +61,7 @@ export function VibePresets({
     if (!presetName.trim()) return;
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('vibe_configs')
         .insert({
           user_id: userId,
@@ -158,7 +159,7 @@ export function VibePresets({
               type="text"
               value={presetName}
               onChange={(e) => setPresetName(e.target.value)}
-              placeholder="Preset name (e.g., 'Q4 Revenue Push')"
+              placeholder="Preset name (e.g., &apos;Q4 Revenue Push&apos;)"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
               autoFocus
               onKeyDown={(e) => {

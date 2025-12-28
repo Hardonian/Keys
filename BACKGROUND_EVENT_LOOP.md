@@ -2,20 +2,29 @@
 
 ## Overview
 
-The background event loop service has been fully implemented to monitor Shopify webhooks and Supabase events, generating proactive suggestions for users based on their events.
+The background event loop service monitors code repositories, CI/CD systems, issue trackers, and metrics to generate proactive suggestions for users based on events in their development workflow.
 
 ## Components Created
 
 ### 1. Integration Adapters
 
-#### `backend/src/integrations/shopifyAdapter.ts`
-- **ShopifyAdapter class** with methods:
-  - `verifyWebhookSignature()` - Verifies HMAC-SHA256 signatures
+#### `backend/src/integrations/codeRepoAdapter.ts`
+- **CodeRepoAdapter class** with methods:
+  - `verifyWebhookSignature()` - Verifies webhook signatures (GitHub, GitLab, Bitbucket)
   - `parseWebhook()` - Parses and validates webhook payloads
-  - `fetchProduct()` - Fetches product details from Shopify API
-  - `checkInventoryLevels()` - Checks if inventory is low
-  - `getRecentProducts()` - Polls for recent products (fallback)
-  - `topicToEventType()` - Maps Shopify topics to internal event types
+  - `fetchPullRequest()` - Fetches PR details from repository APIs
+  - `checkBuildStatus()` - Checks CI/CD build status for branches/commits
+  - `getRecentPullRequests()` - Polls for recent PRs (fallback)
+  - `isPRStale()` - Checks if PR has been inactive
+  - `eventToEventType()` - Maps webhook events to internal event types
+
+#### `backend/src/integrations/contentAdapter.ts`
+- **ContentAdapter class** for generating communication artifacts:
+  - `generateReleaseNotes()` - Creates release notes from changelog data
+  - `generateChangelogEntry()` - Generates changelog entries
+  - `generateRFC()` - Creates RFC (Request for Comments) structure
+  - `generateADR()` - Creates ADR (Architecture Decision Record)
+  - `formatAsMarkdown()` / `formatAsPlainText()` - Format content artifacts
 
 #### `backend/src/integrations/supabaseAdapter.ts`
 - **SupabaseAdapter class** with methods:
@@ -31,7 +40,7 @@ The background event loop service has been fully implemented to monitor Shopify 
   - `start(userId)` - Starts event loop for a user
   - `stop(userId)` - Stops event loop for a user
   - `startForAllUsers()` - Starts loops for all active users
-  - `pollShopifyEvents()` - Polls Shopify for new events
+  - `pollCodeRepoEvents()` - Polls code repos for new events (PRs, builds, issues)
   - `pollSupabaseEvents()` - Polls Supabase for schema changes
   - Supports multiple concurrent user loops
 
@@ -47,9 +56,9 @@ The background event loop service has been fully implemented to monitor Shopify 
 ### 4. Webhook Routes
 
 #### `backend/src/routes/webhooks.ts`
-- **POST /webhooks/shopify** - Receives Shopify webhooks
-  - Verifies HMAC signature
-  - Maps topics to event types
+- **POST /webhooks/code-repo** - Receives code repository webhooks (GitHub/GitLab/Bitbucket)
+  - Verifies webhook signature
+  - Maps events to internal event types
   - Stores events and triggers processing
   
 - **POST /webhooks/supabase** - Receives Supabase webhooks
@@ -61,8 +70,10 @@ The background event loop service has been fully implemented to monitor Shopify 
 
 ```
 1. External Event Occurs
-   ├─ Shopify: Product created, order placed, inventory low
-   └─ Supabase: Schema changed, table created, column added
+   ├─ Code Repo: PR opened, build failed, issue created
+   ├─ CI/CD: Build completed, workflow failed
+   ├─ Issue Tracker: Issue created, stale issue detected
+   └─ Metrics: Regression detected, anomaly found
 
 2. Event Received
    ├─ Via Webhook (real-time)
@@ -87,12 +98,26 @@ The background event loop service has been fully implemented to monitor Shopify 
 
 ## Supported Event Types
 
-### Shopify Events
-- `shopify.product.created` → Generate TikTok hook, marketing copy
-- `shopify.product.updated` → Suggest updated marketing content
-- `shopify.collection.created` → Generate collection marketing
-- `shopify.inventory.low` → Suggest restocking strategies
-- `shopify.order.created` → Suggest follow-up marketing
+### Code Repository Events
+- `repo.pr.opened` → Generate review checklist, suggest test coverage
+- `repo.pr.merged` → Suggest documentation updates, changelog entry
+- `repo.pr.stale` → Suggest closing, splitting, or refreshing spec
+- `repo.build.failed` → Analyze failure, suggest fixes, propose code changes
+- `repo.dependency.outdated` → Suggest update plan, migration strategy
+- `repo.push` → Check for breaking changes, suggest tests
+
+### Issue Tracker Events
+- `issue.created` → Suggest solution approach, break down into tasks, propose RFC
+- `issue.stale` → Suggest closing, updating spec, or breaking into smaller issues
+- `issue.comment.created` → Analyze discussion, suggest next steps
+
+### CI/CD Events
+- `repo.build.failed` → Analyze logs, suggest fixes, propose code changes
+- `repo.build.completed` → Review build health, suggest optimizations
+
+### Metrics Events
+- `metric.regression` → Analyze cause, review recent changes, propose remediation
+- `incident.opened` → Suggest investigation plan, propose fixes, draft postmortem
 
 ### Supabase Events
 - `supabase.schema.changed` → Generate documentation
@@ -104,22 +129,33 @@ The background event loop service has been fully implemented to monitor Shopify 
 
 ### Environment Variables Required
 ```env
-SHOPIFY_API_KEY=your_api_key
-SHOPIFY_API_SECRET=your_api_secret
-SHOPIFY_STORE_URL=your-store.myshopify.com
+CODE_REPO_API_KEY=your_api_key (or GITHUB_TOKEN)
+CODE_REPO_WEBHOOK_SECRET=your_webhook_secret (or GITHUB_WEBHOOK_SECRET)
+CODE_REPO_URL=your-org/your-repo (or GITHUB_REPO_URL)
+CODE_REPO_PROVIDER=github (or gitlab, bitbucket)
 SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-### Shopify Webhook Setup
-1. Go to Shopify Admin → Settings → Notifications → Webhooks
-2. Create webhook: `POST https://your-domain.com/webhooks/shopify`
-3. Subscribe to events:
-   - `products/create`
-   - `products/update`
-   - `collections/create`
-   - `orders/create`
-   - `inventory_levels/update`
+### Code Repository Webhook Setup
+
+#### GitHub
+1. Go to Repository → Settings → Webhooks
+2. Create webhook: `POST https://your-domain.com/webhooks/code-repo`
+3. Select events:
+   - Pull requests
+   - Pull request reviews
+   - Issues
+   - Workflow runs
+   - Check runs
+
+#### GitLab
+1. Go to Project → Settings → Webhooks
+2. Create webhook: `POST https://your-domain.com/webhooks/code-repo`
+3. Select events:
+   - Merge request events
+   - Pipeline events
+   - Issue events
 
 ### Starting the Service
 
@@ -138,13 +174,35 @@ await backgroundEventLoop.startForAllUsers();
 Events are stored in `background_events` table:
 - `id` - UUID
 - `user_id` - User identifier
-- `event_type` - Type of event (e.g., "shopify.product.created")
-- `source` - Source system ("shopify", "supabase", etc.)
+- `event_type` - Type of event (e.g., "repo.pr.opened", "repo.build.failed")
+- `source` - Source system ("code_repo", "issue_tracker", "ci_cd", "infra", "metrics", "manual", "schedule")
 - `event_data` - Full event payload (JSONB)
 - `event_timestamp` - When event occurred
 - `suggestion_generated` - Boolean flag
 - `suggestion_id` - Reference to agent_runs table
 - `user_actioned` - Whether user acted on suggestion
+
+## Example Event Processing
+
+### Example 1: `repo.build.failed`
+1. Detect failing builds via webhook or polling
+2. Fetch build logs and PR details
+3. Summarize failure cause
+4. Propose fixes (code changes, config updates)
+5. Offer to open PR or patch file directly
+
+### Example 2: `metric.regression`
+1. Detect metric regression (error rate, latency increase)
+2. Agent reads logs, recent commits, related issues
+3. Proposes analysis + remediation plan
+4. Optionally generates code fixes
+
+### Example 3: `issue.stale`
+1. Detect old issues with no activity
+2. Agent proposes either:
+   - Closing if resolved/obsolete
+   - Splitting into smaller issues
+   - Refreshing specification
 
 ## Future Enhancements
 
@@ -159,10 +217,10 @@ Events are stored in `background_events` table:
    - Event importance scoring
    - Rate limiting per event type
 
-3. **Calendar Integration**
+3. **Schedule Integration**
    - Monitor calendar events
-   - Product launch date reminders
-   - Meeting-based suggestions
+   - Weekly review reminders
+   - Sprint planning suggestions
 
 4. **Performance Optimization**
    - Event batching
@@ -173,3 +231,9 @@ Events are stored in `background_events` table:
    - Event processing metrics
    - Suggestion acceptance rates
    - Error tracking and alerting
+
+6. **Additional Integrations**
+   - Jira, Linear for issue tracking
+   - Notion, Confluence for documentation
+   - PostHog, Datadog for metrics
+   - AWS CloudWatch, GCP Monitoring

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import { shopifyAdapter } from '../integrations/shopifyAdapter.js';
-import { supabaseAdapter } from '../integrations/supabaseAdapter.js';
+import { codeRepoAdapter } from '../integrations/codeRepoAdapter.js';
 import { processBackgroundEvent } from './eventProcessor.js';
+import { logger } from '../utils/logger.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -10,7 +10,7 @@ const supabase = createClient(
 
 interface ExternalEvent {
   type: string;
-  source: 'shopify' | 'supabase' | 'calendar' | 'manual';
+  source: 'code_repo' | 'issue_tracker' | 'ci_cd' | 'infra' | 'metrics' | 'manual' | 'schedule';
   data: Record<string, any>;
   timestamp: Date;
 }
@@ -128,21 +128,26 @@ export class BackgroundEventLoop {
   private async pollExternalEvents(userId: string): Promise<ExternalEvent[]> {
     const events: ExternalEvent[] = [];
 
-    // Poll Shopify events (fallback polling if webhooks aren't configured)
-    const shopifyEvents = await this.pollShopifyEvents(userId);
-    events.push(...shopifyEvents);
+    // Poll code repo events (fallback polling if webhooks aren't configured)
+    const codeRepoEvents = await this.pollCodeRepoEvents(userId);
+    events.push(...codeRepoEvents);
 
-    // Poll Supabase schema changes
-    const supabaseEvents = await this.pollSupabaseEvents(userId);
-    events.push(...supabaseEvents);
+      // Poll Supabase schema changes (if supabase adapter is configured)
+      try {
+        const supabaseEvents = await this.pollSupabaseEvents(userId);
+        events.push(...supabaseEvents);
+      } catch (error) {
+        // Supabase adapter may not be configured, skip
+        logger.debug('Supabase events polling skipped', { userId });
+      }
 
     return events;
   }
 
   /**
-   * Poll Shopify for recent events (fallback if webhooks aren't configured)
+   * Poll code repo for recent events (fallback if webhooks aren't configured)
    */
-  private async pollShopifyEvents(userId: string): Promise<ExternalEvent[]> {
+  private async pollCodeRepoEvents(userId: string): Promise<ExternalEvent[]> {
     const events: ExternalEvent[] = [];
 
     try {
@@ -151,7 +156,7 @@ export class BackgroundEventLoop {
         .from('background_events')
         .select('event_timestamp')
         .eq('user_id', userId)
-        .eq('source', 'shopify')
+        .eq('source', 'code_repo')
         .order('event_timestamp', { ascending: false })
         .limit(1)
         .single();
@@ -160,59 +165,76 @@ export class BackgroundEventLoop {
         ? new Date(lastEvent.event_timestamp)
         : new Date(Date.now() - 24 * 60 * 60 * 1000); // Default to 24 hours ago
 
-      // Get recent products
-      const recentProducts = await shopifyAdapter.getRecentProducts(20);
+      // Get recent pull requests
+      const recentPRs = await codeRepoAdapter.getRecentPullRequests(20, 'open');
 
-      for (const product of recentProducts) {
-        const productCreated = new Date(product.created_at);
-        const productUpdated = new Date(product.updated_at);
+      for (const pr of recentPRs) {
+        const prCreated = new Date(pr.created_at);
+        const prUpdated = new Date(pr.updated_at);
 
-        // Check if product was created recently
-        if (productCreated > lastChecked) {
+        // Check if PR was created recently
+        if (prCreated > lastChecked) {
           events.push({
-            type: 'shopify.product.created',
-            source: 'shopify',
+            type: 'repo.pr.opened',
+            source: 'code_repo',
             data: {
-              id: product.id,
-              title: product.title,
-              description: product.description,
-              vendor: product.vendor,
-              product_type: product.product_type,
+              id: pr.id,
+              number: pr.number,
+              title: pr.title,
+              author: pr.author,
+              branch: pr.branch,
             },
-            timestamp: productCreated,
+            timestamp: prCreated,
           });
         }
 
-        // Check if product was updated recently (and not just created)
-        if (productUpdated > lastChecked && productUpdated.getTime() !== productCreated.getTime()) {
+        // Check if PR was updated recently (and not just created)
+        if (prUpdated > lastChecked && prUpdated.getTime() !== prCreated.getTime()) {
           events.push({
-            type: 'shopify.product.updated',
-            source: 'shopify',
+            type: 'repo.pr.updated',
+            source: 'code_repo',
             data: {
-              id: product.id,
-              title: product.title,
-              description: product.description,
+              id: pr.id,
+              number: pr.number,
+              title: pr.title,
             },
-            timestamp: productUpdated,
+            timestamp: prUpdated,
           });
         }
 
-        // Check inventory levels
-        const lowInventory = await shopifyAdapter.checkInventoryLevels(product.id.toString(), 10);
-        if (lowInventory) {
+        // Check if PR is stale
+        const isStale = await codeRepoAdapter.isPRStale(pr.number, 7);
+        if (isStale) {
           events.push({
-            type: 'shopify.inventory.low',
-            source: 'shopify',
+            type: 'repo.pr.stale',
+            source: 'code_repo',
             data: {
-              product_id: product.id,
-              product_title: product.title,
+              id: pr.id,
+              number: pr.number,
+              title: pr.title,
             },
             timestamp: new Date(),
           });
         }
+
+        // Check build status
+        const buildStatus = await codeRepoAdapter.checkBuildStatus(pr.branch);
+        if (buildStatus && buildStatus.status === 'failure') {
+          events.push({
+            type: 'repo.build.failed',
+            source: 'ci_cd',
+            data: {
+              branch: pr.branch,
+              commit: buildStatus.commit,
+              workflow: buildStatus.workflow,
+              logs_url: buildStatus.logs_url,
+            },
+            timestamp: buildStatus.completed_at ? new Date(buildStatus.completed_at) : new Date(),
+          });
+        }
       }
     } catch (error) {
-      console.error('Error polling Shopify events:', error);
+      console.error('Error polling code repo events:', error);
     }
 
     return events;
@@ -225,13 +247,16 @@ export class BackgroundEventLoop {
     const events: ExternalEvent[] = [];
 
     try {
+      // Import supabaseAdapter dynamically to avoid issues if not configured
+      const { supabaseAdapter } = await import('../integrations/supabaseAdapter.js');
+      
       // Detect schema changes
       const schemaChanges = await supabaseAdapter.detectSchemaChanges();
 
       for (const change of schemaChanges) {
         events.push({
           type: supabaseAdapter.schemaChangeToEventType(change),
-          source: 'supabase',
+          source: 'infra' as const, // Map supabase to infra source
           data: {
             change_type: change.type,
             table: change.table,
@@ -247,7 +272,7 @@ export class BackgroundEventLoop {
       if (hasPendingMigrations) {
         events.push({
           type: 'supabase.migration.pending',
-          source: 'supabase',
+          source: 'infra' as const,
           data: {
             message: 'There are pending migrations to apply',
           },
@@ -255,7 +280,7 @@ export class BackgroundEventLoop {
         });
       }
     } catch (error) {
-      console.error('Error polling Supabase events:', error);
+      logger.debug('Supabase events polling skipped', { userId });
     }
 
     return events;
@@ -266,12 +291,19 @@ export class BackgroundEventLoop {
     userId: string
   ): Promise<boolean> {
     // Determine if this event warrants a suggestion
-    // Example: product.created -> suggest TikTok hook
-    if (event.type === 'shopify.product.created') {
-      return true;
-    }
+    // Example: pr.opened -> suggest review checklist, build.failed -> suggest fixes
+    const suggestionWorthyEvents = [
+      'repo.pr.opened',
+      'repo.pr.stale',
+      'repo.build.failed',
+      'issue.created',
+      'issue.stale',
+      'metric.regression',
+      'incident.opened',
+      'supabase.schema.changed',
+    ];
 
-    if (event.type === 'supabase.schema.changed') {
+    if (suggestionWorthyEvents.includes(event.type)) {
       return true;
     }
 

@@ -78,7 +78,7 @@ export function ApprovalFlow({
       );
     }
 
-    const content = editedContent as Record<string, any>;
+    const content = editedContent as Record<string, unknown>;
     return (
       <div className="space-y-3">
         {output.editableFields.map((field) => (
@@ -105,7 +105,7 @@ export function ApprovalFlow({
             ) : (
               <input
                 type="text"
-                value={content[field] || ''}
+                value={typeof content[field] === 'string' ? content[field] as string : String(content[field] || '')}
                 onChange={(e) =>
                   setEditedContent({ ...content, [field]: e.target.value })
                 }

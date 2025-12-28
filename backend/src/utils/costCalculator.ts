@@ -47,6 +47,27 @@ const MODEL_PRICING: Record<string, ModelPricing> = {
   },
 };
 
+export function calculateCost(
+  provider: string,
+  model: string,
+  totalTokens: number
+): number {
+  const pricing = MODEL_PRICING[model];
+  if (!pricing) {
+    // Default pricing for unknown models
+    return (totalTokens / 1000) * 0.01; // $0.01 per 1k tokens
+  }
+  
+  // Estimate: 70% input, 30% output
+  const inputTokens = totalTokens * 0.7;
+  const outputTokens = totalTokens * 0.3;
+  
+  const inputCost = (inputTokens / 1000) * pricing.inputCostPer1k;
+  const outputCost = (outputTokens / 1000) * pricing.outputCostPer1k;
+  
+  return inputCost + outputCost;
+}
+
 export class CostCalculator {
   /**
    * Calculate cost for a model based on input/output tokens

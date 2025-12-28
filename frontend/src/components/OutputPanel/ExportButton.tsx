@@ -6,7 +6,7 @@ interface ExportButtonProps {
   onExportMindStudio?: () => void;
   onExportJSON?: () => void;
   onCopy?: () => void;
-  content?: string | Record<string, any>;
+  content?: string | Record<string, unknown>;
 }
 
 export function ExportButton({
@@ -47,31 +47,45 @@ export function ExportButton({
 
   const handleExportMindStudio = () => {
     // Format for MindStudio import
-    if (content && typeof content === 'object') {
+    if (content && typeof content === 'object' && content !== null) {
+      const contentObj = content as Record<string, unknown>;
       // Convert to MindStudio format
-      const mindstudioFormat = {
-        agentName: content.agentName || 'Generated Agent',
-        description: content.description || '',
-        trigger: content.trigger || { type: 'manual' },
-        steps: (content.steps || []).map((step: any) => ({
-          id: step.id || `step_${Date.now()}`,
-          name: step.name || 'Step',
-          type: step.type || 'action',
-          ...(step.action && { action: step.action }),
-          ...(step.llm && {
-            llm: {
-              model: step.llm.model || 'gpt-4-turbo',
-              systemPrompt: step.llm.systemPrompt || '',
-              userPrompt: step.llm.userPrompt || '',
-              temperature: step.llm.temperature || 0.7,
-              maxTokens: step.llm.maxTokens || 2000,
-            },
-          }),
-          ...(step.humanInTheLoop && { humanInTheLoop: step.humanInTheLoop }),
-          ...(step.condition && { condition: step.condition }),
-          ...(step.nextStep && { nextStep: step.nextStep }),
-        })),
-        variables: content.variables || {},
+      const mindstudioFormat: Record<string, unknown> = {
+        agentName: typeof contentObj.agentName === 'string' ? contentObj.agentName : 'Generated Agent',
+        description: typeof contentObj.description === 'string' ? contentObj.description : '',
+        trigger: contentObj.trigger && typeof contentObj.trigger === 'object' ? contentObj.trigger : { type: 'manual' },
+        steps: (Array.isArray(contentObj.steps) ? contentObj.steps : []).map((step: unknown) => {
+          const stepObj = step as Record<string, unknown>;
+          const stepLlm = stepObj.llm as Record<string, unknown> | undefined;
+          const result: Record<string, unknown> = {
+            id: typeof stepObj.id === 'string' || typeof stepObj.id === 'number' ? String(stepObj.id) : `step_${Date.now()}`,
+            name: typeof stepObj.name === 'string' ? stepObj.name : 'Step',
+            type: typeof stepObj.type === 'string' ? stepObj.type : 'action',
+          };
+          if (stepObj.action) {
+            result.action = stepObj.action;
+          }
+          if (stepLlm && typeof stepLlm === 'object') {
+            result.llm = {
+              model: typeof stepLlm.model === 'string' ? stepLlm.model : 'gpt-4-turbo',
+              systemPrompt: typeof stepLlm.systemPrompt === 'string' ? stepLlm.systemPrompt : '',
+              userPrompt: typeof stepLlm.userPrompt === 'string' ? stepLlm.userPrompt : '',
+              temperature: typeof stepLlm.temperature === 'number' ? stepLlm.temperature : 0.7,
+              maxTokens: typeof stepLlm.maxTokens === 'number' ? stepLlm.maxTokens : 2000,
+            };
+          }
+          if (stepObj.humanInTheLoop) {
+            result.humanInTheLoop = stepObj.humanInTheLoop;
+          }
+          if (stepObj.condition) {
+            result.condition = stepObj.condition;
+          }
+          if (stepObj.nextStep) {
+            result.nextStep = stepObj.nextStep;
+          }
+          return result;
+        }),
+        variables: contentObj.variables && typeof contentObj.variables === 'object' ? contentObj.variables : {},
         metadata: {
           version: '1.0',
           createdAt: new Date().toISOString(),

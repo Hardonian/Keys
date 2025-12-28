@@ -43,7 +43,7 @@ export class RecommendationEngine {
     const userHistoryScore = this.calculateUserHistoryScore(userId, selectedAtomIds, userHistory);
     const atomSuccessRateScore = this.calculateAtomSuccessScore(atomScores);
     const timingScore = this.calculateTimingScore(userHistory);
-    const relevanceScore = this.calculateRelevanceScore(userId, selectedAtomIds);
+    const relevanceScore = await this.calculateRelevanceScore(userId, selectedAtomIds);
 
     // Weighted average
     const score =

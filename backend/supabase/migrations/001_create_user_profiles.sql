@@ -13,24 +13,24 @@ CREATE TABLE user_profiles (
   
   -- Core Profile
   name TEXT,
-  role TEXT,  -- 'operator', 'marketer', 'builder', 'educator', 'founder'
-  vertical TEXT,  -- 'ecommerce', 'edtech', 'saas', 'agency'
+  role TEXT,  -- 'founder', 'pm', 'staff_engineer', 'devops', 'cfo', 'investor'
+  vertical TEXT,  -- 'software', 'agency', 'internal_tools', 'content', 'other'
   
   -- Stack Preferences (JSON)
   stack JSONB DEFAULT '{
-    "shopify": true,
-    "supabase": true,
-    "mindstudio": true,
-    "capcut": false,
-    "stripe": false,
-    "zapier": true
+    "code_repo": true,
+    "issue_tracker": true,
+    "doc_space": true,
+    "ci_cd": true,
+    "infra": true,
+    "analytics": false
   }',
   
   -- Vibe Preferences
-  tone TEXT DEFAULT 'balanced',  -- 'playful', 'serious', 'technical', 'casual'
+  tone TEXT DEFAULT 'balanced',  -- 'playful', 'serious', 'technical', 'casual', 'balanced'
   risk_tolerance TEXT DEFAULT 'moderate',  -- 'conservative', 'moderate', 'aggressive'
-  kpi_focus TEXT DEFAULT 'revenue',  -- 'revenue', 'efficiency', 'growth', 'impact'
-  perspective TEXT DEFAULT 'operator',  -- 'operator', 'investor', 'cfo', 'strategic'
+  kpi_focus TEXT DEFAULT 'velocity',  -- 'velocity', 'reliability', 'growth', 'revenue', 'quality'
+  perspective TEXT DEFAULT 'founder',  -- 'founder', 'pm', 'staff_engineer', 'devops', 'cfo', 'investor'
   
   -- Behavior Embeddings (OpenAI vector for similarity search)
   behavior_embedding VECTOR(1536),

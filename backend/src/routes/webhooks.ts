@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { shopifyAdapter } from '../integrations/shopifyAdapter.js';
+import { codeRepoAdapter } from '../integrations/codeRepoAdapter.js';
 
 const router = Router();
 const supabase = createClient(
@@ -9,11 +9,11 @@ const supabase = createClient(
 );
 
 /**
- * Shopify webhook endpoint
- * POST /webhooks/shopify
+ * Code repository webhook endpoint (GitHub, GitLab, Bitbucket)
+ * POST /webhooks/code-repo
  * Note: This route should use express.raw() middleware for signature verification
  */
-router.post('/shopify', async (req, res) => {
+router.post('/code-repo', async (req, res) => {
   try {
     // Get raw body for signature verification
     // req.body will be a Buffer if express.raw() middleware is used
@@ -29,22 +29,31 @@ router.post('/shopify', async (req, res) => {
       : req.body;
 
     // Parse and verify webhook
-    const webhook = shopifyAdapter.parseWebhook(bodyData, headers);
+    const webhook = codeRepoAdapter.parseWebhook(bodyData, headers);
 
     if (!webhook) {
       return res.status(401).json({ error: 'Invalid webhook signature' });
     }
 
-    // Convert Shopify topic to event type
-    const eventType = shopifyAdapter.topicToEventType(webhook.topic);
+    // Convert webhook event to internal event type
+    const action = bodyData.action || bodyData.object_attributes?.action;
+    const eventType = codeRepoAdapter.eventToEventType(webhook.event, action);
 
-    // Get user_id from shop domain or webhook data
-    // In production, you'd have a mapping table: shop_domain -> user_id
-    const userId = await getUserIdFromShop(webhook.shop);
+    // Get user_id from repository or webhook data
+    // In production, you'd have a mapping table: repository -> user_id
+    const userId = await getUserIdFromRepo(webhook.repository);
 
     if (!userId) {
-      console.warn(`No user found for shop: ${webhook.shop}`);
+      console.warn(`No user found for repository: ${webhook.repository}`);
       return res.status(200).json({ received: true }); // Return 200 to acknowledge webhook
+    }
+
+    // Determine source based on event type
+    let source: 'code_repo' | 'ci_cd' | 'issue_tracker' = 'code_repo';
+    if (eventType.includes('build') || eventType.includes('workflow')) {
+      source = 'ci_cd';
+    } else if (eventType.includes('issue')) {
+      source = 'issue_tracker';
     }
 
     // Store event in background_events table
@@ -53,7 +62,7 @@ router.post('/shopify', async (req, res) => {
       .insert({
         user_id: userId,
         event_type: eventType,
-        source: 'shopify',
+        source: source,
         event_data: webhook.data,
         event_timestamp: webhook.timestamp,
       })
@@ -61,7 +70,7 @@ router.post('/shopify', async (req, res) => {
       .single();
 
     if (saveError) {
-      console.error('Error saving Shopify webhook event:', saveError);
+      console.error('Error saving code repo webhook event:', saveError);
       return res.status(500).json({ error: 'Failed to save event' });
     }
 
@@ -73,7 +82,7 @@ router.post('/shopify', async (req, res) => {
     // Acknowledge webhook immediately
     res.status(200).json({ received: true, eventId: eventRecord.id });
   } catch (error) {
-    console.error('Error processing Shopify webhook:', error);
+    console.error('Error processing code repo webhook:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -132,17 +141,17 @@ router.post('/supabase', async (req, res) => {
 });
 
 /**
- * Helper: Get user_id from shop domain
+ * Helper: Get user_id from repository
  */
-async function getUserIdFromShop(shopDomain: string): Promise<string | null> {
-  // In production, you'd have a shop_users table mapping shop domains to user_ids
+async function getUserIdFromRepo(repository: string): Promise<string | null> {
+  // In production, you'd have a repo_users table mapping repositories to user_ids
   // For now, return null or implement a lookup
   try {
-    // Example: Check if user has shopify in their stack and use their user_id
+    // Example: Check if user has code_repo in their stack and use their user_id
     const { data } = await supabase
       .from('user_profiles')
       .select('user_id')
-      .contains('stack', { shopify: true })
+      .contains('stack', { code_repo: true })
       .limit(1)
       .single();
 
@@ -253,19 +262,22 @@ async function processWebhookEvent(userId: string, eventRecord: any) {
 
 function eventToTaskDescription(eventRecord: any): string {
   const eventType = eventRecord.event_type;
+  const eventData = eventRecord.event_data || {};
 
-  if (eventType.startsWith('shopify.product.created')) {
-    const productTitle = eventRecord.event_data?.title || 'product';
-    return `A new product "${productTitle}" was created in Shopify. Generate a TikTok hook and brief for promoting this product.`;
+  if (eventType.startsWith('repo.pr.opened')) {
+    return `A new pull request #${eventData.number || 'N/A'} "${eventData.title || 'PR'}" was opened. Generate a review checklist, suggest test coverage, and identify potential issues.`;
   }
 
-  if (eventType.startsWith('shopify.product.updated')) {
-    const productTitle = eventRecord.event_data?.title || 'product';
-    return `Product "${productTitle}" was updated in Shopify. Suggest updated marketing copy and promotional content.`;
+  if (eventType.startsWith('repo.pr.stale')) {
+    return `Pull request #${eventData.number || 'N/A'} "${eventData.title || 'PR'}" has been stale. Suggest either closing it, splitting it into smaller PRs, or refreshing the specification.`;
   }
 
-  if (eventType.startsWith('shopify.inventory.low')) {
-    return `Product inventory is running low. Suggest restocking strategies and customer communication.`;
+  if (eventType.startsWith('repo.build.failed')) {
+    return `Build failed for branch "${eventData.branch || 'unknown'}". Analyze the failure, suggest fixes, and propose code changes if needed.`;
+  }
+
+  if (eventType.startsWith('issue.created')) {
+    return `A new issue was created: "${eventData.title || 'issue'}". Suggest a solution approach, break it down into tasks, or propose an RFC if it's a significant change.`;
   }
 
   if (eventType.startsWith('supabase.schema')) {

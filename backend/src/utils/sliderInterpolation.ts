@@ -8,14 +8,16 @@ const sliderToAtomMap: Record<string, Record<number, string>> = {
     100: 'tone.absurdist',
   },
   revenueFocus: {
-    0: 'goal.impact',
-    30: 'goal.efficiency',
-    60: 'goal.revenue',
+    0: 'goal.velocity',
+    25: 'goal.reliability',
+    50: 'goal.growth',
+    75: 'goal.revenue',
     100: 'goal.revenue',
   },
   investorPerspective: {
-    0: 'perspective.operator',
-    50: 'perspective.operator_investor',
+    0: 'perspective.founder',
+    33: 'perspective.pm',
+    66: 'perspective.staff_engineer',
     100: 'perspective.cfo',
   },
 };

@@ -8,12 +8,12 @@ interface StackSelectorProps {
 }
 
 const STACK_OPTIONS = [
-  { id: 'shopify', label: 'Shopify' },
-  { id: 'supabase', label: 'Supabase' },
-  { id: 'mindstudio', label: 'MindStudio' },
-  { id: 'capcut', label: 'CapCut' },
-  { id: 'stripe', label: 'Stripe' },
-  { id: 'zapier', label: 'Zapier / Make / n8n' },
+  { id: 'code_repo', label: 'Code Repository (GitHub/GitLab)' },
+  { id: 'issue_tracker', label: 'Issue Tracker (Jira/Linear/GitHub Issues)' },
+  { id: 'doc_space', label: 'Documentation (Notion/Confluence)' },
+  { id: 'ci_cd', label: 'CI/CD (GitHub Actions/CircleCI)' },
+  { id: 'infra', label: 'Infrastructure (AWS/GCP/Vercel)' },
+  { id: 'analytics', label: 'Analytics (PostHog/GA/Custom)' },
 ];
 
 export function StackSelector({ stack, onChange }: StackSelectorProps) {

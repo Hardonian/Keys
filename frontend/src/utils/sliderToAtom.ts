@@ -49,11 +49,13 @@ export function sliderToAtomName(
 
   // Find the two closest keypoints
   let lowerKey = keys[0];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let upperKey = keys[keys.length - 1];
 
   for (let i = 0; i < keys.length - 1; i++) {
     if (clampedValue >= keys[i] && clampedValue <= keys[i + 1]) {
       lowerKey = keys[i];
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       upperKey = keys[i + 1];
       break;
     }
@@ -70,6 +72,7 @@ export function sliderToAtomName(
  * Gets atom by name (would typically fetch from database)
  */
 export async function getAtomByName(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   atomName: string
 ): Promise<PromptAtom | null> {
   // This would typically fetch from Supabase

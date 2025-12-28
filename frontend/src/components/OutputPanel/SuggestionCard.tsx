@@ -24,25 +24,29 @@ export function SuggestionCard({
 
     // Handle structured content
     if (output.outputType === 'content_generation') {
-      const content = output.content as Record<string, any>;
+      const content = output.content as Record<string, unknown>;
+      const hook = typeof content.hook === 'string' ? content.hook : null;
+      const script = typeof content.script === 'string' ? content.script : null;
+      const cta = typeof content.cta === 'string' ? content.cta : null;
+      
       return (
         <div className="space-y-3">
-          {content.hook && (
+          {hook && (
             <div>
               <h4 className="font-semibold text-sm mb-1">Hook:</h4>
-              <p className="text-sm">{content.hook}</p>
+              <p className="text-sm">{hook}</p>
             </div>
           )}
-          {content.script && (
+          {script && (
             <div>
               <h4 className="font-semibold text-sm mb-1">Script:</h4>
-              <p className="text-sm">{content.script}</p>
+              <p className="text-sm">{script}</p>
             </div>
           )}
-          {content.cta && (
+          {cta && (
             <div>
               <h4 className="font-semibold text-sm mb-1">CTA:</h4>
-              <p className="text-sm">{content.cta}</p>
+              <p className="text-sm">{cta}</p>
             </div>
           )}
         </div>

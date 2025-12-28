@@ -5,26 +5,33 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
   name?: string;
-  role?: 'operator' | 'marketer' | 'builder' | 'educator' | 'founder';
-  vertical?: 'ecommerce' | 'edtech' | 'saas' | 'agency' | 'finance' | 'other';
+  role?: 'founder' | 'pm' | 'staff_engineer' | 'devops' | 'cfo' | 'investor';
+  vertical?: 'software' | 'agency' | 'internal_tools' | 'content' | 'other';
   stack: {
-    shopify?: boolean;
-    supabase?: boolean;
-    mindstudio?: boolean;
-    capcut?: boolean;
-    stripe?: boolean;
-    zapier?: boolean;
+    code_repo?: boolean;
+    issue_tracker?: boolean;
+    doc_space?: boolean;
+    ci_cd?: boolean;
+    infra?: boolean;
+    analytics?: boolean;
     [key: string]: boolean | undefined;
   };
   tone?: 'playful' | 'serious' | 'technical' | 'casual' | 'balanced';
   risk_tolerance?: 'conservative' | 'moderate' | 'aggressive';
-  kpi_focus?: 'revenue' | 'efficiency' | 'growth' | 'impact';
-  perspective?: 'operator' | 'investor' | 'cfo' | 'strategic';
+  kpi_focus?: 'velocity' | 'reliability' | 'growth' | 'revenue' | 'quality';
+  perspective?: 'founder' | 'pm' | 'staff_engineer' | 'devops' | 'cfo' | 'investor';
   behavior_embedding?: number[];
   brand_voice?: string;
   company_context?: string;
   preferred_models?: string[];
   timezone?: string;
+  premium_features?: {
+    enabled: boolean;
+    voiceToText?: boolean;
+    tokenLimit?: number;
+    advancedFilters?: boolean;
+    customPrompts?: boolean;
+  };
 }
 
 // Prompt Atom Types
@@ -32,11 +39,11 @@ export interface PromptAtom {
   id: string;
   created_at: string;
   name: string;
-  category: 'tone' | 'stack' | 'channel' | 'constraint' | 'example' | 'perspective' | 'goal' | 'risk';
+  category: 'tone' | 'stack' | 'perspective' | 'phase' | 'domain' | 'constraint' | 'example' | 'goal' | 'risk';
   version: number;
   system_prompt?: string;
-  constraints?: Record<string, any>;
-  examples?: any[];
+  constraints?: Record<string, unknown>;
+  examples?: unknown[];
   weight: number;
   compatible_atoms?: string[];
   target_roles?: string[];
@@ -69,13 +76,13 @@ export interface AgentRun {
   user_id: string;
   created_at: string;
   trigger: 'manual' | 'event' | 'schedule' | 'chat_input';
-  trigger_data?: Record<string, any>;
+  trigger_data?: Record<string, unknown>;
   assembled_prompt?: string;
   selected_atoms?: string[];
   vibe_config_snapshot?: Partial<VibeConfig>;
   agent_type: 'suggestion' | 'generator' | 'orchestrator';
   model_used?: string;
-  generated_content?: Record<string, any>;
+  generated_content?: Record<string, unknown>;
   user_feedback?: 'approved' | 'rejected' | 'revised';
   feedback_detail?: string;
   tokens_used?: number;
@@ -89,8 +96,8 @@ export interface BackgroundEvent {
   user_id: string;
   created_at: string;
   event_type: string;
-  source: 'shopify' | 'supabase' | 'calendar' | 'manual';
-  event_data?: Record<string, any>;
+  source: 'code_repo' | 'issue_tracker' | 'ci_cd' | 'infra' | 'metrics' | 'manual' | 'schedule';
+  event_data?: Record<string, unknown>;
   event_timestamp?: string;
   suggestion_generated: boolean;
   suggestion_id?: string;
@@ -104,7 +111,7 @@ export interface CompanionInput {
   playfulness: number;
   revenueFocus: number;
   investorPerspective: number;
-  selectedPerspective?: 'operator' | 'investor' | 'cfo' | 'blend';
+  selectedPerspective?: 'founder' | 'pm' | 'staff_engineer' | 'devops' | 'cfo' | 'investor' | 'blend';
   saveAsPreset?: string;
 }
 
@@ -116,7 +123,7 @@ export interface PromptAssembly {
     userRole?: string;
     userVertical?: string;
     userStack?: Record<string, boolean>;
-    executionConstraints?: Record<string, any>;
+    executionConstraints?: Record<string, unknown>;
   };
   selectedAtomIds: string[];
   blendRecipe: Array<{
@@ -138,7 +145,7 @@ export type OutputType =
 
 export interface AgentOutput {
   outputType: OutputType;
-  content: string | Record<string, any>;
+  content: string | Record<string, unknown>;
   requiresApproval: boolean;
   editableFields: string[];
   generatedAt: string;
@@ -150,8 +157,7 @@ export interface AgentOutput {
 // Task Intent Types
 export interface TaskIntent {
   task: string;
-  channel?: string;
-  asset?: string;
+  artifact_type?: 'rfc' | 'adr' | 'test_plan' | 'changelog' | 'incident_report' | 'roadmap';
   context?: string;
   tools?: string[];
 }

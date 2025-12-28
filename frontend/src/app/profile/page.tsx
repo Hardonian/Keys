@@ -9,7 +9,7 @@ export default function ProfilePage() {
   // TODO: Get userId from auth session
   const userId = 'demo-user'; // Replace with actual auth
 
-  const handleComplete = async (profile: any) => {
+  const handleComplete = async (profile: Partial<import('@/types').UserProfile>) => {
     try {
       await profileService.createProfile(profile);
       router.push('/chat');

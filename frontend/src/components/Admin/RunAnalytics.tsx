@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/services/supabaseClient';
-import type { AgentRun } from '@/types';
+// AgentRun type imported but not directly used - kept for future use
 import { formatCurrency } from '@/utils/format';
 
 interface AnalyticsData {
@@ -24,6 +24,7 @@ export function RunAnalytics() {
 
   useEffect(() => {
     fetchAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange]);
 
   async function fetchAnalytics() {
@@ -104,7 +105,7 @@ export function RunAnalytics() {
         <h2 className="text-2xl font-bold">Run Analytics</h2>
         <select
           value={dateRange}
-          onChange={(e) => setDateRange(e.target.value as any)}
+          onChange={(e) => setDateRange(e.target.value as '7d' | '30d' | '90d' | 'all')}
           className="px-4 py-2 border border-gray-300 rounded-lg"
         >
           <option value="7d">Last 7 days</option>

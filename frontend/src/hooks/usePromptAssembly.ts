@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { apiService } from '@/services/api';
 import type { PromptAssembly, VibeConfig } from '@/types';
+import type { InputFilter } from '@/types/filters';
 
 export function usePromptAssembly() {
   const [loading, setLoading] = useState(false);
@@ -10,12 +11,13 @@ export function usePromptAssembly() {
   const assemblePrompt = async (
     userId: string,
     taskDescription: string,
-    vibeConfig: Partial<VibeConfig>
+    vibeConfig: Partial<VibeConfig>,
+    inputFilter?: InputFilter
   ) => {
     try {
       setLoading(true);
       setError(null);
-      const result = await apiService.assemblePrompt(userId, taskDescription, vibeConfig);
+      const result = await apiService.assemblePrompt(userId, taskDescription, vibeConfig, inputFilter);
       setAssembly(result);
       return result;
     } catch (err) {

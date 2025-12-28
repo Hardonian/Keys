@@ -1,66 +1,57 @@
 import { Request, Response, NextFunction } from 'express';
-
-export interface AppError extends Error {
-  statusCode?: number;
-  code?: string;
-  details?: any;
-}
-
-/**
- * Custom error class
- */
-export class AppError extends Error {
-  statusCode: number;
-  code?: string;
-  details?: any;
-
-  constructor(message: string, statusCode: number = 500, code?: string, details?: any) {
-    super(message);
-    this.statusCode = statusCode;
-    this.code = code;
-    this.details = details;
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
+import { AppError, ErrorCode } from '../types/errors';
+import { logger } from '../utils/logger';
 
 /**
  * Global error handler middleware
  */
 export function errorHandler(
-  err: AppError | Error,
+  err: Error | AppError,
   req: Request,
   res: Response,
   next: NextFunction
 ): void {
-  // Log error
-  console.error('Error:', {
-    message: err.message,
-    stack: err.stack,
-    url: req.url,
-    method: req.method,
-    body: req.body,
-  });
+  // Generate request ID if not present
+  const requestId = (req.headers['x-request-id'] as string) || 
+                    `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  // Determine status code
-  const statusCode = (err as AppError).statusCode || 500;
-  const code = (err as AppError).code || 'INTERNAL_ERROR';
-  const details = (err as AppError).details;
+  // Determine if this is an AppError
+  const isAppError = err instanceof AppError;
+  const statusCode = isAppError ? err.statusCode : 500;
+  const errorCode = isAppError ? err.code : ErrorCode.INTERNAL_ERROR;
+  const context = isAppError ? err.context : undefined;
+
+  // Log error with context
+  logger.error(
+    err.message,
+    err,
+    {
+      requestId,
+      userId: (req as any).userId,
+      url: req.url,
+      method: req.method,
+      statusCode,
+      errorCode,
+      ...context,
+    }
+  );
 
   // Don't leak error details in production
   const isDevelopment = process.env.NODE_ENV === 'development';
 
   const response: Record<string, any> = {
     error: {
+      code: errorCode,
       message: err.message || 'Internal server error',
-      code,
       ...(isDevelopment && { stack: err.stack }),
-      ...(details && { details }),
+      ...(context && { context }),
     },
+    requestId,
   };
 
-  // Add request ID if available
-  if (req.headers['x-request-id']) {
-    response.requestId = req.headers['x-request-id'];
+  // Add retry-after header for rate limit errors
+  if (errorCode === ErrorCode.RATE_LIMIT_ERROR && context?.retryAfter) {
+    res.setHeader('Retry-After', context.retryAfter);
   }
 
   res.status(statusCode).json(response);
@@ -81,38 +72,20 @@ export function asyncHandler(
  * 404 handler
  */
 export function notFoundHandler(req: Request, res: Response): void {
+  const requestId = (req.headers['x-request-id'] as string) || 
+                    `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  logger.warn('Route not found', {
+    requestId,
+    url: req.url,
+    method: req.method,
+  });
+
   res.status(404).json({
     error: {
+      code: ErrorCode.NOT_FOUND,
       message: `Route ${req.method} ${req.path} not found`,
-      code: 'NOT_FOUND',
     },
+    requestId,
   });
-}
-
-/**
- * Validation error helper
- */
-export function validationError(message: string, details?: any): AppError {
-  return new AppError(message, 400, 'VALIDATION_ERROR', details);
-}
-
-/**
- * Authentication error helper
- */
-export function authError(message: string = 'Authentication required'): AppError {
-  return new AppError(message, 401, 'AUTH_ERROR');
-}
-
-/**
- * Authorization error helper
- */
-export function authorizationError(message: string = 'Insufficient permissions'): AppError {
-  return new AppError(message, 403, 'AUTHORIZATION_ERROR');
-}
-
-/**
- * Not found error helper
- */
-export function notFoundError(message: string = 'Resource not found'): AppError {
-  return new AppError(message, 404, 'NOT_FOUND');
 }

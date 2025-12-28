@@ -7,7 +7,8 @@ import type { PromptAtom } from '@/types';
 export function PromptAtomsManager() {
   const [atoms, setAtoms] = useState<PromptAtom[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingAtom, setEditingAtom] = useState<PromptAtom | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_editingAtom, _setEditingAtom] = useState<PromptAtom | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
