@@ -15,8 +15,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.9.1",
-    "@google/generative-ai": "^0.2.1",
+    "@anthropic-ai/sdk": "^0.71.2",
+    "@google/generative-ai": "^0.24.1",
     "@sentry/node": "^7.80.0",
     "@supabase/supabase-js": "^2.38.0",
     "axios": "^1.6.0",
