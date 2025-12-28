@@ -45,6 +45,7 @@ export class InputReformatter {
 
   /**
    * Apply style-based formatting to input
+   * Optimized for common cases
    */
   private applyStyleFormatting(input: string, style: InputStyle): string {
     switch (style) {

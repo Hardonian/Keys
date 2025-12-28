@@ -6,6 +6,7 @@ import { SuggestionCard } from '../OutputPanel/SuggestionCard';
 import { usePromptAssembly } from '@/hooks/usePromptAssembly';
 import { useAgentOrchestration } from '@/hooks/useAgentOrchestration';
 import { usePremiumFeatures } from '@/hooks/usePremiumFeatures';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import type { VibeConfig, AgentOutput } from '@/types';
 import type { InputFilter } from '@/types/filters';
 
@@ -39,6 +40,7 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
   }, [messages]);
 
   const { isPremium } = usePremiumFeatures(userId);
+  const { profile } = useUserProfile(userId);
 
   const handleSend = async (
     messageText: string,
@@ -193,6 +195,7 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
         initialVibeConfig={currentVibeConfig}
         loading={loading}
         isPremium={isPremium}
+        userProfile={profile || undefined}
       />
     </div>
   );

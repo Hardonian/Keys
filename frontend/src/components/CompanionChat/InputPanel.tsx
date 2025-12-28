@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { SliderControl } from './SliderControl';
 import { InputFilters } from './InputFilters';
-import type { VibeConfig } from '@/types';
+import type { VibeConfig, UserProfile } from '@/types';
 import type { InputFilter } from '@/types/filters';
 
 interface InputPanelProps {
@@ -11,6 +11,7 @@ interface InputPanelProps {
   initialVibeConfig?: Partial<VibeConfig>;
   loading?: boolean;
   isPremium?: boolean;
+  userProfile?: Partial<UserProfile>;
 }
 
 export function InputPanel({
@@ -18,6 +19,7 @@ export function InputPanel({
   initialVibeConfig,
   loading = false,
   isPremium = false,
+  userProfile,
 }: InputPanelProps) {
   const [message, setMessage] = useState('');
   const [playfulness, setPlayfulness] = useState(
@@ -133,6 +135,7 @@ export function InputPanel({
         onFilterChange={setInputFilter}
         initialFilter={inputFilter}
         isPremium={isPremium}
+        userProfile={userProfile}
       />
 
       {/* Message Input - Mobile optimized */}

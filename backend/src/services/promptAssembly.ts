@@ -3,6 +3,8 @@ import type { UserProfile, PromptAtom, VibeConfig, PromptAssemblyResult } from '
 import type { InputFilter } from '../types/filters.js';
 import { sliderToAtomName } from '../utils/sliderInterpolation.js';
 import { inputReformatter } from './inputReformatter.js';
+import { getCache, setCache } from '../cache/redis.js';
+import { logger } from '../utils/logger.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -15,6 +17,25 @@ export async function assemblePrompt(
   vibeConfig: Partial<VibeConfig>,
   inputFilter?: InputFilter
 ): Promise<PromptAssemblyResult> {
+  // Create cache key based on inputs
+  const cacheKey = `prompt:${userId}:${JSON.stringify({
+    task: taskDescription.substring(0, 100), // First 100 chars for cache key
+    vibe: vibeConfig,
+    filter: inputFilter,
+  })}`;
+
+  // Try to get from cache (only if no input filter or filter is simple)
+  if (!inputFilter || (!inputFilter.model && !inputFilter.temperature)) {
+    try {
+      const cached = await getCache(cacheKey);
+      if (cached) {
+        logger.debug('Using cached prompt assembly', { userId, cacheKey });
+        return cached as PromptAssemblyResult;
+      }
+    } catch (error) {
+      logger.warn('Cache read failed, continuing without cache', error as Error);
+    }
+  }
   // 1. Load user profile
   const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
@@ -118,7 +139,7 @@ export async function assemblePrompt(
   const userPrompt = finalUserPrompt;
 
   // 9. Return assembled prompt + metadata
-  return {
+  const result: PromptAssemblyResult = {
     systemPrompt,
     userPrompt,
     context: {
@@ -136,6 +157,17 @@ export async function assemblePrompt(
         index < 2 ? 'primary' : index < 4 ? 'secondary' : ('modifier' as const),
     })),
   };
+
+  // Cache result (only if no complex filters)
+  if (!inputFilter || (!inputFilter.model && !inputFilter.temperature)) {
+    try {
+      await setCache(cacheKey, result, 3600); // Cache for 1 hour
+    } catch (error) {
+      logger.warn('Cache write failed', error as Error);
+    }
+  }
+
+  return result;
 }
 
 async function inferTaskAtoms(
