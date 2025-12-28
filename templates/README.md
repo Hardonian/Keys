@@ -1,30 +1,110 @@
 # Scaffold Prompt Templates
 
-A comprehensive system of **mega prompt templates** for scaffolding full-stack applications. These templates are static, comprehensive prompts that serve as trainable bases and get dynamically modified with user inputs and filters.
+A user-friendly system for customizing mega prompt templates. Start with default base templates, customize them to your needs, and the system automatically uses your customized versions.
 
-## Core Concept
+## How It Works
 
-**Mega Prompts** = Static, comprehensive prompt templates that:
-- Serve as a consistent base for training models
-- Get dynamically modified with user inputs and filters
-- Provide structure and best practices
-- Are reusable across projects and tech stacks
+1. **Base Templates**: Default, comprehensive prompts shown initially
+2. **Customize**: Modify variables and instructions to match your needs  
+3. **Automatic Usage**: System uses your customized version when generating prompts
+4. **Easy Revert**: Delete customization to return to base template
 
-## Architecture
+## User Flow
 
 ```
-Static Mega Prompt Template
-         ↓
-User Inputs & Profile Data
-         ↓
-Input Filters (style, format, etc.)
-         ↓
-Dynamic Variable Replacement
-         ↓
-Final Optimized Prompt
-         ↓
-Model Training/Inference
+1. View Base Template
+   ↓
+2. See Default Prompt
+   ↓
+3. Customize Variables/Instructions
+   ↓
+4. Save Customization
+   ↓
+5. System Uses Your Customized Version
+   ↓
+6. (Optional) Revert to Base
 ```
+
+## Quick Start
+
+### 1. View Base Template
+
+```bash
+GET /user-templates/auth-jwt-middleware/preview
+```
+
+**Response:**
+```json
+{
+  "templateId": "auth-jwt-middleware",
+  "name": "JWT Authentication Middleware",
+  "basePrompt": "You are an expert... [default base template]",
+  "customizedPrompt": null,
+  "hasCustomization": false
+}
+```
+
+### 2. Customize Template
+
+```bash
+POST /user-templates/auth-jwt-middleware/customize
+{
+  "customVariables": {
+    "user_role": "security-engineer",
+    "use_caching": true
+  },
+  "customInstructions": "Focus on security best practices"
+}
+```
+
+**Response:**
+```json
+{
+  "customization": { ... },
+  "preview": {
+    "basePrompt": "...",
+    "customizedPrompt": "You are an expert security-engineer... [your customized version]",
+    "hasCustomization": true
+  }
+}
+```
+
+### 3. Use Your Customized Template
+
+When you request a scaffold task:
+
+```bash
+POST /assemble-prompt
+{
+  "taskDescription": "Setup JWT authentication",
+  ...
+}
+```
+
+The system automatically:
+- ✅ Detects scaffold task
+- ✅ Finds recommended templates
+- ✅ Uses your customized version (if customized)
+- ✅ Falls back to base (if not customized)
+
+## API Endpoints
+
+### User-Facing (Requires Auth)
+
+- `GET /user-templates/milestone/:milestone` - Browse templates by milestone
+- `GET /user-templates/:templateId/preview` - View base and customized versions
+- `POST /user-templates/:templateId/customize` - Save customization
+- `PATCH /user-templates/:templateId/customize` - Update customization
+- `DELETE /user-templates/:templateId/customize` - Revert to base
+- `GET /user-templates/customizations` - List all your customizations
+- `POST /user-templates/reset` - Reset all customizations
+- `POST /user-templates/:templateId/generate` - Generate prompt with your customization
+
+### Internal/Admin (Requires Auth)
+
+- `GET /scaffold-templates` - List all templates (admin)
+- `GET /scaffold-templates/:id` - Get template details (admin)
+- `POST /scaffold-templates/generate` - Generate prompt (admin)
 
 ## Template Structure
 
@@ -35,175 +115,110 @@ id: template-id
 milestone: 02-authentication
 name: Template Name
 description: What it does
-priority: high|medium|low
-dependencies: [other-template-ids]
-tags: [relevant, tags]
-stack: [express, typescript]
-security_level: required|recommended|optional
-optimization_level: required|recommended|optional
 
-# The mega prompt - static base that gets modified
 mega_prompt: |
-  You are an expert...
+  You are an expert {{user_role|default:developer}}.
   
-  ## Context
-  Role: {{user_role|default:developer}}
-  {{#if company_context}}
-  Company: {{company_context}}
+  {{#if security_focus}}
+  Security Requirements: ...
   {{/if}}
-  
-  ## Task
-  {{task_description}}
 
 variables:
   - name: user_role
     description: User's role
-    required: false
     default: "developer"
 ```
 
-## Variable System
+## Customization Options
 
-Templates support dynamic variables:
+### Custom Variables
 
-### Simple Variables
-```yaml
-{{variable_name}}
-{{variable_name|default:fallback_value}}
+Override template variables:
+
+```json
+{
+  "customVariables": {
+    "user_role": "backend-engineer",
+    "framework": { "express": true },
+    "security_focus": true
+  }
+}
 ```
 
-### Conditional Blocks
-```yaml
-{{#if condition}}
-  Content shown if condition is true
-{{/if}}
+### Custom Instructions
 
-{{#unless condition}}
-  Content shown if condition is false
-{{/unless}}
+Add your own instructions:
+
+```json
+{
+  "customInstructions": "Always use TypeScript, include error handling, follow our coding standards"
+}
 ```
 
-### Nested Objects
-```yaml
-{{stack.frontend_framework}}
-{{user.profile.role}}
+## Example Workflow
+
+### Step 1: Explore
+```bash
+GET /user-templates/milestone/02-authentication
+```
+See all authentication templates with base versions.
+
+### Step 2: Preview Base
+```bash
+GET /user-templates/auth-jwt-middleware/preview
+```
+Review the default template.
+
+### Step 3: Customize
+```bash
+POST /user-templates/auth-jwt-middleware/customize
+{
+  "customVariables": { "user_role": "security-engineer" },
+  "customInstructions": "Focus on security"
+}
 ```
 
-## Dynamic Modification
+### Step 4: Verify
+```bash
+GET /user-templates/auth-jwt-middleware/preview
+```
+Now shows your customized version.
 
-Templates are modified with:
-
-1. **User Profile Data**
-   - Role, vertical, stack preferences
-   - Company context, brand voice
-   - Experience level
-
-2. **Input Filters**
-   - Style (concise, detailed, technical)
-   - Format (markdown, json, code)
-   - Tone preferences
-
-3. **Custom Variables**
-   - Project-specific overrides
-   - Framework choices
-   - Database selections
-
-## Usage
-
-### Automatic (Recommended)
-
-The prompt assembly engine automatically detects scaffold tasks and uses templates:
-
+### Step 5: Use
 ```bash
 POST /assemble-prompt
 {
-  "userId": "...",
-  "taskDescription": "Scaffold authentication middleware",
-  "vibeConfig": {...},
-  "inputFilter": {
-    "style": "technical",
-    "outputFormat": "code"
-  }
+  "taskDescription": "Setup authentication"
 }
 ```
-
-### Manual Template Selection
-
-```bash
-POST /scaffold-templates/generate
-{
-  "taskDescription": "Setup API routes",
-  "templateIds": ["api-route-structure", "api-validation-middleware"],
-  "variables": {
-    "framework": "express",
-    "database": "supabase"
-  }
-}
-```
-
-## Milestones
-
-Templates organized by project milestones:
-
-1. **01-initialization**: Project setup, structure, dependencies
-2. **02-authentication**: Auth flows, tokens, sessions
-3. **03-database-schema**: Tables, RLS policies, migrations
-4. **04-api-routes**: REST endpoints, middleware, validation
-5. **05-frontend-routes**: Pages, components, routing
-6. **06-security-hardening**: Headers, CSRF, sanitization
-7. **07-performance-optimization**: Caching, compression
-8. **08-testing**: Unit, integration, E2E tests
-9. **09-ci-cd**: GitHub Actions, quality gates
-10. **10-deployment**: Docker, env configs, monitoring
+System uses your customized template automatically!
 
 ## Benefits
 
-1. **Consistency**: Same base prompts ensure consistent outputs
-2. **Trainability**: Static bases are perfect for fine-tuning models
-3. **Flexibility**: Dynamic modification adapts to any context
-4. **Reusability**: One template works across many projects
-5. **Maintainability**: Update templates once, affects all uses
-6. **Security**: Built-in security considerations in every template
+✅ **User-Friendly**: Simple API, clear flow  
+✅ **Flexible**: Customize variables and instructions  
+✅ **Automatic**: System uses your customizations automatically  
+✅ **Reversible**: Easy to revert to base  
+✅ **Secure**: User-specific customizations  
+✅ **Backend-Only**: All logic in backend, clean separation  
 
-## Template Development
+## Documentation
 
-When creating new templates:
+- **USER_GUIDE.md**: Detailed user guide
+- **CONCEPT.md**: Mega prompt concept explanation
+- **INTEGRATION.md**: Technical integration details
+- **TESTING.md**: Testing framework documentation
 
-1. **Start with comprehensive base**: Include all relevant context
-2. **Use variables liberally**: Make templates adaptable
-3. **Include security notes**: Always consider security implications
-4. **Add optimization hints**: Performance considerations
-5. **Document variables**: Clear descriptions and defaults
-6. **Test modifications**: Ensure variables work correctly
+## Security
 
-## Example Template Flow
-
-```
-Static Template:
-"You are an expert {{user_role}}. Use {{framework}}..."
-
-User Profile:
-{ role: "backend-engineer", stack: { express: true } }
-
-Input Filter:
-{ style: "technical" }
-
-Result:
-"You are an expert backend-engineer. Use Express..."
-[Technical style applied]
-```
-
-## Integration
-
-Templates integrate seamlessly with:
-- Prompt assembly engine (`promptAssembly.ts`)
-- Input reformatter (`inputReformatter.ts`)
-- User profiles and vibe configs
-- Existing filter system
+- All customizations are user-specific
+- Only you can see/modify your customizations
+- Base templates remain unchanged
+- RLS policies protect user data
 
 ## Next Steps
 
-- Review existing templates: `templates/milestones/`
-- Check usage guide: `templates/USAGE.md`
-- See integration details: `templates/INTEGRATION.md`
-- Create custom templates following the format
+1. Review base templates
+2. Customize templates to your needs
+3. Use scaffold tasks - system uses your customizations
+4. Iterate and refine customizations
