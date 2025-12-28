@@ -48,11 +48,37 @@ export function ExportButton({
   const handleExportMindStudio = () => {
     // Format for MindStudio import
     if (content && typeof content === 'object') {
+      // Convert to MindStudio format
       const mindstudioFormat = {
-        ...content,
-        format: 'mindstudio',
-        version: '1.0',
+        agentName: content.agentName || 'Generated Agent',
+        description: content.description || '',
+        trigger: content.trigger || { type: 'manual' },
+        steps: (content.steps || []).map((step: any) => ({
+          id: step.id || `step_${Date.now()}`,
+          name: step.name || 'Step',
+          type: step.type || 'action',
+          ...(step.action && { action: step.action }),
+          ...(step.llm && {
+            llm: {
+              model: step.llm.model || 'gpt-4-turbo',
+              systemPrompt: step.llm.systemPrompt || '',
+              userPrompt: step.llm.userPrompt || '',
+              temperature: step.llm.temperature || 0.7,
+              maxTokens: step.llm.maxTokens || 2000,
+            },
+          }),
+          ...(step.humanInTheLoop && { humanInTheLoop: step.humanInTheLoop }),
+          ...(step.condition && { condition: step.condition }),
+          ...(step.nextStep && { nextStep: step.nextStep }),
+        })),
+        variables: content.variables || {},
+        metadata: {
+          version: '1.0',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
       };
+
       const blob = new Blob([JSON.stringify(mindstudioFormat, null, 2)], {
         type: 'application/json',
       });

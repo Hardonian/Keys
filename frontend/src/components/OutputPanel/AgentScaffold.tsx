@@ -103,6 +103,7 @@ export function AgentScaffold({ output, onExport }: AgentScaffoldProps) {
 
       <div className="flex gap-2 pt-3 border-t border-gray-200">
         <ExportButton
+          content={scaffold}
           onExportMindStudio={() => handleExport('mindstudio')}
           onExportJSON={() => handleExport('json')}
         />

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { orchestrateAgent } from '../services/agentOrchestration.js';
 import { createClient } from '@supabase/supabase-js';
 import type { PromptAssemblyResult } from '../types/index.js';
+import { telemetryService } from '../services/telemetryService.js';
 
 const router = Router();
 const supabase = createClient(
@@ -32,19 +33,31 @@ router.post('/', async (req, res) => {
 
     // Log agent run
     if (userId) {
-      await supabase.from('agent_runs').insert({
-        user_id: userId,
-        trigger: 'chat_input',
-        assembled_prompt: assembledPrompt.systemPrompt,
-        selected_atoms: assembledPrompt.selectedAtomIds,
-        vibe_config_snapshot: assembledPrompt.context,
-        agent_type: 'orchestrator',
-        model_used: output.modelUsed,
-        generated_content: output.content,
-        tokens_used: output.tokensUsed,
-        latency_ms: latencyMs,
-        cost_usd: output.costUsd,
-      });
+      const { data: run } = await supabase
+        .from('agent_runs')
+        .insert({
+          user_id: userId,
+          trigger: 'chat_input',
+          assembled_prompt: assembledPrompt.systemPrompt,
+          selected_atoms: assembledPrompt.selectedAtomIds,
+          vibe_config_snapshot: assembledPrompt.context,
+          agent_type: 'orchestrator',
+          model_used: output.modelUsed,
+          generated_content: output.content,
+          tokens_used: output.tokensUsed,
+          latency_ms: latencyMs,
+          cost_usd: output.costUsd,
+        })
+        .select()
+        .single();
+
+      // Track telemetry
+      if (run) {
+        await telemetryService.trackChatMessage(userId, naturalLanguageInput.length);
+        if (output.costUsd && output.tokensUsed) {
+          await telemetryService.trackCost(userId, output.costUsd, output.tokensUsed);
+        }
+      }
     }
 
     res.json(output);

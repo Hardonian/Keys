@@ -7,6 +7,11 @@ import { assemblePromptRouter } from './routes/assemble-prompt.js';
 import { orchestrateAgentRouter } from './routes/orchestrate-agent.js';
 import { feedbackRouter } from './routes/feedback.js';
 import { webhooksRouter } from './routes/webhooks.js';
+import { adminRouter } from './routes/admin.js';
+import { presetsRouter } from './routes/presets.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { optionalAuthMiddleware } from './middleware/auth.js';
+import { userRateLimit } from './middleware/rateLimit.js';
 
 dotenv.config();
 
@@ -21,10 +26,16 @@ app.use(express.json());
 // This must be registered before the webhooks router
 const webhookMiddleware = express.raw({ type: 'application/json' });
 
-// Health check
+// Health check (no auth required)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Optional auth for public routes
+app.use(optionalAuthMiddleware);
+
+// Rate limiting for API routes
+app.use('/api', userRateLimit);
 
 // Routes
 app.use('/profiles', profilesRouter);
@@ -32,8 +43,16 @@ app.use('/vibe-configs', vibeConfigsRouter);
 app.use('/assemble-prompt', assemblePromptRouter);
 app.use('/orchestrate-agent', orchestrateAgentRouter);
 app.use('/feedback', feedbackRouter);
+app.use('/admin', adminRouter);
+app.use('/presets', presetsRouter);
 // Webhooks with raw body middleware
 app.use('/webhooks', webhookMiddleware, webhooksRouter);
+
+// 404 handler
+app.use(notFoundHandler);
+
+// Error handler (must be last)
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);

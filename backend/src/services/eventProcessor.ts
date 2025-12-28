@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { assemblePrompt } from './promptAssembly.js';
 import { orchestrateAgent } from './agentOrchestration.js';
+import { notificationService } from './notificationService.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -148,16 +149,14 @@ function eventToTaskDescription(eventRecord: any): string {
 }
 
 async function notifyUserOfSuggestion(userId: string, run: any) {
-  // TODO: Integrate with notification service (Slack, email, UI toast)
-  // For now, just log
-  console.log(`Suggestion generated for user ${userId}:`, {
-    runId: run.id,
-    eventType: run.trigger_data?.event_type,
-  });
-
-  // In production, you would:
-  // 1. Send real-time notification via WebSocket/SSE
-  // 2. Send email notification
-  // 3. Send Slack notification
-  // 4. Update UI state
+  try {
+    await notificationService.notifySuggestion(
+      userId,
+      run.id,
+      run.trigger_data?.event_type || 'unknown',
+      run.generated_content || ''
+    );
+  } catch (error) {
+    console.error('Error notifying user of suggestion:', error);
+  }
 }

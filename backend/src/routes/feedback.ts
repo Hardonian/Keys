@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import { telemetryService } from '../services/telemetryService.js';
 
 const router = Router();
 const supabase = createClient(
@@ -57,6 +58,17 @@ router.post('/', async (req, res) => {
             .eq('id', atomId);
         }
       }
+    }
+
+    // Track telemetry
+    if (data.user_id) {
+      const source = data.trigger === 'event' ? 'background' : 'manual';
+      await telemetryService.trackSuggestionFeedback(
+        data.user_id,
+        runId,
+        feedback,
+        source
+      );
     }
 
     res.json({ success: true, data });

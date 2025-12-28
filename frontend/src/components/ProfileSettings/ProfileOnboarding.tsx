@@ -137,6 +137,11 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
                 });
               }}
             />
+            <div className="mt-6">
+              <p className="text-sm text-gray-600 mb-2">
+                You can save this configuration as a preset later in your profile settings.
+              </p>
+            </div>
           </div>
         );
 

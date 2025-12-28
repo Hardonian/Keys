@@ -8,7 +8,7 @@ export default function Home() {
         <p className="text-xl text-gray-600 mb-8">
           Your personalized agent that learns your preferences and helps you get things done.
         </p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex gap-4 justify-center flex-wrap">
           <Link
             href="/chat"
             className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -20,6 +20,18 @@ export default function Home() {
             className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Setup Profile
+          </Link>
+          <Link
+            href="/dashboard"
+            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/profile/settings"
+            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Profile Settings
           </Link>
         </div>
       </div>
