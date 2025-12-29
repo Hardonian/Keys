@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ChatInterface } from '@/components/CompanionChat/ChatInterface';
 import { useVibeConfig } from '@/hooks/useVibeConfig';
 import { useAuth } from '@/contexts/AuthContext';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 // Force dynamic rendering since this page uses Supabase
 export const dynamic = 'force-dynamic';
@@ -70,6 +71,7 @@ export default function ChatPage() {
             >
               Settings
             </a>
+            <ThemeSwitcher />
           </nav>
         </div>
       </header>
