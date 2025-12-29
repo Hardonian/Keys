@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { supabase } from '@/services/supabaseClient';
 import { formatRelativeTime } from '@/utils/format';
 import type { AgentRun } from '@/types';
+import { EmptyState } from '@/components/EmptyState';
 
 interface ActionHistoryProps {
   userId: string;
@@ -78,17 +79,32 @@ export function ActionHistory({ userId, limit = 20 }: ActionHistoryProps) {
 
   if (error) {
     return (
-      <div className="p-4 text-center text-red-500">
-        <p>Error loading history: {error.message}</p>
+      <div className="p-4 text-center">
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
+          <p className="text-red-800 dark:text-red-200 font-medium mb-1">Failed to load action history</p>
+          <p className="text-red-600 dark:text-red-400 text-sm">{error.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-3 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
 
   if (runs.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        <p>No actions yet. Your agent runs will appear here.</p>
-      </div>
+      <EmptyState
+        title="No actions yet"
+        description="Your agent runs and activity will appear here once you start using the chat interface."
+        icon="📋"
+        action={{
+          label: "Start Chatting",
+          onClick: () => window.location.href = '/chat'
+        }}
+      />
     );
   }
 

@@ -56,8 +56,8 @@ export class ExternalAPIError extends AppError {
 }
 
 export class RateLimitError extends AppError {
-  constructor(message: string = 'Rate limit exceeded', retryAfter?: number) {
-    super(ErrorCode.RATE_LIMIT_ERROR, message, 429, { retryAfter });
+  constructor(message: string = 'Rate limit exceeded', retryAfter?: number, context?: Record<string, any>) {
+    super(ErrorCode.RATE_LIMIT_ERROR, message, 429, { retryAfter, ...context });
   }
 }
 
