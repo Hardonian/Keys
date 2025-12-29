@@ -14,9 +14,16 @@ export async function middleware(request: NextRequest) {
     request,
   });
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Use placeholder values during build when env vars are missing
+  const supabaseUrl = url || 'https://placeholder.supabase.co';
+  const supabaseKey = key || 'placeholder-key';
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         get(name: string) {
@@ -56,17 +63,26 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  
+  // Only check auth if we have valid env vars
+  if (url && key) {
+    try {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      user = authUser;
+    } catch {
+      // Ignore auth errors during build or when env vars are invalid
+    }
+  }
 
   // Check if route is protected
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
   const isPublicAuthRoute = publicAuthRoutes.some((route) => pathname.startsWith(route));
 
   // For protected routes, check authentication
-  if (isProtectedRoute && !user) {
+  if (isProtectedRoute && !user && url && key) {
     const signInUrl = new URL('/signin', request.url);
     signInUrl.searchParams.set('returnUrl', pathname);
     return NextResponse.redirect(signInUrl);

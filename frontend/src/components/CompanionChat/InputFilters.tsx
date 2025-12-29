@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { InputFilter, LLMProvider, InputStyle, OutputFormat } from '@/types/filters';
 import { loadFilterPreferences, saveFilterPreferences, getSmartDefaults } from '@/utils/filterStorage';
 import { findMatchingPreset } from '@/utils/filterPresets';

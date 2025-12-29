@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { SliderControl } from './SliderControl';
 import { InputFilters } from './InputFilters';
 import type { VibeConfig, UserProfile } from '@/types';
@@ -174,10 +174,10 @@ export function InputPanel({
         userProfile={userProfile}
       />
 
-      {/* Message Input - Mobile optimized */}
+      {/* Message Input - Mobile optimized with modern design */}
       <form 
         onSubmit={handleSubmit} 
-        className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex gap-2"
+        className="px-3 sm:px-4 md:px-6 pb-safe pb-3 sm:pb-4 flex gap-2 sm:gap-3 items-end"
         role="form"
         aria-label="Message input form"
       >
@@ -186,37 +186,71 @@ export function InputPanel({
             type="button"
             onClick={handleVoiceInput}
             disabled={loading || isVoiceMode}
-            className="px-3 py-2.5 sm:py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-shrink-0 px-3 py-2.5 sm:py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 active:scale-95"
             title="Voice input (Premium)"
             aria-label={isVoiceMode ? 'Stop voice input' : 'Start voice input'}
             aria-pressed={isVoiceMode}
           >
-            <span aria-hidden="true">{isVoiceMode ? '🎤' : '🎙️'}</span>
+            <span className="text-lg" aria-hidden="true">{isVoiceMode ? '🎤' : '🎙️'}</span>
           </button>
         )}
         <label htmlFor="message-input" className="sr-only">
           Type your message
         </label>
-        <input
-          id="message-input"
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder={isVoiceMode ? 'Listening...' : 'Ask anything...'}
-          className="flex-1 px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-          disabled={loading || isVoiceMode}
-          aria-label="Message input"
-          aria-describedby={isVoiceMode ? 'voice-mode-indicator' : undefined}
-        />
+        <div className="flex-1 relative">
+          <textarea
+            id="message-input"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={isVoiceMode ? 'Listening...' : 'Ask anything...'}
+            rows={1}
+            className="w-full px-4 py-2.5 sm:py-3 pr-12 text-sm sm:text-base border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none min-h-[44px] max-h-32 overflow-y-auto"
+            disabled={loading || isVoiceMode}
+            aria-label="Message input"
+            aria-describedby={isVoiceMode ? 'voice-mode-indicator' : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
+          />
+          {message.trim() && (
+            <button
+              type="button"
+              onClick={() => setMessage('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+              aria-label="Clear message"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
         {isVoiceMode && <span id="voice-mode-indicator" className="sr-only">Voice input mode is active</span>}
         <button
           type="submit"
           disabled={!message.trim() || loading || isVoiceMode}
-          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-medium text-sm sm:text-base disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="flex-shrink-0 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl font-medium text-sm sm:text-base disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center gap-2"
           aria-label={loading ? 'Sending message' : 'Send message'}
         >
-          <span className="hidden sm:inline">{loading ? 'Sending...' : 'Send'}</span>
-          <span className="sm:hidden" aria-hidden="true">{loading ? '...' : '→'}</span>
+          {loading ? (
+            <>
+              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span className="hidden sm:inline">Sending...</span>
+            </>
+          ) : (
+            <>
+              <span className="hidden sm:inline">Send</span>
+              <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </>
+          )}
         </button>
       </form>
     </div>

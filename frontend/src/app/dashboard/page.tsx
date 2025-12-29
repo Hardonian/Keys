@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RunAnalytics } from '@/components/Admin/RunAnalytics';
 import { ActionHistory } from '@/components/BackgroundAgent/ActionHistory';
@@ -20,7 +20,7 @@ export default function DashboardPage() {
   const { profile, loading: profileLoading } = useUserProfile(userId || '');
 
   // Redirect to signin if not authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (!authLoading && !user) {
       router.push('/signin?returnUrl=/dashboard');
     }

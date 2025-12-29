@@ -6,9 +6,16 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Use placeholder values during build when env vars are missing
+  const supabaseUrl = url || 'https://placeholder.supabase.co';
+  const supabaseKey = key || 'placeholder-key';
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         get(name: string) {
@@ -49,7 +56,14 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refresh session if expired - required for Server Components
-  await supabase.auth.getUser();
+  // Only if we have valid env vars, otherwise skip auth check during build
+  if (url && key) {
+    try {
+      await supabase.auth.getUser();
+    } catch {
+      // Ignore auth errors during build
+    }
+  }
 
   return supabaseResponse;
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
+import { StructuredData, generateOrganizationSchema, generateSoftwareApplicationSchema } from '@/components/SEO/StructuredData';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true });
 
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     default: 'Cursor Venture Companion - AI Cofounder for Product Lifecycle',
     template: '%s | Cursor Venture Companion',
   },
-  description: 'Your AI cofounder for ideation, specification, implementation, and operations. Transform your product development with intelligent automation.',
+  description: 'Your AI cofounder for ideation, specification, implementation, and operations. Transform your product development with intelligent automation. Join 10K+ founders building faster.',
   keywords: [
     'AI cofounder',
     'product development',
@@ -33,6 +34,13 @@ export const metadata: Metadata = {
     'AI tools',
     'startup tools',
     'product management',
+    'AI product manager',
+    'startup AI',
+    'founder tools',
+    'productivity AI',
+    'LLM tools',
+    'prompt engineering',
+    'AI templates',
   ],
   authors: [{ name: 'Cursor Venture Companion' }],
   creator: 'Cursor Venture Companion',
@@ -114,29 +122,8 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Venture Companion" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'SoftwareApplication',
-              name: 'Cursor Venture Companion',
-              applicationCategory: 'BusinessApplication',
-              operatingSystem: 'Web',
-              offers: {
-                '@type': 'Offer',
-                price: '0',
-                priceCurrency: 'USD',
-              },
-              description: 'Your AI cofounder for ideation, specification, implementation, and operations.',
-              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://cursor-venture-companion.com',
-              author: {
-                '@type': 'Organization',
-                name: 'Cursor Venture Companion',
-              },
-            }),
-          }}
-        />
+        <StructuredData type="Organization" data={generateOrganizationSchema()} />
+        <StructuredData type="SoftwareApplication" data={generateSoftwareApplicationSchema()} />
       </head>
       <body className={`${inter.className} antialiased`}>
         <Providers>

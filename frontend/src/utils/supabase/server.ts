@@ -3,10 +3,16 @@ import { cookies } from 'next/headers';
 
 export function createClient() {
   const cookieStore = cookies();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Use placeholder values during build when env vars are missing
+  const supabaseUrl = url || 'https://placeholder.supabase.co';
+  const supabaseKey = key || 'placeholder-key';
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         get(name: string) {
