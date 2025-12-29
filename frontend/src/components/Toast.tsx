@@ -57,14 +57,44 @@ export function ToastContainer() {
   }, []);
 
   return (
-    <div className="toast-container">
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md w-full sm:w-auto">
       {currentToasts.map((toast) => (
         <div
           key={toast.id}
-          className={`toast toast-${toast.type}`}
+          className={`
+            relative px-4 py-3 rounded-lg shadow-lg cursor-pointer
+            transform transition-all duration-300 ease-in-out
+            animate-in slide-in-from-top-5 fade-in
+            ${
+              toast.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
+                : toast.type === 'error'
+                ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+                : toast.type === 'warning'
+                ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800'
+                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800'
+            }
+          `}
           onClick={() => removeToast(toast.id)}
+          role="alert"
+          aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
         >
-          {toast.message}
+          <div className="flex items-start gap-3">
+            <span className="text-lg" aria-hidden="true">
+              {toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : toast.type === 'warning' ? '⚠' : 'ℹ'}
+            </span>
+            <p className="flex-1 text-sm font-medium">{toast.message}</p>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                removeToast(toast.id);
+              }}
+              className="text-current opacity-70 hover:opacity-100 transition-opacity"
+              aria-label="Dismiss notification"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       ))}
     </div>

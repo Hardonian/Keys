@@ -50,9 +50,9 @@ export default function SignUpPage() {
     } else {
       setSuccess(true);
       setLoading(false);
-      // Redirect to dashboard after a moment
+      // Redirect to onboarding after a moment
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/onboarding');
       }, 2000);
     }
   };

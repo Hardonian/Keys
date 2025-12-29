@@ -138,11 +138,24 @@ async function handleMessage(request, sender, sendResponse) {
 
 // API Functions
 
+// Import auth functions (will be loaded as separate script)
+let chromeAuth = null;
+
+// Load auth module
+try {
+  chromeAuth = require('./auth.js');
+} catch (e) {
+  // Fallback if require not available
+  chromeAuth = global.chromeAuth || {};
+}
+
 async function getApiConfig() {
-  const config = await chrome.storage.sync.get(['apiBaseUrl', 'authToken']);
+  const config = await chrome.storage.sync.get(['apiBaseUrl']);
+  const authToken = chromeAuth?.getToken ? await chromeAuth.getToken() : null;
+  
   return {
     baseUrl: config.apiBaseUrl || API_BASE_URL,
-    authToken: config.authToken,
+    authToken,
   };
 }
 
@@ -155,7 +168,18 @@ async function apiRequest(endpoint, options = {}) {
     ...options.headers,
   };
 
-  if (config.authToken) {
+  // Ensure authenticated before making request
+  if (chromeAuth?.ensureAuthenticated) {
+    try {
+      const token = await chromeAuth.ensureAuthenticated();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      throw new Error('Authentication required. Please sign in.');
+    }
+  } else if (config.authToken) {
     headers['Authorization'] = `Bearer ${config.authToken}`;
   }
 

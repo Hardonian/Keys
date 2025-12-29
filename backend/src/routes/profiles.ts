@@ -9,6 +9,7 @@ import { logger } from '../utils/logger.js';
 import { getCache, setCache, deleteCache, cacheKeys } from '../cache/redis.js';
 import { getPaginationParams, createPaginatedResponse } from '../utils/pagination.js';
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
+import { checkLimit } from '../services/usageMetering.js';
 
 const router = Router();
 const supabase = createClient(

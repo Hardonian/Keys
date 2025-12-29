@@ -13,6 +13,7 @@ import { inputFiltersRouter } from './routes/input-filters.js';
 import { scaffoldTemplatesRouter } from './routes/scaffold-templates.js';
 import { userTemplatesRouter } from './routes/user-templates.js';
 import { enhancedUserTemplatesRouter } from './routes/enhanced-user-templates.js';
+import { billingRouter } from './routes/billing.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { optionalAuthMiddleware, authMiddleware } from './middleware/auth.js';
 import { userRateLimiterMiddleware, apiRateLimiter } from './middleware/rateLimit.js';
@@ -106,6 +107,9 @@ app.use('/admin', authMiddleware, adminRouter);
 // Webhooks with raw body middleware
 const webhookMiddleware = express.raw({ type: 'application/json' });
 app.use('/webhooks', webhookMiddleware, webhooksRouter);
+
+// Billing routes
+app.use('/billing', billingRouter);
 
 // Initialize WebSocket server
 const wsServer = new WebSocketServer();

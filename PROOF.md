@@ -163,10 +163,10 @@ AND tablename IN ('user_profiles', 'vibe_configs', 'agent_runs', 'background_eve
 
 ## Known Limitations
 
-1. **Chrome Extension**: No auth yet (Phase 4)
-2. **Error Handling**: Basic error boundary exists, but could be improved (Phase 3)
-3. **Toast Notifications**: Not implemented yet (Phase 3)
-4. **E2E Tests**: Not implemented yet (Phase 8)
+1. **Chrome Extension Auth**: Requires web app to be running for token exchange
+2. **E2E Tests**: Require test user setup and environment configuration
+3. **Billing**: Requires Stripe account and webhook configuration
+4. **Multi-tenant UI**: Backend ready, frontend UI pending
 
 ## Production Deployment
 
