@@ -48,10 +48,9 @@ export async function trackUsage(
   const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  // Use idempotency key if provided
-  const uniqueConstraint = idempotencyKey
-    ? { user_id: userId, metric_type: metricType, idempotency_key: idempotencyKey }
-    : { user_id: userId, metric_type: metricType, period_start: periodStart.toISOString() };
+  // Use idempotency key if provided (note: idempotency_key column not yet in schema)
+  // For now, use period_start as unique constraint
+  const uniqueConstraint = { user_id: userId, metric_type: metricType, period_start: periodStart.toISOString() };
 
   const { error } = await supabase
     .from('usage_metrics')

@@ -6,6 +6,8 @@ import { assemblePrompt } from '../services/promptAssembly.js';
 import type { InputFilter } from '../types/filters.js';
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
 import { AuthorizationError } from '../types/errors.js';
+import { checkLimit } from '../services/usageMetering.js';
+import { RateLimitError } from '../types/errors.js';
 
 const router = Router();
 
@@ -49,6 +51,21 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res) => {
     const userId = req.userId!; // Always use authenticated user ID
     const { taskDescription, vibeConfig, inputFilter } = req.body;
+
+    // Check usage limits (assemble-prompt is part of the run flow)
+    const usageCheck = await checkLimit(userId, 'runs', 0);
+    if (!usageCheck.allowed) {
+      const error = new RateLimitError(
+        `Usage limit exceeded. You have used ${usageCheck.current}/${usageCheck.limit} runs this month. Please upgrade your plan to continue.`
+      );
+      error.context = {
+        current: usageCheck.current,
+        limit: usageCheck.limit,
+        remaining: usageCheck.remaining,
+        metricType: 'runs',
+      };
+      throw error;
+    }
 
     // Ignore userId from body if present - always use authenticated user
     const result = await assemblePrompt(

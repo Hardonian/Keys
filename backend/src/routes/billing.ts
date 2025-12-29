@@ -106,9 +106,10 @@ router.get(
         .eq('user_id', userId);
     }
 
+    const returnUrl = (req.query.returnUrl as string) || process.env.FRONTEND_URL || 'http://localhost:3000';
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: req.query.returnUrl as string || 'https://your-app.com/settings',
+      return_url: returnUrl,
     });
 
     res.json({ url: session.url });
