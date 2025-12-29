@@ -10,7 +10,7 @@ interface AuthContextType {
   loading: boolean;
   error: Error | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, metadata?: Record<string, any>) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (
     email: string,
     password: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ) => {
     setLoading(true);
     setError(null);

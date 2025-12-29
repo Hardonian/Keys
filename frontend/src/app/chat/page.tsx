@@ -49,10 +49,12 @@ export default function ChatPage() {
         </p>
       </header>
       <main id="main-content" className="flex-1 overflow-hidden min-h-0" role="main">
-        <ChatInterface
-          userId={userId}
-          initialVibeConfig={vibeConfig || undefined}
-        />
+        {userId && (
+          <ChatInterface
+            userId={userId}
+            initialVibeConfig={vibeConfig || undefined}
+          />
+        )}
       </main>
     </div>
   );

@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClient } from '@/utils/supabase/client';
 
-export default function ExtensionAuthPage() {
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+function ExtensionAuthContent() {
   const searchParams = useSearchParams();
   const { user, session } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -55,14 +57,26 @@ export default function ExtensionAuthPage() {
           }, '*');
         }
 
-        // Also try to send via chrome.runtime if available
-        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-          chrome.runtime.sendMessage(extensionId, {
-            type: 'AUTH_SUCCESS',
-            state,
-            token,
-            expiresIn,
-          });
+        // Also try to send via chrome.runtime if available (extension context only)
+        // Chrome extension API is not available in standard TypeScript types
+        if (typeof window !== 'undefined' && 'chrome' in window) {
+          // Chrome extension API typing
+          interface ChromeWindow extends Window {
+            chrome?: {
+              runtime?: {
+                sendMessage: (extensionId: string, message: unknown) => void;
+              };
+            };
+          }
+          const chromeWindow = window as unknown as ChromeWindow;
+          if (chromeWindow.chrome?.runtime?.sendMessage) {
+            chromeWindow.chrome.runtime.sendMessage(extensionId, {
+              type: 'AUTH_SUCCESS',
+              state,
+              token,
+              expiresIn,
+            });
+          }
         }
 
         setStatus('success');
@@ -107,5 +121,20 @@ export default function ExtensionAuthPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ExtensionAuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ExtensionAuthContent />
+    </Suspense>
   );
 }

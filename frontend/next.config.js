@@ -1,6 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // ESLint configuration
+  eslint: {
+    // Don't fail build on lint warnings (only errors)
+    ignoreDuringBuilds: false,
+  },
+  typescript: {
+    // Don't ignore TypeScript errors
+    ignoreBuildErrors: false,
+  },
   // PWA configuration
   async headers() {
     return [

@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
-export default function SignInPage() {
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signIn, user, loading: authLoading } = useAuth();
@@ -127,5 +130,20 @@ export default function SignInPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <SignInContent />
+    </Suspense>
   );
 }
