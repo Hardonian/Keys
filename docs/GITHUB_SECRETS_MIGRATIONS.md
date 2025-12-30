@@ -4,9 +4,9 @@
 
 To enable automatic migrations, add these secrets to your GitHub repository:
 
-### Option 1: Direct Database Connection (Recommended)
+### Required Secret
 
-**Secret Name:** `SUPABASE_DB_URL`
+**Secret Name:** `DATABASE_URL`
 
 **Value Format:**
 ```
@@ -19,24 +19,17 @@ postgresql://postgres.[PROJECT_REF]:[DB_PASSWORD]@aws-0-us-east-1.pooler.supabas
 3. Copy the connection string
 4. Replace `[YOUR-PASSWORD]` with your database password
 
-### Option 2: Alternative Database URL
-
-**Secret Name:** `DATABASE_URL`
-
-**Value Format:**
+**Alternative Format (Direct Connection):**
 ```
-postgresql://user:password@host:port/database
+postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres
 ```
 
-### Option 3: Supabase Credentials (Fallback)
+### Optional Secrets (for other features)
 
-If you don't have direct DB URL, you can use:
+- `SUPABASE_URL` - Your Supabase project URL (used by app, not migrations)
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (used by app, not migrations)
 
-- `SUPABASE_URL` - Your Supabase project URL
-- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (from API settings)
-- `SUPABASE_DB_PASSWORD` - Database password (from Database settings)
-
-**Note:** Option 1 is recommended as it's most reliable.
+**Note:** `DATABASE_URL` is the primary secret needed for migrations.
 
 ## Setting Secrets
 

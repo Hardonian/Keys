@@ -71,9 +71,10 @@ for migration in "${NEW_MIGRATIONS[@]}"; do
 done
 
 # Check for database connection
-if [ -z "$SUPABASE_DB_URL" ] && [ -z "$DATABASE_URL" ]; then
+if [ -z "$DATABASE_URL" ]; then
   echo -e "${RED}Error: No database connection configured${NC}"
-  echo "Please set SUPABASE_DB_URL or DATABASE_URL"
+  echo "Please set DATABASE_URL environment variable"
+  echo "Format: postgresql://user:password@host:port/database"
   exit 1
 fi
 
@@ -89,12 +90,8 @@ for migration_file in "${NEW_MIGRATIONS[@]}"; do
   echo "Running: $migration_name"
   echo "==========================================${NC}"
   
-  # Determine connection method
-  if [ -n "$SUPABASE_DB_URL" ]; then
-    DB_URL="$SUPABASE_DB_URL"
-  else
-    DB_URL="$DATABASE_URL"
-  fi
+  # Use DATABASE_URL
+  DB_URL="$DATABASE_URL"
   
   # Run migration
   if command -v psql &> /dev/null; then
