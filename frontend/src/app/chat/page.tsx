@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChatInterface } from '@/components/CompanionChat/ChatInterface';
 import { useVibeConfig } from '@/hooks/useVibeConfig';
@@ -16,19 +16,15 @@ function ChatPageContent() {
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const userId = user?.id;
-  const [showOnboardingSuccess, setShowOnboardingSuccess] = useState(false);
 
   const { vibeConfig, loading } = useVibeConfig(userId || '');
 
   // Check for onboarding completion
   useEffect(() => {
     if (searchParams.get('onboarding') === 'complete') {
-      setShowOnboardingSuccess(true);
       toast.success('Welcome! Start chatting with your AI companion.');
       // Remove query param after showing message
       router.replace('/chat', { scroll: false });
-      // Hide message after 5 seconds
-      setTimeout(() => setShowOnboardingSuccess(false), 5000);
     }
   }, [searchParams, router]);
 

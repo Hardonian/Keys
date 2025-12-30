@@ -42,8 +42,14 @@ api.interceptors.response.use(
     const requestId = error.config?.headers?.['x-request-id'] || 'unknown';
     
     // Track error to Sentry or analytics
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
+    interface WindowWithSentry extends Window {
+      Sentry?: {
+        captureException: (error: unknown, options?: Record<string, unknown>) => void;
+      };
+    }
+    const windowWithSentry = window as unknown as WindowWithSentry;
+    if (typeof window !== 'undefined' && windowWithSentry.Sentry) {
+      windowWithSentry.Sentry.captureException(error, {
         tags: {
           requestId,
           endpoint: error.config?.url,

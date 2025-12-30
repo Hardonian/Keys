@@ -14,7 +14,7 @@ export interface MetricRegression {
   changePercent: number;
   severity: 'low' | 'medium' | 'high' | 'critical';
   detectedAt: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface Anomaly {
@@ -156,7 +156,7 @@ export class AnalyticsAdapter {
   /**
    * Track an event
    */
-  async trackEvent(eventName: string, properties?: Record<string, any>): Promise<boolean> {
+  async trackEvent(eventName: string, properties?: Record<string, unknown>): Promise<boolean> {
     if (!this.apiKey) {
       return false;
     }
@@ -190,10 +190,9 @@ export class AnalyticsAdapter {
     if (!this.apiKey || !this.projectId) return null;
 
     try {
-      const start = timeRange?.start || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const end = timeRange?.end || new Date().toISOString();
 
-      const response = await axios.get(
+      await axios.get(
         `${this.baseUrl || 'https://app.posthog.com'}/api/projects/${this.projectId}/insights/`,
         {
           params: {
@@ -218,16 +217,16 @@ export class AnalyticsAdapter {
   }
 
   private async detectPostHogAnomalies(
-    metricName: string,
-    timeRange: { start: string; end: string },
-    baselineWindow?: { start: string; end: string }
+    _metricName: string,
+    _timeRange: { start: string; end: string },
+    _baselineWindow?: { start: string; end: string }
   ): Promise<Anomaly[]> {
     // PostHog has built-in anomaly detection
     // This would integrate with their API
     return [];
   }
 
-  private async trackPostHogEvent(eventName: string, properties?: Record<string, any>): Promise<boolean> {
+  private async trackPostHogEvent(eventName: string, properties?: Record<string, unknown>): Promise<boolean> {
     if (!this.apiKey || !this.projectId) return false;
 
     try {
@@ -288,15 +287,15 @@ export class AnalyticsAdapter {
   }
 
   private async detectGAAnomalies(
-    metricName: string,
-    timeRange: { start: string; end: string },
-    baselineWindow?: { start: string; end: string }
+    _metricName: string,
+    _timeRange: { start: string; end: string },
+    _baselineWindow?: { start: string; end: string }
   ): Promise<Anomaly[]> {
     // Google Analytics has anomaly detection in their API
     return [];
   }
 
-  private async trackGAEvent(eventName: string, properties?: Record<string, any>): Promise<boolean> {
+  private async trackGAEvent(_eventName: string, _properties?: Record<string, unknown>): Promise<boolean> {
     // Google Analytics tracking via Measurement Protocol
     return true;
   }
@@ -352,7 +351,7 @@ export class AnalyticsAdapter {
     }
   }
 
-  private async trackCustomEvent(eventName: string, properties?: Record<string, any>): Promise<boolean> {
+  private async trackCustomEvent(eventName: string, properties?: Record<string, unknown>): Promise<boolean> {
     if (!this.baseUrl) return false;
 
     try {

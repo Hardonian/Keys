@@ -17,11 +17,11 @@ export function initRedis(): Redis | null {
   try {
     redisClient = new Redis(redisUrl, {
       maxRetriesPerRequest: 3,
-      retryStrategy: (times) => {
+      retryStrategy: (times: number): number => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
-      reconnectOnError: (err) => {
+      reconnectOnError: (err: Error): boolean => {
         const targetError = 'READONLY';
         if (err.message.includes(targetError)) {
           return true;
@@ -30,7 +30,7 @@ export function initRedis(): Redis | null {
       },
     });
 
-    redisClient.on('error', (err) => {
+    redisClient.on('error', (err: Error) => {
       logger.error('Redis connection error', err);
     });
 

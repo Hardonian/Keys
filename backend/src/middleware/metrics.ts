@@ -41,7 +41,7 @@ export function metricsMiddleware(
     });
 
     // Track error rate
-    if (metrics.statusCode >= 400) {
+    if (metrics.statusCode && metrics.statusCode >= 400) {
       logger.warn('Request error', {
         requestId,
         method: metrics.method,
