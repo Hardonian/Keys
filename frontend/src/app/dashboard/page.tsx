@@ -8,6 +8,9 @@ import { ProactiveSuggestions } from '@/components/BackgroundAgent/ProactiveSugg
 import { UsageDashboard } from '@/components/UsageDashboard';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/contexts/AuthContext';
+import { PageWrapper } from '@/components/PageWrapper';
+import { LoadingSpinner } from '@/components/Loading';
+import { Reveal, AnimatedCard } from '@/systems/motion';
 
 // Force dynamic rendering since this page uses Supabase
 export const dynamic = 'force-dynamic';
@@ -29,22 +32,22 @@ export default function DashboardPage() {
 
   if (authLoading || !userId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading dashboard...</p>
-      </div>
+      <PageWrapper className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner label="Loading dashboard..." />
+      </PageWrapper>
     );
   }
 
   if (profileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading dashboard...</p>
-      </div>
+      <PageWrapper className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner label="Loading dashboard..." />
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <PageWrapper className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <header className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -58,32 +61,41 @@ export default function DashboardPage() {
         <main id="main-content" className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Analytics */}
           <section className="lg:col-span-2 space-y-4 sm:space-y-6" aria-label="Analytics and activity">
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
-              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Analytics</h2>
-              <RunAnalytics />
-            </div>
+            <Reveal direction="left" delay={0}>
+              <AnimatedCard variant="elevated" hoverable className="p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Analytics</h2>
+                <RunAnalytics />
+              </AnimatedCard>
+            </Reveal>
 
             {/* Action History */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
-              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Recent Activity</h2>
-              <ActionHistory userId={userId} limit={10} />
-            </div>
+            <Reveal direction="left" delay={100}>
+              <AnimatedCard variant="elevated" hoverable className="p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Recent Activity</h2>
+                <ActionHistory userId={userId} limit={10} />
+              </AnimatedCard>
+            </Reveal>
           </section>
 
           {/* Sidebar */}
           <aside className="space-y-4 sm:space-y-6" aria-label="Quick information">
             {/* Usage Dashboard */}
-            <UsageDashboard />
+            <Reveal direction="right" delay={0}>
+              <UsageDashboard />
+            </Reveal>
 
             {/* Proactive Suggestions */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
-              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Suggestions</h2>
-              <ProactiveSuggestions userId={userId} />
-            </div>
+            <Reveal direction="right" delay={100}>
+              <AnimatedCard variant="elevated" hoverable className="p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Suggestions</h2>
+                <ProactiveSuggestions userId={userId} />
+              </AnimatedCard>
+            </Reveal>
 
             {/* Quick Stats */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
-              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Quick Stats</h2>
+            <Reveal direction="right" delay={200}>
+              <AnimatedCard variant="elevated" hoverable className="p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Quick Stats</h2>
               <dl className="space-y-4">
                 {profile && (
                   <>
@@ -115,10 +127,11 @@ export default function DashboardPage() {
                   </>
                 )}
               </dl>
-            </div>
+              </AnimatedCard>
+            </Reveal>
           </aside>
         </main>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

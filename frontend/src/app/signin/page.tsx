@@ -4,6 +4,10 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { AnimatedButton } from '@/systems/motion';
+import { LoadingSpinner } from '@/components/Loading';
+import { PageWrapper } from '@/components/PageWrapper';
+import { ErrorToast } from '@/components/Feedback';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -45,17 +49,14 @@ function SignInContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
-        </div>
-      </div>
+      <PageWrapper className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <LoadingSpinner label="Loading authentication..." />
+      </PageWrapper>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 sm:px-6 lg:px-8">
+    <PageWrapper className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
@@ -72,17 +73,11 @@ function SignInContent() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                    {error}
-                  </h3>
-                </div>
-              </div>
-            </div>
-          )}
+          <ErrorToast
+            message={error || ''}
+            isVisible={!!error}
+            onDismiss={() => setError(null)}
+          />
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">
@@ -119,29 +114,28 @@ function SignInContent() {
           </div>
 
           <div>
-            <button
+            <AnimatedButton
               type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600"
+              variant="primary"
+              fullWidth
+              isLoading={loading}
+              isDisabled={loading}
             >
               {loading ? 'Signing in...' : 'Sign in'}
-            </button>
+            </AnimatedButton>
           </div>
         </form>
       </div>
-    </div>
+    </PageWrapper>
   );
 }
 
 export default function SignInPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
-        </div>
-      </div>
+      <PageWrapper className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner label="Loading..." />
+      </PageWrapper>
     }>
       <SignInContent />
     </Suspense>

@@ -9,6 +9,8 @@ import { onboardingMachine, type OnboardingMachineContext } from '@/systems/stat
 import { profileService } from '@/services/profileService';
 import { AnimatedButton, AnimatedCard, Reveal } from '@/systems/motion';
 import { ProgressIndicator } from '@/components/Feedback/ProgressIndicator';
+import { logUXEvent } from '@/systems/analytics/uxEvents';
+import { withTimeout } from '@/systems/utils/timeout';
 
 interface ProfileOnboardingProps {
   userId: string;
@@ -29,14 +31,23 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
     onboardingMachine.provide({
       actors: {
         submitProfileData: async ({ input }: { input: OnboardingMachineContext }) => {
-          const result = await profileService.createProfile({
-            ...input.profile,
-            user_id: input.userId,
-          });
-          if (!result) {
-            throw new Error('Failed to create profile');
+          try {
+            const result = await withTimeout(
+              profileService.createProfile({
+                ...input.profile,
+                user_id: input.userId,
+              }),
+              { timeout: 30000 }
+            );
+            if (!result) {
+              throw new Error('Failed to create profile');
+            }
+            logUXEvent.flowCompleted('onboarding', context.totalSteps);
+            return result;
+          } catch (error) {
+            logUXEvent.errorOccurred('onboarding', error as Error);
+            throw error;
           }
-          return result;
         },
       } as any,
     }) as any,
@@ -56,9 +67,16 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
   // Handle success state
   useEffect(() => {
     if (isSuccess && context.profile) {
+      logUXEvent.successCelebrated('onboarding');
       onComplete(context.profile);
     }
   }, [isSuccess, context.profile, onComplete]);
+
+  // Log step views
+  useEffect(() => {
+    const stepName = STEPS[context.currentStep];
+    logUXEvent.stepViewed('onboarding', stepName, context.currentStep, context.totalSteps);
+  }, [context.currentStep, context.totalSteps]);
 
   const updateProfile = (updates: Partial<UserProfile>) => {
     send({ type: 'UPDATE_PROFILE', updates } as any);
@@ -270,7 +288,10 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
             <div className="flex gap-2">
               <AnimatedButton
                 variant="danger"
-                onClick={() => send({ type: 'RETRY' } as any)}
+                onClick={() => {
+                  logUXEvent.retryAttempted('onboarding', context.retryCount);
+                  send({ type: 'RETRY' } as any);
+                }}
                 isDisabled={context.retryCount >= 3}
               >
                 Retry ({3 - context.retryCount} left)
