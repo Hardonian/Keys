@@ -1,22 +1,32 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChatInterface } from '@/components/CompanionChat/ChatInterface';
 import { useVibeConfig } from '@/hooks/useVibeConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+import { toast } from '@/components/Toast';
 
 // Force dynamic rendering since this page uses Supabase
 export const dynamic = 'force-dynamic';
 
-// Note: Metadata export doesn't work with 'use client', but we'll handle SEO via layout
-export default function ChatPage() {
+function ChatPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const userId = user?.id;
 
   const { vibeConfig, loading } = useVibeConfig(userId || '');
+
+  // Check for onboarding completion
+  useEffect(() => {
+    if (searchParams.get('onboarding') === 'complete') {
+      toast.success('Welcome! Start chatting with your AI companion.');
+      // Remove query param after showing message
+      router.replace('/chat', { scroll: false });
+    }
+  }, [searchParams, router]);
 
   // Redirect to signin if not authenticated
   useEffect(() => {
@@ -84,5 +94,21 @@ export default function ChatPage() {
         )}
       </main>
     </div>
+  );
+}
+
+// Note: Metadata export doesn't work with 'use client', but we'll handle SEO via layout
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ChatPageContent />
+    </Suspense>
   );
 }

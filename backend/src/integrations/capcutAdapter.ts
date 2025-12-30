@@ -31,7 +31,7 @@ export class CapCutAdapter {
    * Generate script brief for CapCut
    */
   generateScriptBrief(
-    content: string | Record<string, any>,
+    content: string | Record<string, unknown>,
     options?: {
       duration?: number;
       tone?: string;
@@ -94,7 +94,7 @@ export class CapCutAdapter {
   /**
    * Extract title from content
    */
-  private extractTitle(content: string | Record<string, any>): string {
+  private extractTitle(content: string | Record<string, unknown>): string {
     if (typeof content === 'object' && content.title) {
       return content.title;
     }

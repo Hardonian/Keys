@@ -23,7 +23,8 @@ export default function OnboardingPage() {
     try {
       await profileService.createProfile(profile);
       toast.success('Profile created successfully!');
-      router.push('/dashboard');
+      // Redirect to chat for first-time experience
+      router.push('/chat?onboarding=complete');
     } catch (error) {
       console.error('Error creating profile:', error);
       toast.error('Failed to create profile. Please try again.');

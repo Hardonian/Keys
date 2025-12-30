@@ -38,15 +38,55 @@ api.interceptors.request.use(async (config) => {
 // Add response interceptor for error handling and toast notifications
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const requestId = error.config?.headers?.['x-request-id'] || 'unknown';
+    
+    // Track error to Sentry or analytics
+    interface WindowWithSentry extends Window {
+      Sentry?: {
+        captureException: (error: unknown, options?: Record<string, unknown>) => void;
+      };
+    }
+    const windowWithSentry = window as unknown as WindowWithSentry;
+    if (typeof window !== 'undefined' && windowWithSentry.Sentry) {
+      windowWithSentry.Sentry.captureException(error, {
+        tags: {
+          requestId,
+          endpoint: error.config?.url,
+        },
+        extra: {
+          status: error.response?.status,
+          data: error.response?.data,
+        },
+      });
+    }
+
     if (error.response) {
+      const status = error.response.status;
       const message = error.response.data?.error?.message || error.response.data?.message || 'An error occurred';
-      toast.error(message);
+      
+      // Handle specific error codes
+      if (status === 403 && error.response.data?.error?.code === 'SUBSCRIPTION_REQUIRED') {
+        toast.error('Active subscription required. Please upgrade your plan.');
+        // Could redirect to billing page
+        if (error.response.data?.error?.upgradeUrl) {
+          setTimeout(() => {
+            window.location.href = error.response.data.error.upgradeUrl;
+          }, 2000);
+        }
+      } else if (status === 403 && error.response.data?.error?.code === 'PREMIUM_REQUIRED') {
+        toast.error('Premium features required. Please upgrade your plan.');
+      } else if (status === 429) {
+        toast.error('Rate limit exceeded. Please try again later.');
+      } else {
+        toast.error(message);
+      }
     } else if (error.request) {
       toast.error('Network error. Please check your connection.');
     } else {
       toast.error('An unexpected error occurred');
     }
+    
     return Promise.reject(error);
   }
 );

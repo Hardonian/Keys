@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { PromptAssemblyResult } from '../types/index.js';
 import { telemetryService } from '../services/telemetryService.js';
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
+import { entitlementsMiddleware } from '../middleware/entitlements.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { validateBody } from '../middleware/validation.js';
 import { checkLimit, trackUsage } from '../services/usageMetering.js';
@@ -30,6 +31,7 @@ const orchestrateAgentSchema = z.object({
 router.post(
   '/',
   authMiddleware,
+  entitlementsMiddleware({ checkUsageLimit: true }),
   validateBody(orchestrateAgentSchema),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
     const userId = req.userId!; // Always use authenticated user ID

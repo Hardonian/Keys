@@ -63,7 +63,7 @@ export class CiCdAdapter {
         default:
           return [];
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error fetching recent builds:', error);
       return [];
     }
@@ -92,7 +92,7 @@ export class CiCdAdapter {
         default:
           return null;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error fetching build:', error);
       return null;
     }
@@ -121,7 +121,7 @@ export class CiCdAdapter {
         default:
           return null;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error fetching build logs:', error);
       return null;
     }
@@ -150,7 +150,7 @@ export class CiCdAdapter {
         default:
           return false;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error retrying build:', error);
       return false;
     }
@@ -179,7 +179,7 @@ export class CiCdAdapter {
         default:
           return false;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error cancelling build:', error);
       return false;
     }
@@ -200,7 +200,7 @@ export class CiCdAdapter {
       },
     });
 
-    return response.data.workflow_runs.map((run: any) => ({
+    return response.data.workflow_runs.map((run: { id: number; status: string; conclusion: string; created_at: string; updated_at: string; html_url: string }) => ({
       id: run.id.toString(),
       number: run.run_number,
       status: run.conclusion === 'success' ? 'success' :
@@ -292,7 +292,7 @@ export class CiCdAdapter {
         errors: errors.length > 0 ? errors : undefined,
         warnings: warnings.length > 0 ? warnings : undefined,
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error fetching GitHub Actions logs:', error);
       return null;
     }
@@ -313,7 +313,7 @@ export class CiCdAdapter {
         }
       );
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error retrying GitHub Actions build:', error);
       return false;
     }
@@ -334,7 +334,7 @@ export class CiCdAdapter {
         }
       );
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error cancelling GitHub Actions build:', error);
       return false;
     }
@@ -358,7 +358,7 @@ export class CiCdAdapter {
       },
     });
 
-    return response.data.items.map((pipeline: any) => ({
+    return response.data.items.map((pipeline: { id: string; state: string; created_at: string; stopped_at: string }) => ({
       id: pipeline.id,
       status: pipeline.state === 'success' ? 'success' :
              pipeline.state === 'failed' ? 'failure' :
@@ -371,20 +371,20 @@ export class CiCdAdapter {
     }));
   }
 
-  private async getCircleCIBuild(buildId: string): Promise<Build | null> {
+  private async getCircleCIBuild(_buildId: string): Promise<Build | null> {
     // CircleCI uses pipeline IDs, would need to fetch pipeline details
     return null;
   }
 
-  private async getCircleCILogs(buildId: string): Promise<BuildLog | null> {
+  private async getCircleCILogs(_buildId: string): Promise<BuildLog | null> {
     return null; // Would need CircleCI logs API
   }
 
-  private async retryCircleCIBuild(buildId: string): Promise<boolean> {
+  private async retryCircleCIBuild(_buildId: string): Promise<boolean> {
     return false; // Would need CircleCI retry API
   }
 
-  private async cancelCircleCIBuild(buildId: string): Promise<boolean> {
+  private async cancelCircleCIBuild(_buildId: string): Promise<boolean> {
     return false; // Would need CircleCI cancel API
   }
 
@@ -403,7 +403,7 @@ export class CiCdAdapter {
       },
     });
 
-    return response.data.map((pipeline: any) => ({
+    return response.data.map((pipeline: { id: number; status: string; ref: string; sha: string; created_at: string; updated_at: string }) => ({
       id: pipeline.id.toString(),
       status: pipeline.status === 'success' ? 'success' :
              pipeline.status === 'failed' ? 'failure' :
@@ -445,7 +445,7 @@ export class CiCdAdapter {
     };
   }
 
-  private async getGitLabCILogs(buildId: string): Promise<BuildLog | null> {
+  private async getGitLabCILogs(_buildId: string): Promise<BuildLog | null> {
     return null; // Would need GitLab job logs API
   }
 
@@ -464,7 +464,7 @@ export class CiCdAdapter {
         }
       );
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -484,29 +484,29 @@ export class CiCdAdapter {
         }
       );
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
 
   // Jenkins Implementation (stub)
-  private async getJenkinsBuilds(limit: number, branch?: string): Promise<Build[]> {
+  private async getJenkinsBuilds(_limit: number, _branch?: string): Promise<Build[]> {
     return [];
   }
 
-  private async getJenkinsBuild(buildId: string): Promise<Build | null> {
+  private async getJenkinsBuild(_buildId: string): Promise<Build | null> {
     return null;
   }
 
-  private async getJenkinsLogs(buildId: string): Promise<BuildLog | null> {
+  private async getJenkinsLogs(_buildId: string): Promise<BuildLog | null> {
     return null;
   }
 
-  private async retryJenkinsBuild(buildId: string): Promise<boolean> {
+  private async retryJenkinsBuild(_buildId: string): Promise<boolean> {
     return false;
   }
 
-  private async cancelJenkinsBuild(buildId: string): Promise<boolean> {
+  private async cancelJenkinsBuild(_buildId: string): Promise<boolean> {
     return false;
   }
 
@@ -521,7 +521,7 @@ export class CiCdAdapter {
       });
 
       return response.data.builds || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -535,7 +535,7 @@ export class CiCdAdapter {
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -549,7 +549,7 @@ export class CiCdAdapter {
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -562,7 +562,7 @@ export class CiCdAdapter {
         headers: this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {},
       });
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -575,7 +575,7 @@ export class CiCdAdapter {
         headers: this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {},
       });
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
