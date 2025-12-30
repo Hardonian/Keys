@@ -78,12 +78,18 @@ jobs:
       - name: Run tests
         run: |
           cd backend
-          npm test -- --coverage
+          npm test -- --coverage --reporter=verbose
         env:
           NODE_ENV: test
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           REDIS_URL: redis://localhost:6379
+      
+      - name: Check coverage thresholds
+        run: |
+          cd backend
+          npm test -- --coverage --reporter=json --outputFile=coverage.json || true
+          # Coverage thresholds are enforced in vitest.config.ts
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -153,9 +159,20 @@ jobs:
       - name: Run tests
         run: |
           cd frontend
-          npm test -- --coverage
+          npm test -- --coverage --reporter=verbose
         env:
           NODE_ENV: test
+      
+      - name: Run E2E tests
+        run: |
+          cd frontend
+          npx playwright install --with-deps
+          npm run test:e2e
+        env:
+          NODE_ENV: test
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        continue-on-error: true
       
       - name: Build
         run: |

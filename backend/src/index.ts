@@ -14,6 +14,7 @@ import { scaffoldTemplatesRouter } from './routes/scaffold-templates.js';
 import { userTemplatesRouter } from './routes/user-templates.js';
 import { enhancedUserTemplatesRouter } from './routes/enhanced-user-templates.js';
 import { billingRouter } from './routes/billing.js';
+import { extensionAuthRouter } from './routes/extension-auth.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { optionalAuthMiddleware, authMiddleware } from './middleware/auth.js';
 import { userRateLimiterMiddleware, apiRateLimiter } from './middleware/rateLimit.js';
@@ -56,6 +57,10 @@ app.use(corsMiddleware());
 
 // Request logging
 app.use(requestLoggingMiddleware);
+
+// Metrics middleware
+import { metricsMiddleware } from './middleware/metrics.js';
+app.use(metricsMiddleware);
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
@@ -110,6 +115,9 @@ app.use('/webhooks', webhookMiddleware, webhooksRouter);
 
 // Billing routes
 app.use('/billing', billingRouter);
+
+// Extension auth routes (public, rate-limited)
+app.use('/extension-auth', extensionAuthRouter);
 
 // Initialize WebSocket server
 const wsServer = new WebSocketServer();
