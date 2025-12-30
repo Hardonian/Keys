@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { authMiddleware, requireRole } from '../middleware/auth.js';
 import type { AuthenticatedRequest } from '../middleware/auth.js';
+import { auditLogService } from '../services/auditLogService.js';
 
 const router = Router();
 const supabase = createClient(
@@ -45,7 +46,7 @@ router.get('/atoms', requireRole('admin', 'superadmin'), async (req, res) => {
 /**
  * POST /admin/atoms - Create new atom
  */
-router.post('/atoms', requireRole('admin', 'superadmin'), async (req, res) => {
+router.post('/atoms', requireRole('admin', 'superadmin'), async (req: AuthenticatedRequest, res) => {
   try {
     const atom = req.body;
 
@@ -59,6 +60,16 @@ router.post('/atoms', requireRole('admin', 'superadmin'), async (req, res) => {
       return res.status(400).json({ error: error.message });
     }
 
+    // Log audit event
+    await auditLogService.logAdminAction(
+      req.userId!,
+      'create_atom',
+      'prompt_atom',
+      data.id,
+      { category: atom.category },
+      req
+    );
+
     res.status(201).json(data);
   } catch (error) {
     console.error('Error creating atom:', error);
@@ -69,7 +80,7 @@ router.post('/atoms', requireRole('admin', 'superadmin'), async (req, res) => {
 /**
  * PATCH /admin/atoms/:id - Update atom
  */
-router.patch('/atoms/:id', requireRole('admin', 'superadmin'), async (req, res) => {
+router.patch('/atoms/:id', requireRole('admin', 'superadmin'), async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -85,6 +96,16 @@ router.patch('/atoms/:id', requireRole('admin', 'superadmin'), async (req, res) 
       return res.status(400).json({ error: error.message });
     }
 
+    // Log audit event
+    await auditLogService.logAdminAction(
+      req.userId!,
+      'update_atom',
+      'prompt_atom',
+      id,
+      { fields: Object.keys(updates) },
+      req
+    );
+
     res.json(data);
   } catch (error) {
     console.error('Error updating atom:', error);
@@ -95,7 +116,7 @@ router.patch('/atoms/:id', requireRole('admin', 'superadmin'), async (req, res) 
 /**
  * DELETE /admin/atoms/:id - Delete atom
  */
-router.delete('/atoms/:id', requireRole('admin', 'superadmin'), async (req, res) => {
+router.delete('/atoms/:id', requireRole('admin', 'superadmin'), async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
 
@@ -104,6 +125,16 @@ router.delete('/atoms/:id', requireRole('admin', 'superadmin'), async (req, res)
     if (error) {
       return res.status(400).json({ error: error.message });
     }
+
+    // Log audit event
+    await auditLogService.logAdminAction(
+      req.userId!,
+      'delete_atom',
+      'prompt_atom',
+      id,
+      {},
+      req
+    );
 
     res.json({ success: true });
   } catch (error) {
@@ -202,6 +233,76 @@ router.get('/profiles', requireRole('admin', 'superadmin'), async (req, res) => 
   } catch (error) {
     console.error('Error fetching profiles:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * GET /admin/health - System health check (admin only)
+ */
+router.get('/health', requireRole('admin', 'superadmin'), async (req, res) => {
+  try {
+    const startTime = Date.now();
+    
+    // Check database connectivity
+    const { error: dbError } = await supabase.from('user_profiles').select('user_id').limit(1);
+    const dbResponseTime = Date.now() - startTime;
+    const dbConnected = !dbError;
+
+    // Check Redis (if configured)
+    let redisConnected = false;
+    try {
+      const { initRedis } = await import('../cache/redis.js');
+      const redis = initRedis();
+      if (redis) {
+        await redis.ping();
+        redisConnected = true;
+      }
+    } catch {
+      // Redis not configured or unavailable
+    }
+
+    // Check Stripe (if configured)
+    const stripeConfigured = !!process.env.STRIPE_SECRET_KEY;
+
+    // Get webhook status (would need to track this in a table)
+    // For now, return unknown
+    const webhookStatus = {
+      stripe: {
+        status: stripeConfigured ? 'ok' as const : 'unknown' as const,
+        lastReceived: null as string | null,
+      },
+      github: {
+        status: 'unknown' as const,
+        lastReceived: null as string | null,
+      },
+    };
+
+    // Get system uptime (process uptime in seconds)
+    const uptime = Math.floor(process.uptime());
+    const version = process.env.npm_package_version || '1.0.0';
+
+    res.json({
+      database: {
+        connected: dbConnected,
+        responseTime: dbResponseTime,
+      },
+      webhooks: webhookStatus,
+      services: {
+        redis: {
+          connected: redisConnected,
+        },
+        stripe: {
+          configured: stripeConfigured,
+        },
+      },
+      system: {
+        uptime,
+        version,
+      },
+    });
+  } catch (error) {
+    console.error('Error checking health:', error);
+    res.status(500).json({ error: 'Health check failed' });
   }
 });
 

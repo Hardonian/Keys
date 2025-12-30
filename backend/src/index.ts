@@ -13,8 +13,10 @@ import { inputFiltersRouter } from './routes/input-filters.js';
 import { scaffoldTemplatesRouter } from './routes/scaffold-templates.js';
 import { userTemplatesRouter } from './routes/user-templates.js';
 import { enhancedUserTemplatesRouter } from './routes/enhanced-user-templates.js';
-import { billingRouter } from './routes/billing.js';
 import { extensionAuthRouter } from './routes/extension-auth.js';
+import { metricsRouter } from './routes/metrics.js';
+import { apmRouter } from './routes/apm.js';
+import { auditRouter } from './routes/audit.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { optionalAuthMiddleware, authMiddleware } from './middleware/auth.js';
 import { userRateLimiterMiddleware, apiRateLimiter } from './middleware/rateLimit.js';
@@ -49,6 +51,10 @@ const PORT = process.env.PORT || 3001;
 // Security middleware (must be first)
 app.use(securityMiddleware());
 
+// Request signing for sensitive operations
+import { requestSigningMiddleware } from './middleware/securityHardening.js';
+app.use(requestSigningMiddleware());
+
 // Request ID middleware
 app.use(requestIdMiddleware);
 
@@ -60,9 +66,16 @@ app.use(requestLoggingMiddleware);
 
 // Metrics middleware
 import { metricsMiddleware } from './middleware/metrics.js';
+import { apmMiddleware } from './middleware/apm.js';
 app.use(metricsMiddleware);
+app.use(apmMiddleware);
 
-// Body parsing
+// Stripe webhook needs raw body for signature verification
+// Mount it BEFORE JSON body parser
+import { billingRouter } from './routes/billing.js';
+app.use('/billing/webhook', express.raw({ type: 'application/json' }), billingRouter);
+
+// Body parsing (for all other routes)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -113,11 +126,20 @@ app.use('/admin', authMiddleware, adminRouter);
 const webhookMiddleware = express.raw({ type: 'application/json' });
 app.use('/webhooks', webhookMiddleware, webhooksRouter);
 
-// Billing routes
+// Other billing routes (checkout, portal) use JSON body parser
 app.use('/billing', billingRouter);
 
 // Extension auth routes (public, rate-limited)
 app.use('/extension-auth', extensionAuthRouter);
+
+// Metrics routes (require auth)
+app.use('/metrics', metricsRouter);
+
+// APM routes (require auth, admin only)
+app.use('/apm', apmRouter);
+
+// Audit routes (require auth, admin only)
+app.use('/audit', auditRouter);
 
 // Initialize WebSocket server
 const wsServer = new WebSocketServer();

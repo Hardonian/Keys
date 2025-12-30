@@ -137,7 +137,9 @@ router.post(
     let event: Stripe.Event;
 
     try {
-      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+      // req.body is a Buffer when using express.raw() middleware
+      const rawBody = req.body instanceof Buffer ? req.body : Buffer.from(JSON.stringify(req.body));
+      event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err) {
       console.error('Webhook signature verification failed:', err);
       return res.status(400).json({ error: 'Invalid signature' });

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     default: 'Cursor Venture Companion - AI Cofounder for Product Lifecycle',
     template: '%s | Cursor Venture Companion',
   },
-  description: 'Your AI cofounder for ideation, specification, implementation, and operations. Transform your product development with intelligent automation. Join 10K+ founders building faster.',
+  description: 'Your AI cofounder for ideation, specification, implementation, and operations. Transform your product development with intelligent automation.',
   keywords: [
     'AI cofounder',
     'product development',

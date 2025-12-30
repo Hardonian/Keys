@@ -1,0 +1,8 @@
+# Migration Tracking File
+# This file tracks which migrations have been successfully applied
+# Format: One migration filename per line
+# Do not edit manually - updated automatically by GitHub Actions
+
+# Example:
+# 001_create_user_profiles.sql
+# 002_create_prompt_atoms.sql

@@ -1,0 +1,7 @@
+# Migration tracking file (contains list of applied migrations)
+# Note: This file IS tracked in git for CI/CD coordination
+# .migrations_tracked.txt
+
+# Archive directory (contains migrated files)
+# Note: Archive directory IS tracked to preserve migration history
+# archive/

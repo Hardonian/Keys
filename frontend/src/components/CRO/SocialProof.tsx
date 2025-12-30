@@ -40,10 +40,10 @@ const defaultTestimonials: Testimonial[] = [
 ];
 
 const defaultStats = [
-  { label: 'Active Users', value: '10K+' },
-  { label: 'Prompts Generated', value: '500K+' },
-  { label: 'Templates Created', value: '5K+' },
-  { label: 'Avg. Time Saved', value: '15hrs/week' },
+  { label: 'Active Users', value: '—' },
+  { label: 'Prompts Generated', value: '—' },
+  { label: 'Templates Created', value: '—' },
+  { label: 'Avg. Time Saved', value: '—' },
 ];
 
 export function SocialProof({ testimonials = defaultTestimonials, stats = defaultStats, showLiveActivity = true }: SocialProofProps) {
@@ -72,7 +72,7 @@ export function SocialProof({ testimonials = defaultTestimonials, stats = defaul
             Loved by builders worldwide
           </h2>
           <p className="text-center text-slate-600 dark:text-slate-400 mb-8 sm:mb-12">
-            Join thousands of founders, developers, and product teams
+            Trusted by founders, developers, and product teams
           </p>
         </div>
 
@@ -131,7 +131,7 @@ export function SocialProof({ testimonials = defaultTestimonials, stats = defaul
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
               <span className="text-sm font-medium text-green-700 dark:text-green-400">
-                <span className="font-semibold">127</span> people using this right now
+                System operational
               </span>
             </div>
           </div>

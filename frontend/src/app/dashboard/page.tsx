@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { RunAnalytics } from '@/components/Admin/RunAnalytics';
 import { ActionHistory } from '@/components/BackgroundAgent/ActionHistory';
 import { ProactiveSuggestions } from '@/components/BackgroundAgent/ProactiveSuggestions';
+import { UsageDashboard } from '@/components/UsageDashboard';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -71,6 +72,9 @@ export default function DashboardPage() {
 
           {/* Sidebar */}
           <aside className="space-y-4 sm:space-y-6" aria-label="Quick information">
+            {/* Usage Dashboard */}
+            <UsageDashboard />
+
             {/* Proactive Suggestions */}
             <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
               <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Suggestions</h2>

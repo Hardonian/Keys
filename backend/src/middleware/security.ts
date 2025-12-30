@@ -1,22 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import { logger } from '../utils/logger';
+import { securityHeadersMiddleware, requestSigningMiddleware } from './securityHardening.js';
 
 /**
- * Security headers middleware
+ * Security headers middleware (uses enhanced hardening)
  */
 export function securityMiddleware() {
-  return helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
-      },
-    },
-    crossOriginEmbedderPolicy: false,
-  });
+  return securityHeadersMiddleware();
 }
 
 /**

@@ -50,9 +50,9 @@ export class CapCutAdapter {
       scriptText = content;
       cta = lines.find((l) => l.toLowerCase().includes('cta')) || '';
     } else {
-      hook = content.hook || '';
-      scriptText = content.script || content.content || '';
-      cta = content.cta || '';
+      hook = String(content.hook || '');
+      scriptText = String(content.script || content.content || '');
+      cta = String(content.cta || '');
     }
 
     // Split script into segments (for 15-60 second videos)
@@ -96,7 +96,7 @@ export class CapCutAdapter {
    */
   private extractTitle(content: string | Record<string, unknown>): string {
     if (typeof content === 'object' && content.title) {
-      return content.title;
+      return String(content.title);
     }
 
     if (typeof content === 'string') {

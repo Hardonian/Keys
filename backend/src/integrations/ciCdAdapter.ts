@@ -63,7 +63,7 @@ export class CiCdAdapter {
         default:
           return [];
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error fetching recent builds:', error);
       return [];
     }
@@ -92,7 +92,7 @@ export class CiCdAdapter {
         default:
           return null;
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error fetching build:', error);
       return null;
     }
@@ -121,7 +121,7 @@ export class CiCdAdapter {
         default:
           return null;
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error fetching build logs:', error);
       return null;
     }
@@ -150,7 +150,7 @@ export class CiCdAdapter {
         default:
           return false;
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error retrying build:', error);
       return false;
     }
@@ -179,7 +179,7 @@ export class CiCdAdapter {
         default:
           return false;
       }
-    } catch (_error) {
+    } catch (error) {
       console.error('Error cancelling build:', error);
       return false;
     }
@@ -200,7 +200,7 @@ export class CiCdAdapter {
       },
     });
 
-    return response.data.workflow_runs.map((run: { id: number; status: string; conclusion: string; created_at: string; updated_at: string; html_url: string }) => ({
+    return response.data.workflow_runs.map((run: any) => ({
       id: run.id.toString(),
       number: run.run_number,
       status: run.conclusion === 'success' ? 'success' :
@@ -235,7 +235,7 @@ export class CiCdAdapter {
       }
     );
 
-    const run = response.data;
+    const run: any = response.data;
     return {
       id: run.id.toString(),
       number: run.run_number,
@@ -292,7 +292,7 @@ export class CiCdAdapter {
         errors: errors.length > 0 ? errors : undefined,
         warnings: warnings.length > 0 ? warnings : undefined,
       };
-    } catch (_error) {
+    } catch (error) {
       console.error('Error fetching GitHub Actions logs:', error);
       return null;
     }
@@ -313,7 +313,7 @@ export class CiCdAdapter {
         }
       );
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error retrying GitHub Actions build:', error);
       return false;
     }
@@ -334,7 +334,7 @@ export class CiCdAdapter {
         }
       );
       return true;
-    } catch (_error) {
+    } catch (error) {
       console.error('Error cancelling GitHub Actions build:', error);
       return false;
     }
@@ -358,14 +358,14 @@ export class CiCdAdapter {
       },
     });
 
-    return response.data.items.map((pipeline: { id: string; state: string; created_at: string; stopped_at: string }) => ({
+    return response.data.items.map((pipeline: any) => ({
       id: pipeline.id,
       status: pipeline.state === 'success' ? 'success' :
              pipeline.state === 'failed' ? 'failure' :
              pipeline.state === 'running' ? 'running' :
              pipeline.state === 'canceled' ? 'cancelled' : 'pending',
-      branch: pipeline.vcs.branch,
-      commit: pipeline.vcs.revision,
+      branch: pipeline.vcs?.branch,
+      commit: pipeline.vcs?.revision,
       startedAt: pipeline.created_at,
       completedAt: pipeline.stopped_at,
     }));
@@ -403,7 +403,7 @@ export class CiCdAdapter {
       },
     });
 
-    return response.data.map((pipeline: { id: number; status: string; ref: string; sha: string; created_at: string; updated_at: string }) => ({
+    return response.data.map((pipeline: any) => ({
       id: pipeline.id.toString(),
       status: pipeline.status === 'success' ? 'success' :
              pipeline.status === 'failed' ? 'failure' :
@@ -464,7 +464,7 @@ export class CiCdAdapter {
         }
       );
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -484,7 +484,7 @@ export class CiCdAdapter {
         }
       );
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -521,7 +521,7 @@ export class CiCdAdapter {
       });
 
       return response.data.builds || [];
-    } catch (_error) {
+    } catch {
       return [];
     }
   }
@@ -535,7 +535,7 @@ export class CiCdAdapter {
       });
 
       return response.data;
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -549,7 +549,7 @@ export class CiCdAdapter {
       });
 
       return response.data;
-    } catch (_error) {
+    } catch {
       return null;
     }
   }
@@ -562,7 +562,7 @@ export class CiCdAdapter {
         headers: this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {},
       });
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -575,7 +575,7 @@ export class CiCdAdapter {
         headers: this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {},
       });
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }

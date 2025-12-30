@@ -1,19 +1,15 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { AuthenticatedRequest } from './auth.js';
 import { logger } from '../utils/logger.js';
 
 // Extend AuthenticatedRequest interface
-declare global {
-  namespace Express {
-    interface Request {
-      entitlements?: {
-        subscriptionStatus: string;
-        premiumEnabled: boolean;
-        stripeCustomerId?: string;
-      };
-    }
-  }
+export interface RequestWithEntitlements extends AuthenticatedRequest {
+  entitlements?: {
+    subscriptionStatus: string;
+    premiumEnabled: boolean;
+    stripeCustomerId?: string;
+  };
 }
 
 const supabase = createClient(
@@ -117,7 +113,7 @@ export function entitlementsMiddleware(options: EntitlementCheck = {}) {
       }
 
       // Attach entitlement info to request for downstream use
-      (req as AuthenticatedRequest & { entitlements: any }).entitlements = {
+      (req as RequestWithEntitlements).entitlements = {
         subscriptionStatus,
         premiumEnabled: premiumFeatures.enabled || false,
         stripeCustomerId: profile?.stripe_customer_id,
