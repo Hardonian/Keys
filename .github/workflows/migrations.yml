@@ -1,0 +1,210 @@
+name: Database Migrations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/supabase/migrations/**/*.sql'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force run all migrations (ignore tracking)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  detect-and-run-migrations:
+    name: Detect and Run Migrations
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Detect new migration files
+        id: detect-migrations
+        run: |
+          MIGRATIONS_DIR="backend/supabase/migrations"
+          ARCHIVE_DIR="backend/supabase/migrations/archive"
+          TRACKING_FILE="backend/supabase/migrations/.migrations_tracked.txt"
+          
+          # Create archive directory if it doesn't exist
+          mkdir -p "$ARCHIVE_DIR"
+          
+          # Create tracking file if it doesn't exist
+          touch "$TRACKING_FILE"
+          
+          # Get list of all SQL files in migrations directory (not in archive)
+          ALL_MIGRATIONS=$(find "$MIGRATIONS_DIR" -maxdepth 1 -name "*.sql" -type f | sort)
+          
+          # Get list of already tracked migrations
+          TRACKED_MIGRATIONS=""
+          if [ -f "$TRACKING_FILE" ]; then
+            TRACKED_MIGRATIONS=$(cat "$TRACKING_FILE" | grep -v '^#' | grep -v '^$' || true)
+          fi
+          
+          # Find new migrations (not in tracking file and not in archive)
+          NEW_MIGRATIONS=""
+          for migration in $ALL_MIGRATIONS; do
+            migration_name=$(basename "$migration")
+            # Check if already tracked
+            if echo "$TRACKED_MIGRATIONS" | grep -q "^$migration_name$"; then
+              continue
+            fi
+            # Check if already archived
+            if [ -f "$ARCHIVE_DIR/$migration_name" ]; then
+              continue
+            fi
+            NEW_MIGRATIONS="$NEW_MIGRATIONS $migration"
+          done
+          
+          # If force mode, get all migrations
+          if [ "${{ inputs.force }}" == "true" ]; then
+            NEW_MIGRATIONS="$ALL_MIGRATIONS"
+          fi
+          
+          # Trim whitespace
+          NEW_MIGRATIONS=$(echo "$NEW_MIGRATIONS" | xargs)
+          
+          if [ -z "$NEW_MIGRATIONS" ]; then
+            echo "new_migrations=false" >> $GITHUB_OUTPUT
+            echo "migration_count=0" >> $GITHUB_OUTPUT
+            echo "No new migrations detected"
+          else
+            echo "new_migrations=true" >> $GITHUB_OUTPUT
+            migration_count=$(echo "$NEW_MIGRATIONS" | wc -w)
+            echo "migration_count=$migration_count" >> $GITHUB_OUTPUT
+            # Store migration files (one per line)
+            echo "$NEW_MIGRATIONS" | tr ' ' '\n' > /tmp/migration_files.txt
+            echo "Found $migration_count new migration(s)"
+            cat /tmp/migration_files.txt
+          fi
+
+      - name: Run migrations
+        if: steps.detect-migrations.outputs.new_migrations == 'true'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          MIGRATIONS_DIR="backend/supabase/migrations"
+          ARCHIVE_DIR="backend/supabase/migrations/archive"
+          TRACKING_FILE="backend/supabase/migrations/.migrations_tracked.txt"
+          
+          # Read migration files
+          NEW_MIGRATIONS=$(cat /tmp/migration_files.txt)
+          
+          # Determine database URL
+          if [ -n "$SUPABASE_DB_URL" ]; then
+            DB_URL="$SUPABASE_DB_URL"
+          elif [ -n "$DATABASE_URL" ]; then
+            DB_URL="$DATABASE_URL"
+          else
+            echo "Error: No database connection configured"
+            echo "Required: SUPABASE_DB_URL or DATABASE_URL secret"
+            exit 1
+          fi
+          
+          FAILED_MIGRATIONS=""
+          SUCCESSFUL_MIGRATIONS=""
+          
+          for migration_file in $NEW_MIGRATIONS; do
+            migration_name=$(basename "$migration_file")
+            echo "=========================================="
+            echo "Running migration: $migration_name"
+            echo "=========================================="
+            
+            # Run migration with psql
+            if PGPASSWORD=$(echo "$DB_URL" | sed -n 's/.*:\([^@]*\)@.*/\1/p') psql "$DB_URL" -f "$migration_file" -v ON_ERROR_STOP=1; then
+              echo "✅ Migration $migration_name completed successfully"
+              SUCCESSFUL_MIGRATIONS="$SUCCESSFUL_MIGRATIONS $migration_name"
+              
+              # Add to tracking file
+              echo "$migration_name" >> "$TRACKING_FILE"
+              
+              # Archive the migration file
+              mv "$migration_file" "$ARCHIVE_DIR/$migration_name"
+              echo "📦 Archived $migration_name to $ARCHIVE_DIR"
+            else
+              echo "❌ Migration $migration_name failed"
+              FAILED_MIGRATIONS="$FAILED_MIGRATIONS $migration_name"
+            fi
+          done
+          
+          # Report results
+          echo ""
+          echo "=========================================="
+          echo "Migration Summary"
+          echo "=========================================="
+          echo "Successful: $(echo $SUCCESSFUL_MIGRATIONS | wc -w)"
+          echo "Failed: $(echo $FAILED_MIGRATIONS | wc -w)"
+          
+          if [ -n "$FAILED_MIGRATIONS" ]; then
+            echo "Failed migrations: $FAILED_MIGRATIONS"
+            exit 1
+          fi
+
+      - name: Commit archived migrations
+        if: steps.detect-migrations.outputs.new_migrations == 'true' && steps.run-migrations.outcome == 'success'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Check if there are changes to commit
+          if [ -n "$(git status --porcelain backend/supabase/migrations/)" ]; then
+            git add backend/supabase/migrations/archive/
+            git add backend/supabase/migrations/.migrations_tracked.txt
+            
+            # Get list of migrated files for commit message
+            MIGRATED_FILES=$(cat /tmp/migration_files.txt | xargs -I {} basename {})
+            
+            git commit -m "chore: Archive migrated SQL files after successful migration
+
+            Migrations archived:
+            $MIGRATED_FILES
+            
+            [skip ci]" || echo "No changes to commit or commit failed"
+            
+            git push origin HEAD:${{ github.ref }} || echo "Push failed (may need manual push or permissions)"
+          fi
+
+      - name: Create migration report
+        if: always()
+        run: |
+          echo "## 🔄 Migration Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.detect-migrations.outputs.new_migrations }}" == "true" ]; then
+            echo "✅ **Status:** Migrations detected and processed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Migrations Found:** ${{ steps.detect-migrations.outputs.migration_count }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Migration Files:**" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/migration_files.txt >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "See logs" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ **Status:** No new migrations detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All migrations have been applied or no new migration files found." >> $GITHUB_STEP_SUMMARY
+          fi
