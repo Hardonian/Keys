@@ -9,6 +9,12 @@ import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import pg from 'pg';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
+
+// Load environment variables from .env file
+dotenv.config({ path: resolve(process.cwd(), '../.env') });
+dotenv.config({ path: resolve(process.cwd(), '.env') });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
