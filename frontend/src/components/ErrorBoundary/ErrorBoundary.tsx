@@ -1,58 +1,55 @@
 /**
- * Error Boundary Component
+ * ErrorBoundary
  * 
- * Catches React errors and displays user-friendly error messages
+ * React error boundary component that catches errors and displays a fallback UI.
  */
 
 'use client';
 
-import React from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AnimatedButton, AnimatedCard } from '@/systems/motion';
 import { Reveal } from '@/systems/motion';
 
-interface ErrorBoundaryState {
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+}
+
+interface State {
   hasError: boolean;
   error: Error | null;
 }
 
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error; resetError: () => void }>;
-}
-
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    this.props.onError?.(error, errorInfo);
   }
 
-  resetError = () => {
+  handleReset = () => {
     this.setState({ hasError: false, error: null });
   };
 
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        const Fallback = this.props.fallback;
-        return <Fallback error={this.state.error!} resetError={this.resetError} />;
+        return this.props.fallback;
       }
 
       return (
-        <div 
-          className="error-boundary min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-slate-900 dark:to-slate-800"
-          role="alert"
-          aria-live="assertive"
-        >
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 sm:px-6 lg:px-8">
           <Reveal direction="fade">
-            <AnimatedCard variant="elevated" className="max-w-md w-full p-6 sm:p-8">
+            <AnimatedCard variant="elevated" className="max-w-md w-full p-6">
               <div className="text-center">
                 <div className="mb-4">
                   <svg
@@ -70,17 +67,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                     />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-2">
                   Something went wrong
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-slate-600 dark:text-slate-400 mb-6">
                   {this.state.error?.message || 'An unexpected error occurred'}
                 </p>
                 <div className="flex gap-3 justify-center">
-                  <AnimatedButton 
-                    variant="primary"
-                    onClick={this.resetError}
-                  >
+                  <AnimatedButton variant="primary" onClick={this.handleReset}>
                     Try Again
                   </AnimatedButton>
                   <AnimatedButton
@@ -100,5 +94,3 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     return this.props.children;
   }
 }
-
-export default ErrorBoundary;

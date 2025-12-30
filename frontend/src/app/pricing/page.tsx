@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { UpgradePrompt } from '@/components/Upsell/UpgradePrompt';
 
 export const metadata: Metadata = {
   title: 'Pricing - Cursor Venture Companion',

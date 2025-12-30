@@ -11,7 +11,6 @@ interface SystemMetrics {
 
 export function SocialProofWithRealMetrics() {
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch system metrics (public endpoint or cached)
@@ -36,8 +35,6 @@ export function SocialProofWithRealMetrics() {
       } catch (error) {
         console.error('Failed to fetch metrics:', error);
         // Fallback to showing nothing or cached values
-      } finally {
-        setLoading(false);
       }
     };
 
