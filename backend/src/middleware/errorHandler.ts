@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError, ErrorCode } from '../types/errors';
 import { logger } from '../utils/logger';
+import { errorTrackingService } from '../services/errorTrackingService.js';
+import type { AuthenticatedRequest } from './auth.js';
 
 /**
  * Global error handler middleware
@@ -27,7 +29,7 @@ export function errorHandler(
     err,
     {
       requestId,
-      userId: (req as any).userId,
+      userId: (req as AuthenticatedRequest).userId,
       url: req.url,
       method: req.method,
       statusCode,
@@ -35,6 +37,24 @@ export function errorHandler(
       ...context,
     }
   );
+
+  // Track error for analytics
+  errorTrackingService.trackError({
+    errorType: err.constructor.name,
+    errorMessage: err.message,
+    endpoint: req.path,
+    userId: (req as AuthenticatedRequest).userId,
+    stackTrace: err.stack,
+    metadata: {
+      requestId,
+      statusCode,
+      errorCode,
+      ...context,
+    },
+  }).catch((trackError) => {
+    // Don't fail request if error tracking fails
+    console.error('Error tracking failed:', trackError);
+  });
 
   // Don't leak error details in production
   const isDevelopment = process.env.NODE_ENV === 'development';
