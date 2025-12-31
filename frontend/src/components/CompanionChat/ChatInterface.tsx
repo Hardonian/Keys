@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { InputPanel } from './InputPanel';
 import { SuggestionCard } from '../OutputPanel/SuggestionCard';
+import { ReadOnlyBanner } from '@/components/Security/ReadOnlyBanner';
+import { CannotDoStatement } from '@/components/Security/CannotDoStatement';
 import { usePromptAssembly } from '@/hooks/usePromptAssembly';
 import { useAgentOrchestration } from '@/hooks/useAgentOrchestration';
 import { usePremiumFeatures } from '@/hooks/usePremiumFeatures';
@@ -97,6 +99,9 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
 
   return (
     <div className="flex flex-col h-full min-h-0 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900" role="region" aria-label="Chat interface">
+      {/* Read-only mode banner */}
+      <ReadOnlyBanner />
+      
       {/* Messages Area - Mobile optimized with better spacing */}
       <div 
         className="flex-1 overflow-y-auto scrollbar-thin px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5 md:space-y-6"
@@ -223,6 +228,9 @@ export function ChatInterface({ userId, initialVibeConfig }: ChatInterfaceProps)
         isPremium={isPremium}
         userProfile={profile || undefined}
       />
+      
+      {/* Cannot-do statement */}
+      <CannotDoStatement />
     </div>
   );
 }

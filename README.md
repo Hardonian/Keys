@@ -1,12 +1,12 @@
-# Cursor Venture Companion (Keys)
+# Stop Rewriting Prompts
 
-**AI cofounder for the entire product lifecycle**
+**Get personalized AI outputs tailored to your role, stack, and style—in seconds, not hours.**
 
 ## 🚀 Production Status
 
-**✅ PRODUCTION-READY - Release Candidate 1 (RC1)**
+**⚠️ LAUNCH-READY AFTER FIXES - Release Candidate 1 (RC1)**
 
-This project has been transformed from "partially wired" to production-grade, investor-ready status. All 8 phases of the production readiness overhaul are complete.
+This project has solid technical foundations but requires Phase 1-2 fixes (messaging, trust indicators) before launch. See `LAUNCH_READINESS_REALITY_CHECK.md` for details.
 
 ## Quick Start
 
@@ -33,13 +33,12 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete deployment instructions.
 
 ## 📚 Documentation
 
-- **[STATUS.md](./STATUS.md)** - Current project status
+- **[LAUNCH_READINESS_REALITY_CHECK.md](./LAUNCH_READINESS_REALITY_CHECK.md)** - Comprehensive launch readiness audit
+- **[SECURITY_AND_TRUST_MODEL.md](./SECURITY_AND_TRUST_MODEL.md)** - Security, data handling, and trust model
+- **[GTM_STRATEGY.md](./GTM_STRATEGY.md)** - Go-to-market strategy and ICP definition
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide
 - **[MIGRATION_STATUS.md](./MIGRATION_STATUS.md)** - Database migration guide
-- **[docs/BACKEND_CONTRACT_VERIFICATION.md](./docs/BACKEND_CONTRACT_VERIFICATION.md)** - Backend contract verification guide
 - **[PROOF.md](./PROOF.md)** - Verification steps and evidence
-- **[CHANGELOG.md](./CHANGELOG.md)** - RC1 changelog
-- **[ALL_PHASES_COMPLETE.md](./ALL_PHASES_COMPLETE.md)** - Completion summary
 
 ## ✅ What's Complete
 

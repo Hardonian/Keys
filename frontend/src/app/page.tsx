@@ -4,11 +4,11 @@ import { SocialProofWithRealMetrics } from '@/components/CRO/SocialProofWithReal
 import { UpgradePrompt } from '@/components/Upsell/UpgradePrompt';
 
 export const metadata: Metadata = {
-  title: 'Home',
-  description: 'Your AI cofounder for ideation, specification, implementation, and operations. Transform your product development with intelligent automation.',
+  title: 'Stop Rewriting Prompts - Personalized AI Outputs',
+  description: 'Get personalized AI outputs tailored to your role, stack, and style. Assembles prompts from your context and returns structured outputs (RFCs, specs, plans). Saves 2-3 hours per week on prompt engineering.',
   openGraph: {
-    title: 'Cursor Venture Companion - AI Cofounder',
-    description: 'Your AI cofounder for ideation, specification, implementation, and operations.',
+    title: 'Stop Rewriting Prompts - Personalized AI Outputs',
+    description: 'Get personalized AI outputs tailored to your role, stack, and style. Saves 2-3 hours per week on prompt engineering.',
   },
 };
 
@@ -20,13 +20,13 @@ export default function Home() {
         {/* Main Heading */}
         <div className="space-y-4 sm:space-y-6">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-            Cursor Venture Companion
+            Stop Rewriting Prompts
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Your AI cofounder for ideation, specification, implementation, and operations.
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed font-semibold">
+            Get personalized AI outputs tailored to your role, stack, and style—in seconds, not hours.
           </p>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-            Transform your product development with intelligent automation and personalized assistance.
+            Assembles prompts from your context and returns structured outputs (RFCs, specs, plans). Saves 2-3 hours per week on prompt engineering.
           </p>
         </div>
 
@@ -52,31 +52,31 @@ export default function Home() {
         {/* Feature Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-12 sm:mt-16">
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700">
-            <div className="text-3xl mb-3" aria-hidden="true">💡</div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Ideation</h2>
+            <div className="text-3xl mb-3" aria-hidden="true">⚡</div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">30-Second RFCs</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Generate innovative ideas and explore possibilities
+              Type "Draft RFC for SSO" → Get production-ready RFC tailored to your stack
             </p>
           </div>
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700">
-            <div className="text-3xl mb-3" aria-hidden="true">📋</div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Specification</h2>
+            <div className="text-3xl mb-3" aria-hidden="true">🎯</div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Personalized Prompts</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Create detailed specs and documentation
+              Automatically includes your role, stack, and style—no copy-pasting context
             </p>
           </div>
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700">
-            <div className="text-3xl mb-3" aria-hidden="true">⚙️</div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Implementation</h2>
+            <div className="text-3xl mb-3" aria-hidden="true">📊</div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Structured Outputs</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Build and deploy with AI assistance
+              Get RFCs, specs, and plans—not just chat. See exactly what prompt was used.
             </p>
           </div>
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700">
-            <div className="text-3xl mb-3" aria-hidden="true">🚀</div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Operations</h2>
+            <div className="text-3xl mb-3" aria-hidden="true">🔒</div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Read-Only Mode</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Monitor and optimize your products
+              Never writes to your codebase. Safe to use in production environments.
             </p>
           </div>
         </div>
