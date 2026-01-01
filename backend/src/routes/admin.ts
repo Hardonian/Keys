@@ -321,8 +321,12 @@ router.get('/health', requireRole('admin', 'superadmin'), async (req, res) => {
       .select('*')
       .limit(1);
     
-    const rlsWorking = !anonData || anonData.length === 0 || 
-      (anonError && (anonError.code === 'PGRST301' || anonError.message?.includes('permission')));
+    let rlsWorking = !anonData || anonData.length === 0;
+    if (anonError && !rlsWorking) {
+      const errorObj = anonError as { code?: string; message?: string };
+      rlsWorking = errorObj.code === 'PGRST301' || 
+        (typeof errorObj.message === 'string' && errorObj.message.includes('permission'));
+    }
     
     healthChecks.rls_enforcement = {
       status: rlsWorking ? 'ok' : 'warning',

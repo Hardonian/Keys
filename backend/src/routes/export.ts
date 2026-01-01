@@ -38,7 +38,7 @@ router.get(
       .order('created_at', { ascending: false });
 
     if (error) {
-      logger.error('Failed to fetch failure patterns', { userId, error });
+      logger.error('Failed to fetch failure patterns', error instanceof Error ? error : new Error(String(error)), { userId });
       return res.status(500).json({ error: 'Failed to fetch failure patterns' });
     }
 
@@ -97,7 +97,7 @@ router.get(
       .order('created_at', { ascending: false });
 
     if (error) {
-      logger.error('Failed to fetch success patterns', { userId, error });
+      logger.error('Failed to fetch success patterns', error instanceof Error ? error : new Error(String(error)), { userId });
       return res.status(500).json({ error: 'Failed to fetch success patterns' });
     }
 
@@ -170,7 +170,7 @@ router.get(
     const { data: runs, error } = await query;
 
     if (error) {
-      logger.error('Failed to fetch audit trails', { userId, error });
+      logger.error('Failed to fetch audit trails', error instanceof Error ? error : new Error(String(error)), { userId });
       return res.status(500).json({ error: 'Failed to fetch audit trails' });
     }
 
