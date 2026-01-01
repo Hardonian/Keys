@@ -16,16 +16,22 @@ interface UsageLimit {
 
 const TIER_LIMITS: Record<string, UsageLimit> = {
   free: {
-    runs: 100,
-    tokens: 100000,
-    templates: 10,
-    exports: 5,
+    runs: 50, // Updated: Reduced from 100 to 50 for new pricing architecture
+    tokens: 50000, // Updated: Reduced from 100000 to 50000
+    templates: 5, // Updated: Reduced from 10 to 5
+    exports: 2, // Updated: Reduced from 5 to 2
   },
   pro: {
     runs: 1000,
     tokens: 1000000,
     templates: 100,
     exports: 50,
+  },
+  'pro+': { // New: Pro+ tier for IDE/CI/CD integrations
+    runs: 5000,
+    tokens: 5000000,
+    templates: -1, // unlimited
+    exports: -1, // unlimited
   },
   enterprise: {
     runs: -1, // unlimited
