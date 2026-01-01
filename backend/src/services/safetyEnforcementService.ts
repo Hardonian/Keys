@@ -233,7 +233,7 @@ export class SafetyEnforcementService {
         guaranteeUsage,
       });
     } catch (error) {
-      logger.error('Failed to track guarantee metrics', { userId, error });
+      logger.error('Failed to track guarantee metrics', error instanceof Error ? error : new Error(String(error)), { userId });
     }
   }
 

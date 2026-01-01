@@ -145,14 +145,12 @@ router.post(
       },
     };
 
-    // Assemble prompt with IDE context
+    // Assemble prompt (IDE context will be added to prompt text below)
     const assembledPrompt = await assemblePrompt(
       userId,
       task,
       vibeConfig || {},
-      {
-        context: enhancedContext,
-      }
+      undefined // InputFilter - IDE context is added to prompt text, not filter
     );
 
     // Enhance prompt with IDE context
@@ -162,7 +160,7 @@ router.post(
 ${context.openFiles ? `- Open Files: ${context.openFiles.join(', ')}` : ''}
 ${context.gitHistory?.currentBranch ? `- Git Branch: ${context.gitHistory.currentBranch}` : ''}
 ${context.gitHistory?.modifiedFiles ? `- Modified Files: ${context.gitHistory.modifiedFiles.join(', ')}` : ''}
-${context.recentChanges ? `- Recent Changes:\n${context.recentChanges.map(c => `  - ${c.file}: ${c.changes.substring(0, 100)}`).join('\n')}` : ''}
+${context.recentChanges ? `- Recent Changes:\n${context.recentChanges.map((c: { file: string; changes: string }) => `  - ${c.file}: ${c.changes.substring(0, 100)}`).join('\n')}` : ''}
 
 ${assembledPrompt.systemPrompt}
 `;
