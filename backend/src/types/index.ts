@@ -126,7 +126,17 @@ export interface AgentOutput {
     type: string;
     message: string;
     patternIds?: string[];
+    suggestion?: string;
   }>;
+  safetyCheck?: {
+    passed: boolean;
+    securityScore?: number;
+    complianceStandards?: {
+      gdpr: boolean;
+      soc2: boolean;
+      hipaa: boolean;
+    };
+  };
 }
 
 // Task Intent Types
