@@ -61,7 +61,7 @@ export function generateSoftwareApplicationSchema() {
       worstRating: '1',
     },
     description: 'Your day-to-day AI co-founder that works alongside Cursor. Operational automation, business process intelligence, and institutional memory.',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://cursor-venture-companion.com',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://keys.dev',
   };
 }
 

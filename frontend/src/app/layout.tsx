@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://cursor-venture-companion.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://keys.dev'),
   title: {
     default: 'Keys - Your AI Co-Founder for Operational Automation',
     template: '%s | Keys',
@@ -115,7 +115,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="canonical" href={process.env.NEXT_PUBLIC_SITE_URL || 'https://cursor-venture-companion.com'} />
+        <link rel="canonical" href={process.env.NEXT_PUBLIC_SITE_URL || 'https://keys.dev'} />
         <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#1e40af" media="(prefers-color-scheme: dark)" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
