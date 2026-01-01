@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { GuaranteeBadge } from '@/components/Features/GuaranteeBadge';
 
 export const metadata: Metadata = {
   title: 'Pricing - Keys: Your AI Co-Founder for Operational Automation',
@@ -46,7 +47,7 @@ export default function PricingPage() {
         '✅ Unlimited operational automation',
         '✅ Unlimited institutional memory',
       ],
-      guarantees: [],
+      guarantees: ['security', 'compliance', 'quality'],
       cta: 'Start Free Trial',
       ctaLink: '/signup?plan=pro',
       popular: true,
@@ -67,7 +68,7 @@ export default function PricingPage() {
         '✅ Advanced operational intelligence',
         '✅ Cross-project learning',
       ],
-      guarantees: [],
+      guarantees: ['security', 'compliance', 'quality'],
       cta: 'Upgrade to Pro+',
       ctaLink: '/signup?plan=pro-plus',
       popular: false,
@@ -93,9 +94,7 @@ export default function PricingPage() {
         '✅ SSO (enterprise security)',
         '💰 Usage-based pricing available',
       ],
-      guarantees: [
-        '⚡ SLA Guarantee: 99.9% uptime or 10% refund.',
-      ],
+      guarantees: ['security', 'compliance', 'quality', 'sla'],
       cta: 'Contact Sales',
       ctaLink: '/profile/settings?contact=sales',
       popular: false,
@@ -183,17 +182,17 @@ export default function PricingPage() {
               </ul>
 
               {plan.guarantees && plan.guarantees.length > 0 && (
-                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                <div className="mb-6 space-y-2">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                     Included Guarantees:
                   </h4>
-                  <ul className="space-y-2">
-                    {plan.guarantees.map((guarantee, idx) => (
-                      <li key={idx} className="text-xs text-blue-800 dark:text-blue-200">
-                        {guarantee}
-                      </li>
-                    ))}
-                  </ul>
+                  {plan.guarantees.map((guarantee) => (
+                    <GuaranteeBadge
+                      key={guarantee}
+                      type={guarantee as 'security' | 'compliance' | 'sla' | 'quality'}
+                      className="!p-2"
+                    />
+                  ))}
                 </div>
               )}
 
@@ -253,13 +252,19 @@ export default function PricingPage() {
               <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
                 What are your guarantees?
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Enterprise plans include SLA guarantees. See our{' '}
-                <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Pro and Pro+ plans include security, compliance, and quality guarantees. Enterprise plans add SLA guarantees. See our{' '}
+                <Link href="/docs/TERMS_OF_SERVICE.md" className="text-blue-600 dark:text-blue-400 hover:underline">
                   Terms of Service
                 </Link>
                 {' '}for details.
               </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <GuaranteeBadge type="security" />
+                <GuaranteeBadge type="compliance" />
+                <GuaranteeBadge type="quality" />
+                <GuaranteeBadge type="sla" />
+              </div>
             </div>
             <div id="value-calculation" className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { SocialProofWithRealMetrics } from '@/components/CRO/SocialProofWithRealMetrics';
 import { UpgradePrompt } from '@/components/Upsell/UpgradePrompt';
+import { FeatureAvailabilityBadge } from '@/components/Features/FeatureAvailabilityBadge';
 
 export const metadata: Metadata = {
   title: 'Keys - Holistic AI for Everything | Your Business Co-Founder & Venture Partner',
@@ -56,17 +57,21 @@ export default function Home() {
                   image control, operations management, and venture strategy—all in one comprehensive platform.
                 </p>
                 <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
-                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2">
                     <span className="text-white text-sm font-medium">🎯 Business Operations</span>
+                    <FeatureAvailabilityBadge status="available" className="!text-xs !px-1.5 !py-0.5" />
                   </div>
-                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+                  <Link href="/image-control" className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-colors">
                     <span className="text-white text-sm font-medium">🖼️ Image Control</span>
-                  </div>
-                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+                    <FeatureAvailabilityBadge status="coming-soon" className="!text-xs !px-1.5 !py-0.5" />
+                  </Link>
+                  <Link href="/venture-strategy" className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-colors">
                     <span className="text-white text-sm font-medium">🚀 New Ventures</span>
-                  </div>
-                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+                    <FeatureAvailabilityBadge status="coming-soon" className="!text-xs !px-1.5 !py-0.5" />
+                  </Link>
+                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2">
                     <span className="text-white text-sm font-medium">💼 Co-Founder Support</span>
+                    <FeatureAvailabilityBadge status="available" className="!text-xs !px-1.5 !py-0.5" />
                   </div>
                 </div>
               </div>
@@ -146,13 +151,16 @@ export default function Home() {
                 Your operational partner for new ventures. Strategic support, business automation, and co-founder-level intelligence—no equity required.
               </p>
             </div>
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transform hover:-translate-y-1">
+            <Link href="/image-control" className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transform hover:-translate-y-1 relative block">
+              <div className="absolute top-3 right-3">
+                <FeatureAvailabilityBadge status="coming-soon" />
+              </div>
               <div className="text-3xl mb-3" aria-hidden="true">🖼️</div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Image Control & Design</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Complete visual asset management. Generate, control, and optimize images for your brand. Beyond code—full creative control.
               </p>
-            </div>
+            </Link>
             <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-pink-300 dark:hover:border-pink-600 transform hover:-translate-y-1">
               <div className="text-3xl mb-3" aria-hidden="true">⚙️</div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Operations Management</h2>
@@ -171,13 +179,16 @@ export default function Home() {
           
           {/* Additional Holistic Features */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-xl shadow-md border border-blue-200 dark:border-blue-800">
+            <Link href="/venture-strategy" className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-xl shadow-md border border-blue-200 dark:border-blue-800 relative block hover:shadow-lg transition-shadow">
+              <div className="absolute top-3 right-3">
+                <FeatureAvailabilityBadge status="coming-soon" />
+              </div>
               <div className="text-2xl mb-2" aria-hidden="true">🚀</div>
               <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Venture Strategy</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Strategic planning and growth intelligence for new ventures and scaling businesses.
               </p>
-            </div>
+            </Link>
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-xl shadow-md border border-purple-200 dark:border-purple-800">
               <div className="text-2xl mb-2" aria-hidden="true">🔗</div>
               <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Cursor Integration</h3>
@@ -221,6 +232,18 @@ export default function Home() {
               className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-colors"
             >
               Pricing
+            </Link>
+            <Link
+              href="/compare"
+              className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-colors"
+            >
+              Compare
+            </Link>
+            <Link
+              href="/features"
+              className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg transition-colors"
+            >
+              Features
             </Link>
             <Link
               href="/docs/TERMS_OF_SERVICE.md"
