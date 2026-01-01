@@ -10,6 +10,8 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { validateBody } from '../middleware/validation.js';
 import { checkLimit, trackUsage } from '../services/usageMetering.js';
 import { RateLimitError } from '../types/errors.js';
+import { failurePatternService } from '../services/failurePatternService.js';
+import { safetyEnforcementService } from '../services/safetyEnforcementService.js';
 
 const router = Router();
 const supabase = createClient(
@@ -54,22 +56,94 @@ router.post(
 
     const startTime = Date.now();
 
+    // Apply failure prevention rules (defensive moat: institutional memory)
+    const preventionRules = await failurePatternService.getPreventionRules(
+      userId,
+      assembledPrompt.context
+    );
+    
+    // Enhance system prompt with prevention rules
+    const enhancedSystemPrompt = preventionRules.length > 0
+      ? `${assembledPrompt.systemPrompt}\n\n## Prevention Rules (Based on Past Failures):\n${preventionRules.map((rule, i) => `${i + 1}. ${rule}`).join('\n')}`
+      : assembledPrompt.systemPrompt;
+
+    const enhancedPrompt: PromptAssemblyResult = {
+      ...assembledPrompt,
+      systemPrompt: enhancedSystemPrompt,
+    };
+
     // Orchestrate agent
     const output = await orchestrateAgent(
-      assembledPrompt as PromptAssemblyResult,
+      enhancedPrompt,
       taskIntent || naturalLanguageInput,
       naturalLanguageInput
     );
 
     const latencyMs = Date.now() - startTime;
 
-    // Log agent run
+    // Safety enforcement (defensive moat: transfer risk to Keys)
+    const outputContent = typeof output.content === 'string' 
+      ? output.content 
+      : JSON.stringify(output.content);
+
+    const safetyCheck = await safetyEnforcementService.checkOutput(outputContent, {
+      outputType: output.outputType,
+      templateId: assembledPrompt.context?.templateId,
+      userId,
+    });
+
+    // Block output if critical security/compliance issues detected
+    if (safetyCheck.blocked) {
+      const criticalWarnings = safetyCheck.warnings.filter(w => w.severity === 'critical');
+      return res.status(400).json({
+        error: 'Output blocked due to security or compliance issues',
+        message: 'This output contains critical security or compliance vulnerabilities and cannot be generated.',
+        warnings: criticalWarnings,
+        checks: {
+          security: safetyCheck.checks.security,
+          compliance: safetyCheck.checks.compliance,
+        },
+      });
+    }
+
+    // Add safety warnings to output
+    if (safetyCheck.warnings.length > 0) {
+      output.warnings = output.warnings || [];
+      safetyCheck.warnings.forEach(warning => {
+        output.warnings!.push({
+          type: warning.type,
+          message: warning.message,
+          suggestion: warning.suggestion,
+        });
+      });
+    }
+
+    // Check for similar failures (defensive moat: prevent repeat mistakes)
+    const failureMatches = await failurePatternService.checkForSimilarFailures(
+      userId,
+      outputContent,
+      assembledPrompt.context
+    );
+
+    // If high-confidence failure match detected, warn user
+    const criticalMatches = failureMatches.filter(m => m.match_confidence > 0.8 && m.match_type === 'exact');
+    if (criticalMatches.length > 0) {
+      // Add warning to output
+      output.warnings = output.warnings || [];
+      output.warnings.push({
+        type: 'similar_failure_detected',
+        message: `This output is similar to a previous failure. Review carefully before using.`,
+        patternIds: criticalMatches.map(m => m.pattern_id),
+      });
+    }
+
+    // Log agent run with safety check results
     const { data: run } = await supabase
       .from('agent_runs')
       .insert({
         user_id: userId,
         trigger: 'chat_input',
-        assembled_prompt: assembledPrompt.systemPrompt,
+        assembled_prompt: enhancedPrompt.systemPrompt,
         selected_atoms: assembledPrompt.selectedAtomIds,
         vibe_config_snapshot: assembledPrompt.context,
         agent_type: 'orchestrator',
@@ -78,6 +152,12 @@ router.post(
         tokens_used: output.tokensUsed,
         latency_ms: latencyMs,
         cost_usd: output.costUsd,
+        safety_checks_passed: safetyCheck.passed,
+        safety_check_results: {
+          security: safetyCheck.checks.security,
+          compliance: safetyCheck.checks.compliance,
+          quality: safetyCheck.checks.quality,
+        },
       })
       .select()
       .single();

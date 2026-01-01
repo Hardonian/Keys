@@ -122,6 +122,21 @@ export interface AgentOutput {
   modelUsed: string;
   tokensUsed: number;
   costUsd: number;
+  warnings?: Array<{
+    type: string;
+    message: string;
+    patternIds?: string[];
+    suggestion?: string;
+  }>;
+  safetyCheck?: {
+    passed: boolean;
+    securityScore?: number;
+    complianceStandards?: {
+      gdpr: boolean;
+      soc2: boolean;
+      hipaa: boolean;
+    };
+  };
 }
 
 // Task Intent Types

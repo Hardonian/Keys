@@ -4,11 +4,11 @@ import { SocialProofWithRealMetrics } from '@/components/CRO/SocialProofWithReal
 import { UpgradePrompt } from '@/components/Upsell/UpgradePrompt';
 
 export const metadata: Metadata = {
-  title: 'Stop Rewriting Prompts - Personalized AI Outputs',
-  description: 'Get personalized AI outputs tailored to your role, stack, and style. Assembles prompts from your context and returns structured outputs (RFCs, specs, plans). Saves 2-3 hours per week on prompt engineering.',
+  title: 'Never Ship Insecure Code Again - Keys Security & Compliance',
+  description: 'Your institutional memory prevents failures before they happen. Automatic security scanning, compliance checking, and failure pattern detection. We guarantee outputs meet security and compliance standards.',
   openGraph: {
-    title: 'Stop Rewriting Prompts - Personalized AI Outputs',
-    description: 'Get personalized AI outputs tailored to your role, stack, and style. Saves 2-3 hours per week on prompt engineering.',
+    title: 'Never Ship Insecure Code Again - Keys Security & Compliance',
+    description: 'Your institutional memory prevents failures before they happen. Automatic security scanning and compliance checking.',
   },
 };
 
@@ -20,13 +20,13 @@ export default function Home() {
         {/* Main Heading */}
         <div className="space-y-4 sm:space-y-6">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-            Stop Rewriting Prompts
+            Never Ship Insecure Code Again
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed font-semibold">
-            Get personalized AI outputs tailored to your role, stack, and style—in seconds, not hours.
+            Your institutional memory prevents failures before they happen. Automatic security scanning, compliance checking, and failure pattern detection.
           </p>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-            Assembles prompts from your context and returns structured outputs (RFCs, specs, plans). Saves 2-3 hours per week on prompt engineering.
+            We guarantee outputs meet security and compliance standards. Your failures become prevention rules. Your successes become best practices.
           </p>
         </div>
 
@@ -52,31 +52,31 @@ export default function Home() {
         {/* Feature Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-12 sm:mt-16">
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700">
-            <div className="text-3xl mb-3" aria-hidden="true">⚡</div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">30-Second RFCs</h2>
+            <div className="text-3xl mb-3" aria-hidden="true">🛡️</div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Automatic Security Scanning</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Type "Draft RFC for SSO" → Get production-ready RFC tailored to your stack
+              Every output is scanned for SQL injection, XSS, secret exposure, and other vulnerabilities. We block dangerous outputs before you see them.
             </p>
           </div>
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700">
-            <div className="text-3xl mb-3" aria-hidden="true">🎯</div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Personalized Prompts</h2>
+            <div className="text-3xl mb-3" aria-hidden="true">✅</div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Compliance Guarantees</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Automatically includes your role, stack, and style—no copy-pasting context
+              All outputs meet GDPR, SOC 2, and HIPAA standards. We're liable if we miss a compliance issue.
             </p>
           </div>
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700">
-            <div className="text-3xl mb-3" aria-hidden="true">📊</div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Structured Outputs</h2>
+            <div className="text-3xl mb-3" aria-hidden="true">🧠</div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Institutional Memory</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Get RFCs, specs, and plans—not just chat. See exactly what prompt was used.
+              Your failures become prevention rules. Your successes become best practices. Never repeat mistakes.
             </p>
           </div>
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-slate-700">
-            <div className="text-3xl mb-3" aria-hidden="true">🔒</div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Read-Only Mode</h2>
+            <div className="text-3xl mb-3" aria-hidden="true">🔗</div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">IDE & CI/CD Integration</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Never writes to your codebase. Safe to use in production environments.
+              Automatic context injection in VS Code/Cursor. PR checks in GitHub Actions. Can't deploy without Keys.
             </p>
           </div>
         </div>

@@ -15,6 +15,10 @@ import { userTemplatesRouter } from './routes/user-templates.js';
 import { enhancedUserTemplatesRouter } from './routes/enhanced-user-templates.js';
 import { extensionAuthRouter } from './routes/extension-auth.js';
 import { metricsRouter } from './routes/metrics.js';
+import { ideIntegrationRouter } from './routes/ide-integration.js';
+import { cicdIntegrationRouter } from './routes/cicd-integration.js';
+import { exportRouter } from './routes/export.js';
+import { moatMetricsRouter } from './routes/moat-metrics.js';
 import { apmRouter } from './routes/apm.js';
 import { auditRouter } from './routes/audit.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
@@ -131,6 +135,18 @@ app.use('/billing', billingRouter);
 
 // Extension auth routes (public, rate-limited)
 app.use('/extension-auth', extensionAuthRouter);
+
+// IDE integration routes (require auth)
+app.use('/ide', ideIntegrationRouter);
+
+// CI/CD integration routes (require auth)
+app.use('/cicd', cicdIntegrationRouter);
+
+// Export routes (require auth)
+app.use('/export', exportRouter);
+
+// Moat metrics routes (require auth)
+app.use('/moat-metrics', moatMetricsRouter);
 
 // Metrics routes (require auth)
 app.use('/metrics', metricsRouter);
