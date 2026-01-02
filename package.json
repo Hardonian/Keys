@@ -26,7 +26,9 @@
     "db:reconcile": "echo 'Run migration: backend/supabase/migrations/00000000000000_backend_contract_reconcile.sql in Supabase SQL editor'"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@types/pg": "^8.16.0",
+    "concurrently": "^8.2.2",
+    "pg": "^8.16.3"
   },
   "engines": {
     "node": ">=18.0.0"
