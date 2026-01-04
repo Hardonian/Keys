@@ -42,6 +42,11 @@ function getDatabaseUrl(): string {
     return dbUrl;
   }
 
+  // Try SUPABASE_DB_URL directly
+  if (process.env.SUPABASE_DB_URL) {
+    return process.env.SUPABASE_DB_URL;
+  }
+
   throw new Error(
     'DATABASE_URL or SUPABASE_URL + SUPABASE_DB_PASSWORD required.\n' +
     'Set DATABASE_URL directly or set SUPABASE_URL + SUPABASE_DB_PASSWORD'
@@ -62,8 +67,13 @@ async function runMigration020(): Promise<void> {
     process.exit(1);
   }
 
-  // Create database client
-  const client = new Client({ connectionString: databaseUrl });
+  // Create database client with SSL
+  const client = new Client({ 
+    connectionString: databaseUrl,
+    ssl: {
+      rejectUnauthorized: false, // For Supabase pooler
+    },
+  });
 
   try {
     await client.connect();
