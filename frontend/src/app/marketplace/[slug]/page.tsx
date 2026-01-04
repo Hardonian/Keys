@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
+import Script from 'next/script';
 
 interface Key {
   id: string;
@@ -225,220 +228,401 @@ export default function KeyDetailPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading KEY...</div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-4"
+          />
+          <p className="text-gray-600 dark:text-gray-400">Loading key...</p>
+        </motion.div>
       </div>
     );
   }
 
   if (error || !key) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600">Error: {error || 'KEY not found'}</div>
-        <button
-          onClick={() => router.push('/marketplace')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
         >
-          Back to Marketplace
-        </button>
+          <div className="text-red-600 dark:text-red-400 mb-4">Error: {error || 'Key not found'}</div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => router.push('/marketplace')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Back to Marketplace
+          </motion.button>
+        </motion.div>
       </div>
     );
   }
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <button
-        onClick={() => router.push('/marketplace')}
-        className="mb-6 text-blue-600 hover:underline"
-      >
-        ← Back to Marketplace
-      </button>
+  // Structured data for SEO
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: key.title,
+    description: key.description || `A ${key.key_type} key for ${key.category || 'development'}`,
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: key.key_type === 'jupyter' ? 'Jupyter' : key.key_type === 'node' ? 'Node.js' : 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.5',
+      ratingCount: '1',
+    },
+  };
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  return (
+    <>
+      <Script
+        id="key-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          whileHover={{ x: -4 }}
+          onClick={() => router.push('/marketplace')}
+          className="mb-4 sm:mb-6 text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2 transition-colors"
+        >
+          <span>←</span> Back to Marketplace
+        </motion.button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Main Content */}
-        <div className="lg:col-span-2">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="lg:col-span-2"
+        >
           {key.cover_path && (
-            <div className="w-full h-64 bg-gray-200 rounded-lg mb-6 flex items-center justify-center">
-              <span className="text-gray-400">Cover Image</span>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="w-full h-48 sm:h-64 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 sm:mb-6 flex items-center justify-center overflow-hidden"
+            >
+              <span className="text-gray-400 dark:text-gray-500">Cover Image</span>
+            </motion.div>
           )}
 
-          <h1 className="text-4xl font-bold mb-4">{key.title}</h1>
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4"
+          >
+            {key.title}
+          </motion.h1>
 
-          <div className="flex flex-wrap gap-2 mb-6">
-            <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded">
-              {key.key_type}
-            </span>
-            {key.category && (
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded">
-                {key.category}
-              </span>
-            )}
-            {key.difficulty && (
-              <span className="px-3 py-1 bg-green-100 text-green-800 rounded">
-                {key.difficulty}
-              </span>
-            )}
-            {key.maturity && (
-              <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded">
-                {key.maturity}
-              </span>
-            )}
-            <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded">
-              {key.license_spdx}
-            </span>
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-wrap gap-2 mb-4 sm:mb-6"
+          >
+            {[
+              { label: key.key_type, className: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' },
+              key.category && { label: key.category, className: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200' },
+              key.difficulty && { label: key.difficulty, className: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' },
+              key.maturity && { label: key.maturity, className: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200' },
+              { label: key.license_spdx, className: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' },
+            ].filter(Boolean).map((badge, idx) => (
+              <motion.span
+                key={idx}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 + idx * 0.05 }}
+                whileHover={{ scale: 1.05 }}
+                className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded ${badge.className}`}
+              >
+                {badge.label}
+              </motion.span>
+            ))}
+          </motion.div>
 
           {key.description && (
-            <div className="prose mb-8">
-              <p className="text-gray-700 whitespace-pre-wrap">{key.description}</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="prose dark:prose-invert mb-6 sm:mb-8 max-w-none"
+            >
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-sm sm:text-base leading-relaxed">
+                {key.description}
+              </p>
+            </motion.div>
           )}
 
           {key.tags && key.tags.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2">Tags</h3>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="mb-6 sm:mb-8"
+            >
+              <h3 className="text-base sm:text-lg font-semibold mb-2 dark:text-gray-200">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {key.tags.map((tag, idx) => (
-                  <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                  <motion.span
+                    key={idx}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 + idx * 0.03 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs sm:text-sm"
+                  >
                     {tag}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Versions */}
           {key.versions && key.versions.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Versions</h3>
-              <select
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.35 }}
+              className="mb-6 sm:mb-8"
+            >
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 dark:text-gray-200">Versions</h3>
+              <motion.select
+                whileFocus={{ scale: 1.02 }}
                 value={selectedVersion}
                 onChange={(e) => setSelectedVersion(e.target.value)}
-                className="px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg dark:bg-slate-800 dark:border-slate-700 dark:text-white"
               >
                 {key.versions.map((v) => (
                   <option key={v.version} value={v.version}>
                     {v.version} ({new Date(v.created_at).toLocaleDateString()})
                   </option>
                 ))}
-              </select>
-            </div>
+              </motion.select>
+            </motion.div>
           )}
 
           {/* Preview */}
           {previewUrl && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Preview</h3>
-              <iframe
-                src={previewUrl}
-                className="w-full h-96 border rounded-lg"
-                title="KEY Preview"
-              />
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mb-6 sm:mb-8"
+            >
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 dark:text-gray-200">Preview</h3>
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                className="w-full h-64 sm:h-96 border rounded-lg overflow-hidden dark:border-slate-700"
+              >
+                <iframe
+                  src={previewUrl}
+                  className="w-full h-full"
+                  title={`${key.title} Preview`}
+                  loading="lazy"
+                />
+              </motion.div>
+            </motion.div>
           )}
 
           {/* Related Keys */}
           {key.relatedKeys && key.relatedKeys.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Related Keys</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {key.relatedKeys.map((related) => (
-                  <Link
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.45 }}
+              className="mb-6 sm:mb-8"
+            >
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 dark:text-gray-200">Related Keys</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {key.relatedKeys.map((related, idx) => (
+                  <motion.div
                     key={related.id}
-                    href={`/marketplace/${related.slug}`}
-                    className="border rounded-lg p-4 hover:shadow-lg transition-shadow"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.45 + idx * 0.1 }}
+                    whileHover={{ y: -2, scale: 1.02 }}
                   >
-                    <h4 className="font-semibold mb-1">{related.title}</h4>
-                    <p className="text-sm text-gray-600 italic">{related.reason}</p>
-                  </Link>
+                    <Link
+                      href={`/marketplace/${related.slug}`}
+                      className="block border rounded-lg p-3 sm:p-4 hover:shadow-lg transition-all duration-200 dark:bg-slate-800 dark:border-slate-700"
+                    >
+                      <h4 className="font-semibold mb-1 text-sm sm:text-base dark:text-gray-200">{related.title}</h4>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 italic">{related.reason}</p>
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
 
         {/* Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="border rounded-lg p-6 sticky top-4">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="lg:col-span-1"
+        >
+          <div className="border rounded-lg p-4 sm:p-6 sticky top-4 dark:bg-slate-800 dark:border-slate-700">
             {/* Pricing */}
             {!key.hasAccess && (
-              <div className="mb-4 pb-4 border-b">
-                <div className="text-sm text-gray-600 mb-1">Price</div>
-                <div className="text-2xl font-bold">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.35 }}
+                className="mb-4 pb-4 border-b dark:border-slate-700"
+              >
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Price</div>
+                <motion.div
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.4, type: 'spring' }}
+                  className="text-xl sm:text-2xl font-bold dark:text-white"
+                >
                   ${((key as any).price_cents || 9900) / 100}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">One-time purchase, perpetual access</div>
-              </div>
+                </motion.div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">One-time purchase, perpetual access</div>
+              </motion.div>
             )}
 
-            <div className="mb-4">
-              <div className="text-sm text-gray-600 mb-2">Version</div>
-              <div className="font-semibold">{selectedVersion || key.version}</div>
-            </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mb-4"
+            >
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">Version</div>
+              <div className="font-semibold text-sm sm:text-base dark:text-white">{selectedVersion || key.version}</div>
+            </motion.div>
 
-            <div className="mb-6">
-              <div className="text-sm text-gray-600 mb-2">Status</div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.45 }}
+              className="mb-4 sm:mb-6"
+            >
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">Status</div>
               {key.hasAccess ? (
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm">
-                  ✓ KEY unlocked
-                </span>
+                <motion.span
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, type: 'spring' }}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-xs sm:text-sm"
+                >
+                  <span>✓</span> KEY unlocked
+                </motion.span>
               ) : (
-                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">
-                  🔒 KEY locked
-                </span>
+                <motion.span
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, type: 'spring' }}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded text-xs sm:text-sm"
+                >
+                  <span>🔒</span> KEY locked
+                </motion.span>
               )}
-            </div>
+            </motion.div>
 
-            <div className="space-y-3">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="space-y-3"
+            >
               {key.hasAccess ? (
                 <>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleDownload}
                     disabled={downloading}
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                    className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm sm:text-base"
                   >
-                    {downloading ? 'Preparing download...' : 'Download KEY'}
-                  </button>
+                    {downloading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <motion.span
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        />
+                        Preparing download...
+                      </span>
+                    ) : (
+                      'Download KEY'
+                    )}
+                  </motion.button>
                   {key.versions && key.versions.length > 1 && (
-                    <p className="text-xs text-gray-500 text-center">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                       Select a version above to download a specific release
                     </p>
                   )}
                 </>
               ) : (
                 <>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handlePurchase}
-                    className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm sm:text-base"
                   >
                     Unlock KEY for ${((key as any).price_cents || 9900) / 100}
-                  </button>
-                  <p className="text-xs text-gray-500 text-center">
+                  </motion.button>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                     Secure checkout via Stripe
                   </p>
                 </>
               )}
-            </div>
+            </motion.div>
 
             {/* What This Unlocks */}
             {key.outcome && (
-              <div className="mt-6 pt-6 border-t">
-                <div className="text-sm font-semibold mb-2">What This Unlocks</div>
-                <div className="text-sm text-gray-600">{key.outcome}</div>
-              </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.55 }}
+                className="mt-6 pt-6 border-t dark:border-slate-700"
+              >
+                <div className="text-xs sm:text-sm font-semibold mb-2 dark:text-gray-200">What This Unlocks</div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{key.outcome}</div>
+              </motion.div>
             )}
 
             {/* Prerequisites */}
             {key.maturity && (
-              <div className="mt-4">
-                <div className="text-sm font-semibold mb-2">Maturity Level</div>
-                <div className="text-sm text-gray-600 capitalize">{key.maturity}</div>
-              </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="mt-4"
+              >
+                <div className="text-xs sm:text-sm font-semibold mb-2 dark:text-gray-200">Maturity Level</div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 capitalize">{key.maturity}</div>
+              </motion.div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

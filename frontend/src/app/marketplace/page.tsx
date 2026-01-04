@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatedCard } from '@/systems/motion/primitives/AnimatedCard';
+import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
 
 interface Key {
   id: string;
@@ -145,7 +148,18 @@ export default function MarketplacePage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading marketplace...</div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-4"
+          />
+          <p className="text-gray-600 dark:text-gray-400">Loading marketplace...</p>
+        </motion.div>
       </div>
     );
   }
@@ -153,78 +167,117 @@ export default function MarketplacePage() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600">Error: {error}</div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center text-red-600 dark:text-red-400"
+        >
+          Error: {error}
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded">
         Skip to main content
       </a>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">KEYS Marketplace</h1>
-        <p className="text-gray-600 mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mb-6 sm:mb-8"
+      >
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">KEYS Marketplace</h1>
+        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-4 sm:mb-6 max-w-3xl">
           Discover and unlock practical capability in Cursor, Jupyter, Node.js, and more. 
           Each key unlocks a specific workflow, component, or runbook you can integrate into your projects.
         </p>
 
         {/* Discovery Recommendations */}
-        {isAuthenticated && recommendations.length > 0 && (
-          <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Recommended for You</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recommendations.map((rec) => (
-                <Link
-                  key={rec.id}
-                  href={`/marketplace/${rec.slug}`}
-                  onClick={() => recordDiscoveryClick(rec.id, rec.reason)}
-                  className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold">{rec.title}</h3>
-                    <span className={`px-2 py-1 text-xs rounded ${
-                      rec.confidence === 'high' ? 'bg-green-100 text-green-800' :
-                      rec.confidence === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {rec.confidence}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                    {rec.description || 'No description available'}
-                  </p>
-                  <p className="text-xs text-blue-600 italic">{rec.reason}</p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {isAuthenticated && recommendations.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="mb-8 p-4 sm:p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+            >
+              <h2 className="text-lg sm:text-xl font-semibold mb-4">Recommended for You</h2>
+              <motion.div
+                variants={staggerContainerVariants}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              >
+                {recommendations.map((rec, index) => (
+                  <motion.div
+                    key={rec.id}
+                    variants={scaleVariants}
+                    custom={index}
+                  >
+                    <Link
+                      href={`/marketplace/${rec.slug}`}
+                      onClick={() => recordDiscoveryClick(rec.id, rec.reason)}
+                      className="block border rounded-lg p-4 hover:shadow-lg transition-all duration-200 bg-white dark:bg-slate-800 dark:border-slate-700"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-sm sm:text-base">{rec.title}</h3>
+                        <motion.span
+                          whileHover={{ scale: 1.1 }}
+                          className={`px-2 py-1 text-xs rounded ${
+                            rec.confidence === 'high' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                            rec.confidence === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                          }`}
+                        >
+                          {rec.confidence}
+                        </motion.span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                        {rec.description || 'No description available'}
+                      </p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 italic">{rec.reason}</p>
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-6"
+        >
           <label htmlFor="search-keys" className="sr-only">
             Search keys
           </label>
-          <input
+          <motion.input
             id="search-keys"
             type="text"
             placeholder="Search keys..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search keys"
-            className="px-4 py-2 border rounded-lg flex-1 min-w-[200px]"
+            whileFocus={{ scale: 1.02 }}
+            className="px-4 py-2 border rounded-lg flex-1 min-w-full sm:min-w-[200px] dark:bg-slate-800 dark:border-slate-700 dark:text-white"
           />
           <label htmlFor="key-type-filter" className="sr-only">
             Filter by key type
           </label>
-          <select
+          <motion.select
             id="key-type-filter"
             value={keyTypeFilter}
             onChange={(e) => setKeyTypeFilter(e.target.value)}
             aria-label="Filter by key type"
-            className="px-4 py-2 border rounded-lg"
+            whileFocus={{ scale: 1.02 }}
+            className="px-4 py-2 border rounded-lg dark:bg-slate-800 dark:border-slate-700 dark:text-white"
           >
             <option value="">All Types</option>
             {keyTypes.map((type) => (
@@ -232,18 +285,19 @@ export default function MarketplacePage() {
                 {type.charAt(0).toUpperCase() + type.slice(1)}
               </option>
             ))}
-          </select>
+          </motion.select>
           {categories.length > 0 && (
             <>
               <label htmlFor="category-filter" className="sr-only">
                 Filter by category
               </label>
-              <select
+              <motion.select
                 id="category-filter"
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 aria-label="Filter by category"
-                className="px-4 py-2 border rounded-lg"
+                whileFocus={{ scale: 1.02 }}
+                className="px-4 py-2 border rounded-lg dark:bg-slate-800 dark:border-slate-700 dark:text-white"
               >
                 <option value="">All Categories</option>
                 {categories.map((cat) => (
@@ -251,97 +305,139 @@ export default function MarketplacePage() {
                     {cat}
                   </option>
                 ))}
-              </select>
+              </motion.select>
             </>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {/* Key Grid */}
       <main id="main-content">
-      {keys.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          No keys found. Try adjusting your filters.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {keys.map((key) => (
-            <Link
-              key={key.id}
-              href={`/marketplace/${key.slug}`}
-              className="border rounded-lg p-6 hover:shadow-lg transition-shadow"
+        <AnimatePresence mode="wait">
+          {keys.length === 0 ? (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-12 text-gray-500 dark:text-gray-400"
             >
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-xl font-semibold">{key.title}</h3>
-                <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
-                  {key.key_type}
-                </span>
-              </div>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {key.description || 'No description available'}
-              </p>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {key.category && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                    {key.category}
-                  </span>
-                )}
-                {key.difficulty && (
-                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                    {key.difficulty}
-                  </span>
-                )}
-                {key.maturity && (
-                  <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
-                    {key.maturity}
-                  </span>
-                )}
-              </div>
-              <div className="text-sm text-gray-500">
-                Version {key.version} • {key.license_spdx}
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+              No keys found. Try adjusting your filters.
+            </motion.div>
+          ) : (
+            <motion.div
+              key="grid"
+              variants={staggerContainerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+            >
+              {keys.map((key, index) => (
+                <motion.div
+                  key={key.id}
+                  variants={scaleVariants}
+                  custom={index}
+                  layout
+                >
+                  <Link
+                    href={`/marketplace/${key.slug}`}
+                    className="block border rounded-lg p-4 sm:p-6 hover:shadow-lg transition-all duration-200 dark:bg-slate-800 dark:border-slate-700 group"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg sm:text-xl font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {key.title}
+                      </h3>
+                      <motion.span
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs rounded whitespace-nowrap ml-2"
+                      >
+                        {key.key_type}
+                      </motion.span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                      {key.description || 'No description available'}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {key.category && (
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded"
+                        >
+                          {key.category}
+                        </motion.span>
+                      )}
+                      {key.difficulty && (
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded"
+                        >
+                          {key.difficulty}
+                        </motion.span>
+                      )}
+                      {key.maturity && (
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded"
+                        >
+                          {key.maturity}
+                        </motion.span>
+                      )}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                      Version {key.version} • {key.license_spdx}
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Bundles Section */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-6">Bundles</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link
-            href="/marketplace/bundles?type=starter"
-            className="border rounded-lg p-6 hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">Starter Bundle</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              Essential keys for getting started
-            </p>
-            <div className="text-lg font-bold">View Bundle →</div>
-          </Link>
-          <Link
-            href="/marketplace/bundles?type=operator"
-            className="border rounded-lg p-6 hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-xl font-semibold mb-2">Operator Bundle</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              Runbooks and operational keys
-            </p>
-            <div className="text-lg font-bold">View Bundle →</div>
-          </Link>
-          <Link
-            href="/marketplace/bundles?type=pro"
-            className="border rounded-lg p-6 hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-purple-50"
-          >
-            <h3 className="text-xl font-semibold mb-2">Pro Tier</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              All keys, unlimited access
-            </p>
-            <div className="text-lg font-bold">View Tier →</div>
-          </Link>
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ delay: 0.2 }}
+        className="mt-8 sm:mt-12"
+      >
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Bundles</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {[
+            { type: 'starter', title: 'Starter Bundle', desc: 'Essential keys for getting started', href: '/marketplace/bundles?type=starter' },
+            { type: 'operator', title: 'Operator Bundle', desc: 'Runbooks and operational keys', href: '/marketplace/bundles?type=operator' },
+            { type: 'pro', title: 'Pro Tier', desc: 'All keys, unlimited access', href: '/marketplace/bundles?type=pro', featured: true },
+          ].map((bundle, index) => (
+            <motion.div
+              key={bundle.type}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 * index }}
+              whileHover={{ y: -4, scale: 1.02 }}
+            >
+              <Link
+                href={bundle.href}
+                className={`block border rounded-lg p-4 sm:p-6 hover:shadow-lg transition-all duration-200 ${
+                  bundle.featured ? 'bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20' : 'dark:bg-slate-800 dark:border-slate-700'
+                }`}
+              >
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">{bundle.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                  {bundle.desc}
+                </p>
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  className="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400"
+                >
+                  View {bundle.type === 'pro' ? 'Tier' : 'Bundle'} →
+                </motion.div>
+              </Link>
+            </motion.div>
+          ))}
         </div>
-      </div>
+      </motion.section>
     </div>
   );
 }
