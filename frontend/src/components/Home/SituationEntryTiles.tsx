@@ -2,6 +2,9 @@
 
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 
 interface SituationTile {
   id: string;
@@ -10,6 +13,7 @@ interface SituationTile {
   icon: string;
   route: string;
   filters?: Record<string, string>;
+  gradient?: string;
 }
 
 const situations: SituationTile[] = [
@@ -20,6 +24,7 @@ const situations: SituationTile[] = [
     icon: '🛡️',
     route: '/marketplace',
     filters: { situation: 'incident-response', category: 'runbook' },
+    gradient: 'from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20',
   },
   {
     id: 'ship-faster',
@@ -28,22 +33,25 @@ const situations: SituationTile[] = [
     icon: '⚡',
     route: '/marketplace',
     filters: { situation: 'shipping', category: 'workflow' },
+    gradient: 'from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20',
   },
   {
     id: 'inherited-system',
-    situation: "I inherited a system I don&apos;t fully trust",
-    description: 'Get Keys that help you understand, document, and safely modify systems you didn&apos;t build.',
+    situation: "I inherited a system I don't fully trust",
+    description: 'Get Keys that help you understand, document, and safely modify systems you didn't build.',
     icon: '🔍',
     route: '/marketplace',
     filters: { situation: 'understanding', category: 'documentation' },
+    gradient: 'from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
   },
   {
     id: 'only-understander',
-    situation: "I don&apos;t want to be the only one who understands this",
+    situation: "I don't want to be the only one who understands this",
     description: 'Find Keys that help you share knowledge and reduce single points of failure.',
     icon: '👥',
     route: '/marketplace',
     filters: { situation: 'knowledge-sharing', category: 'documentation' },
+    gradient: 'from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20',
   },
 ];
 
@@ -66,26 +74,34 @@ export function SituationEntryTiles() {
               animate={{ opacity: 1, y: 0 }}
               transition={shouldReduceMotion ? { duration: 0 } : { delay: index * 0.1, duration: 0.4 }}
             >
-              <Link
-                href={href}
-                className="group block p-6 sm:p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="text-4xl sm:text-5xl flex-shrink-0" aria-hidden="true">
-                    {situation.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {situation.situation}
-                    </h3>
-                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
-                      {situation.description}
-                    </p>
-                    <div className="mt-4 text-sm text-blue-600 dark:text-blue-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                      Explore Keys →
+              <Link href={href} className="block h-full group">
+                <Card className={`h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-2 hover:border-primary/50 bg-gradient-to-br ${situation.gradient}`}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-4">
+                      <div className="text-4xl sm:text-5xl flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
+                        {situation.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg sm:text-xl mb-2 group-hover:text-primary transition-colors">
+                          {situation.situation}
+                        </CardTitle>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm sm:text-base leading-relaxed mb-4">
+                      {situation.description}
+                    </CardDescription>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full sm:w-auto group-hover:text-primary group-hover:bg-primary/10 transition-all duration-300"
+                    >
+                      Explore Keys
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </CardContent>
+                </Card>
               </Link>
             </motion.div>
           );
