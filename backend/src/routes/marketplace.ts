@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../middleware/errorHandler.js';
-import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
+import { authMiddleware, AuthenticatedRequest, requireRole } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validation.js';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
@@ -283,6 +283,7 @@ router.get(
 router.post(
   '/admin/publish',
   authMiddleware,
+  requireRole('admin', 'superadmin'),
   validateBody(
     z.object({
       libraryJson: z.unknown(), // Will be validated by validateLibraryIndex
@@ -290,8 +291,7 @@ router.post(
     })
   ),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    // TODO: Add admin role check
-    // For now, any authenticated user can publish (should be restricted in production)
+    // Admin role check enforced via requireRole middleware
 
     const { libraryJson, dryRun } = req.body;
 
@@ -432,6 +432,7 @@ router.get(
 router.get(
   '/packs/:slug/analytics',
   authMiddleware,
+  requireRole('admin', 'superadmin'),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
     const { slug } = req.params;
     const userId = req.userId!;
