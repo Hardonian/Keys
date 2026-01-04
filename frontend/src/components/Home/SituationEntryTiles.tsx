@@ -38,7 +38,7 @@ const situations: SituationTile[] = [
   {
     id: 'inherited-system',
     situation: "I inherited a system I don't fully trust",
-    description: 'Get Keys that help you understand, document, and safely modify systems you didn't build.',
+    description: "Get Keys that help you understand, document, and safely modify systems you didn't build.",
     icon: '🔍',
     route: '/marketplace',
     filters: { situation: 'understanding', category: 'documentation' },

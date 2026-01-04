@@ -58,121 +58,196 @@ export function KeysLogo({ size = 64, animated = true, className = '' }: KeysLog
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Outer Ring */}
+      {/* Keyring - Circular ring */}
       <motion.circle
         cx="60"
         cy="60"
-        r="55"
+        r="35"
         stroke="currentColor"
-        strokeWidth="3"
+        strokeWidth="4"
         fill="none"
+        strokeLinecap="round"
         variants={animated ? ringVariants : undefined}
         initial={animated ? 'initial' : undefined}
         animate={animated ? 'animate' : undefined}
         className="text-blue-600 dark:text-blue-400"
       />
       
-      {/* Inner Ring */}
-      <motion.circle
-        cx="60"
-        cy="60"
-        r="40"
+      {/* Keyring opening/gap */}
+      <motion.path
+        d="M 60 25 A 35 35 0 0 1 75 35"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="4"
         fill="none"
+        strokeLinecap="round"
         variants={animated ? ringVariants : undefined}
         initial={animated ? 'initial' : undefined}
         animate={animated ? 'animate' : undefined}
-        className="text-purple-600 dark:text-purple-400"
-        style={{ opacity: 0.6 }}
+        className="text-blue-600 dark:text-blue-400"
+        style={{ opacity: 0.3 }}
       />
       
-      {/* Key 1 - Top */}
+      {/* Main Key - Large prominent key */}
       <motion.g
         variants={animated ? keyVariants : undefined}
         initial={animated ? 'initial' : undefined}
         animate={animated ? 'animate' : undefined}
       >
+        {/* Key head (the part that goes on the keyring) */}
+        <circle
+          cx="60"
+          cy="35"
+          r="8"
+          fill="currentColor"
+          className="text-blue-600 dark:text-blue-400"
+        />
+        <circle
+          cx="60"
+          cy="35"
+          r="5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          className="text-white dark:text-slate-900"
+        />
+        
+        {/* Key shaft */}
+        <rect
+          x="58"
+          y="43"
+          width="4"
+          height="35"
+          rx="2"
+          fill="currentColor"
+          className="text-blue-600 dark:text-blue-400"
+        />
+        
+        {/* Key bit (the part that unlocks) */}
+        <rect
+          x="50"
+          y="75"
+          width="20"
+          height="8"
+          rx="2"
+          fill="currentColor"
+          className="text-blue-600 dark:text-blue-400"
+        />
+        {/* Key teeth */}
+        <rect
+          x="52"
+          y="78"
+          width="4"
+          height="5"
+          rx="1"
+          fill="currentColor"
+          className="text-white dark:text-slate-900"
+        />
+        <rect
+          x="64"
+          y="78"
+          width="4"
+          height="5"
+          rx="1"
+          fill="currentColor"
+          className="text-white dark:text-slate-900"
+        />
+      </motion.g>
+      
+      {/* Secondary Key - Smaller key on keyring */}
+      <motion.g
+        variants={animated ? keyVariants : undefined}
+        initial={animated ? 'initial' : undefined}
+        animate={animated ? 'animate' : undefined}
+        style={{ transformOrigin: '60px 60px', transform: 'rotate(120deg) translateY(-35px) rotate(-120deg)' }}
+      >
+        {/* Key head */}
+        <circle
+          cx="60"
+          cy="25"
+          r="5"
+          fill="currentColor"
+          className="text-purple-600 dark:text-purple-400"
+        />
+        <circle
+          cx="60"
+          cy="25"
+          r="3"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+          className="text-white dark:text-slate-900"
+        />
+        
+        {/* Key shaft */}
+        <rect
+          x="59"
+          y="30"
+          width="2"
+          height="20"
+          rx="1"
+          fill="currentColor"
+          className="text-purple-600 dark:text-purple-400"
+        />
+        
+        {/* Key bit */}
         <rect
           x="55"
-          y="15"
+          y="48"
           width="10"
-          height="25"
-          rx="2"
+          height="5"
+          rx="1"
           fill="currentColor"
-          className="text-yellow-400"
+          className="text-purple-600 dark:text-purple-400"
         />
-        <circle cx="60" cy="25" r="4" fill="currentColor" className="text-yellow-400" />
       </motion.g>
       
-      {/* Key 2 - Right */}
+      {/* Third Key - Even smaller */}
       <motion.g
         variants={animated ? keyVariants : undefined}
         initial={animated ? 'initial' : undefined}
         animate={animated ? 'animate' : undefined}
-        style={{ transformOrigin: '60px 60px' }}
+        style={{ transformOrigin: '60px 60px', transform: 'rotate(240deg) translateY(-35px) rotate(-240deg)' }}
       >
-        <rect
-          x="80"
-          y="55"
-          width="25"
-          height="10"
-          rx="2"
+        {/* Key head */}
+        <circle
+          cx="60"
+          cy="25"
+          r="4"
           fill="currentColor"
-          className="text-pink-400"
+          className="text-pink-600 dark:text-pink-400"
         />
-        <circle cx="95" cy="60" r="4" fill="currentColor" className="text-pink-400" />
-      </motion.g>
-      
-      {/* Key 3 - Bottom */}
-      <motion.g
-        variants={animated ? keyVariants : undefined}
-        initial={animated ? 'initial' : undefined}
-        animate={animated ? 'animate' : undefined}
-        style={{ transformOrigin: '60px 60px' }}
-      >
+        <circle
+          cx="60"
+          cy="25"
+          r="2.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="0.8"
+          className="text-white dark:text-slate-900"
+        />
+        
+        {/* Key shaft */}
         <rect
-          x="55"
-          y="80"
-          width="10"
-          height="25"
-          rx="2"
+          x="59.5"
+          y="29"
+          width="1"
+          height="15"
+          rx="0.5"
           fill="currentColor"
-          className="text-purple-400"
+          className="text-pink-600 dark:text-pink-400"
         />
-        <circle cx="60" cy="95" r="4" fill="currentColor" className="text-purple-400" />
-      </motion.g>
-      
-      {/* Key 4 - Left */}
-      <motion.g
-        variants={animated ? keyVariants : undefined}
-        initial={animated ? 'initial' : undefined}
-        animate={animated ? 'animate' : undefined}
-        style={{ transformOrigin: '60px 60px' }}
-      >
+        
+        {/* Key bit */}
         <rect
-          x="15"
-          y="55"
-          width="25"
-          height="10"
-          rx="2"
+          x="57"
+          y="42"
+          width="6"
+          height="4"
+          rx="0.5"
           fill="currentColor"
-          className="text-blue-400"
+          className="text-pink-600 dark:text-pink-400"
         />
-        <circle cx="25" cy="60" r="4" fill="currentColor" className="text-blue-400" />
       </motion.g>
-      
-      {/* Center Circle */}
-      <motion.circle
-        cx="60"
-        cy="60"
-        r="12"
-        fill="currentColor"
-        variants={animated ? ringVariants : undefined}
-        initial={animated ? 'initial' : undefined}
-        animate={animated ? 'animate' : undefined}
-        className="text-white dark:text-slate-900"
-      />
     </svg>
   );
 
