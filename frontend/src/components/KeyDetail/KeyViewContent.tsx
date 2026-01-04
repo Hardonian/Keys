@@ -89,7 +89,7 @@ export function KeyViewContent({ view, keyData }: KeyViewContentProps) {
             <em>{keyData.whenYouNeedThis.toLowerCase()}</em>
           </li>
           <li className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-            <strong className="text-gray-900 dark:text-gray-100">Add to Keyring:</strong> Click "Add to Keyring" to unlock this Key
+            <strong className="text-gray-900 dark:text-gray-100">Add to Keyring:</strong> Click &quot;Add to Keyring&quot; to unlock this Key
           </li>
           <li className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             <strong className="text-gray-900 dark:text-gray-100">Download:</strong> Once unlocked, download the Key files
@@ -122,7 +122,7 @@ export function KeyViewContent({ view, keyData }: KeyViewContentProps) {
         <ul className="space-y-2 text-base text-red-800 dark:text-red-200">
           <li>• People try to build from scratch without proven patterns</li>
           <li>• Common mistakes get repeated across projects</li>
-          <li>• Knowledge isn't captured in reusable form</li>
+          <li>• Knowledge isn&apos;t captured in reusable form</li>
           <li>• Teams reinvent solutions that already exist</li>
         </ul>
       </div>

@@ -30,8 +30,8 @@ interface DiscoveryFlowProps {
 const SITUATIONS = [
   { id: 'incident-response', label: "I'm responsible for something breaking" },
   { id: 'shipping', label: 'I want to ship faster without messing things up' },
-  { id: 'understanding', label: "I inherited a system I don't fully trust" },
-  { id: 'knowledge-sharing', label: "I don't want to be the only one who understands this" },
+  { id: 'understanding', label: "I inherited a system I don&apos;t fully trust" },
+  { id: 'knowledge-sharing', label: "I don&apos;t want to be the only one who understands this" },
 ];
 
 const ROLES = [

@@ -79,7 +79,7 @@ export function ProfileOnboarding({ userId, onComplete }: ProfileOnboardingProps
   }, [context.currentStep, context.totalSteps]);
 
   const updateProfile = (updates: Partial<UserProfile>) => {
-    send({ type: 'UPDATE_PROFILE', updates } as any);
+    send({ type: 'UPDATE_PROFILE', updates });
   };
 
   const currentStepIndex = context.currentStep;

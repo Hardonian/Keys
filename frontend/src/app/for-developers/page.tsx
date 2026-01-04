@@ -81,7 +81,7 @@ export default function ForDevelopersPage() {
                 Security Scanning
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Automatic security scanning of all code outputs. We guarantee security—we're liable if we miss vulnerabilities.
+                Automatic security scanning of all code outputs. We guarantee security—we&apos;re liable if we miss vulnerabilities.
               </p>
             </div>
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-md border border-gray-200 dark:border-slate-700">
@@ -90,7 +90,7 @@ export default function ForDevelopersPage() {
                 Institutional Memory
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Remember what didn't work. Your failures become prevention rules. Never repeat the same mistakes.
+                Remember what didn&apos;t work. Your failures become prevention rules. Never repeat the same mistakes.
               </p>
             </div>
           </div>

@@ -16,7 +16,7 @@ export function PreCheckoutSummary({ whatUnlocks }: PreCheckoutSummaryProps) {
       className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 mb-6"
     >
       <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">
-        What you're equipping yourself with
+        What you&apos;re equipping yourself with
       </h3>
       
       <div className="space-y-4">

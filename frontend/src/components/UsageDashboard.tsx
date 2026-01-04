@@ -143,12 +143,12 @@ export function UsageDashboard() {
         )}
         {isNearLimit && !isOverLimit && (
           <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-            You're approaching your limit. Consider upgrading.
+            You&apos;re approaching your limit. Consider upgrading.
           </p>
         )}
         {isOverLimit && (
           <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-            You've exceeded your limit. Upgrade to continue.
+            You&apos;ve exceeded your limit. Upgrade to continue.
           </p>
         )}
       </div>

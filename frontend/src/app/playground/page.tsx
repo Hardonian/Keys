@@ -98,7 +98,7 @@ export default function PlaygroundPage() {
 }
 
 function StateMachineDemo() {
-  const { state, send, context } = useMachineState(demoMachine as any);
+  const { state, send, context } = useMachineState(demoMachine);
 
   const currentStep = context.currentStep;
   const totalSteps = context.totalSteps;
@@ -145,7 +145,7 @@ function StateMachineDemo() {
             placeholder="Name"
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg mb-4 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
             onChange={(e) =>
-              send({ type: 'UPDATE_DATA', data: { name: e.target.value } } as any)
+              send({ type: 'UPDATE_DATA', data: { name: e.target.value } })
             }
           />
           <div className="flex gap-2">
@@ -170,7 +170,7 @@ function StateMachineDemo() {
             placeholder="email@example.com"
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg mb-4 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
             onChange={(e) =>
-              send({ type: 'UPDATE_DATA', data: { email: e.target.value } } as any)
+              send({ type: 'UPDATE_DATA', data: { email: e.target.value } })
             }
           />
           <div className="flex gap-2">
@@ -203,7 +203,7 @@ function StateMachineDemo() {
                     const updated = e.target.checked
                       ? [...current, option]
                       : current.filter((p: string) => p !== option);
-                    send({ type: 'UPDATE_DATA', data: { preferences: updated } } as any);
+                    send({ type: 'UPDATE_DATA', data: { preferences: updated } });
                   }}
                 />
                 <span className="text-sm text-slate-700 dark:text-slate-300">{option}</span>

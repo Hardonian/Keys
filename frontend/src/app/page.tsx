@@ -44,7 +44,7 @@ export default function Home() {
             </h2>
             <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
               Imagine a modern toolshed filled with powerful tools: Cursor, Jupyter, GitHub, Stripe, Supabase, and more. 
-              Each tool provides raw capability—but capability alone isn't enough. You need to know how to use them effectively. 
+              Each tool provides raw capability—but capability alone isn&apos;t enough. You need to know how to use them effectively. 
               <strong> KEYS is the keyring.</strong>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">

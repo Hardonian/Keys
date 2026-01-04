@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
@@ -24,20 +24,7 @@ function AccountKeysContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchEntitlements();
-    
-    // Handle purchase completion
-    if (searchParams?.get('purchased') === 'true') {
-      toast.success('Purchase successful! Your KEYS are now unlocked.');
-      // Refetch to show new entitlements
-      setTimeout(() => {
-        fetchEntitlements();
-      }, 1000);
-    }
-  }, [searchParams]);
-
-  const fetchEntitlements = async () => {
+  const fetchEntitlements = useCallback(async () => {
     try {
       setLoading(true);
       const supabase = createClient();
@@ -64,12 +51,26 @@ function AccountKeysContent() {
       const data = await response.json();
       setEntitlements(data.entitlements || []);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load entitlements');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to load entitlements');
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    fetchEntitlements();
+    
+    // Handle purchase completion
+    if (searchParams?.get('purchased') === 'true') {
+      toast.success('Purchase successful! Your KEYS are now unlocked.');
+      // Refetch to show new entitlements
+      setTimeout(() => {
+        fetchEntitlements();
+      }, 1000);
+    }
+  }, [searchParams, fetchEntitlements]);
 
   if (loading) {
     return (
@@ -115,7 +116,7 @@ function AccountKeysContent() {
           Your Keyring
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl">
-          Keys you've equipped yourself with, organized by the situations they cover.
+          Keys you&apos;ve equipped yourself with, organized by the situations they cover.
         </p>
       </div>
 
@@ -126,7 +127,7 @@ function AccountKeysContent() {
             Your Keyring is ready
           </h2>
           <p className="text-base text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
-            You don't have any Keys yet. Browse the marketplace to find Keys that help you prepare for situations you might face.
+            You don&apos;t have any Keys yet. Browse the marketplace to find Keys that help you prepare for situations you might face.
           </p>
           <Link
             href="/marketplace"
@@ -148,7 +149,7 @@ function AccountKeysContent() {
               <section key={group} className="space-y-4">
                 <div className="flex items-center gap-3 mb-4">
                   <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                    You're covered for: {situationGroupLabels[group] || situationGroupLabels['other']}
+                    You&apos;re covered for: {situationGroupLabels[group] || situationGroupLabels['other']}
                   </h2>
                   <div className="flex-1 h-px bg-gray-200 dark:bg-slate-700" />
                   <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -232,7 +233,7 @@ function AccountKeysContent() {
               covering {Object.keys(groupedEntitlements).filter(g => groupedEntitlements[g].length > 0).length} different situations.
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-              Most teams don't have this until it hurts. You're prepared.
+              Most teams don&apos;t have this until it hurts. You&apos;re prepared.
             </p>
           </div>
         </div>

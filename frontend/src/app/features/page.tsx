@@ -17,7 +17,7 @@ export default function FeaturesPage() {
             Complete Feature List
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-6">
-            See all Keys features, their availability status, and which plan includes them. We're constantly adding new features based on your feedback.
+            See all Keys features, their availability status, and which plan includes them. We&apos;re constantly adding new features based on your feedback.
           </p>
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
@@ -76,7 +76,7 @@ export default function FeaturesPage() {
             Ready to Get Started?
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            Start with our free tier to explore available features, then upgrade when you're ready for more.
+            Start with our free tier to explore available features, then upgrade when you&apos;re ready for more.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

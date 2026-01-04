@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
@@ -38,7 +38,11 @@ interface Key {
   isDemo?: boolean;
 }
 
-export default function KeyDetailPage() {
+interface ErrorWithMessage {
+  message?: string;
+}
+
+function KeyDetailContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -52,29 +56,9 @@ export default function KeyDetailPage() {
   const [selectedVersion, setSelectedVersion] = useState<string>('');
   const [activeView, setActiveView] = useState<ViewType>('skim');
 
-  useEffect(() => {
-    checkAuth();
-    fetchKey();
-    
-    // Handle purchase completion
-    if (searchParams?.get('purchased') === 'true') {
-      toast.success('Purchase successful! Your KEY is now unlocked.');
-      // Refetch to update access status
-      setTimeout(() => {
-        fetchKey();
-      }, 1000);
-    }
-  }, [slug, searchParams]);
+  const slug = params.slug as string;
 
-  const checkAuth = async () => {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    setIsAuthenticated(!!user);
-  };
-
-  const fetchKey = async () => {
+  const fetchKey = useCallback(async () => {
     try {
       setLoading(true);
       const supabase = createClient();
@@ -139,14 +123,37 @@ export default function KeyDetailPage() {
 
       // If not found in demo data and API failed, show error
       throw new Error('KEY not found');
-    } catch (err: any) {
-      setError(err.message || 'Failed to load KEY');
+    } catch (err) {
+      const error = err as ErrorWithMessage;
+      setError(error.message || 'Failed to load KEY');
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
 
-  const trackView = async (keyId: string, token: string) => {
+  useEffect(() => {
+    checkAuth();
+    fetchKey();
+    
+    // Handle purchase completion
+    if (searchParams?.get('purchased') === 'true') {
+      toast.success('Purchase successful! Your KEY is now unlocked.');
+      // Refetch to update access status
+      setTimeout(() => {
+        fetchKey();
+      }, 1000);
+    }
+  }, [searchParams, fetchKey]);
+
+  const checkAuth = useCallback(async () => {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    setIsAuthenticated(!!user);
+  }, []);
+
+  const trackView = useCallback(async (keyId: string, token: string) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       await fetch(`${apiUrl}/marketplace/analytics`, {
@@ -163,9 +170,9 @@ export default function KeyDetailPage() {
     } catch {
       // Silently fail
     }
-  };
+  }, []);
 
-  const fetchPreview = async (isPublic: boolean, token?: string) => {
+  const fetchPreview = useCallback(async (isPublic: boolean, token?: string) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const headers: HeadersInit = {};
@@ -181,9 +188,9 @@ export default function KeyDetailPage() {
     } catch (err) {
       console.error('Failed to fetch preview:', err);
     }
-  };
+  }, [slug]);
 
-  const handleDownload = async () => {
+  const handleDownload = useCallback(async () => {
     if (!isAuthenticated) {
       router.push(`/signin?returnUrl=/marketplace/${slug}`);
       return;
@@ -226,14 +233,15 @@ export default function KeyDetailPage() {
       const data = await response.json();
       toast.success('Download starting...');
       window.location.href = data.downloadUrl;
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to download KEY');
+    } catch (err) {
+      const error = err as ErrorWithMessage;
+      toast.error(error.message || 'Failed to download KEY');
     } finally {
       setDownloading(false);
     }
-  };
+  }, [slug, isAuthenticated, router, selectedVersion]);
 
-  const handlePurchase = async () => {
+  const handlePurchase = useCallback(async () => {
     if (!isAuthenticated) {
       router.push(`/signin?returnUrl=/marketplace/${slug}`);
       return;
@@ -272,10 +280,11 @@ export default function KeyDetailPage() {
       const data = await response.json();
       toast.info('Redirecting to checkout...');
       window.location.href = data.url;
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to start purchase. Please try again.');
+    } catch (err) {
+      const error = err as ErrorWithMessage;
+      toast.error(error.message || 'Failed to start purchase. Please try again.');
     }
-  };
+  }, [slug, isAuthenticated, router]);
 
   if (loading) {
     return (
@@ -309,7 +318,7 @@ export default function KeyDetailPage() {
             {error?.includes('not found') || !key ? 'KEY not found' : 'Unable to load KEY'}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {error || 'The KEY you\'re looking for doesn\'t exist or has been removed.'}
+            {error || 'The KEY you&apos;re looking for doesn&apos;t exist or has been removed.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <motion.button
@@ -562,7 +571,7 @@ export default function KeyDetailPage() {
             {!key.hasAccess && (
               <PreCheckoutSummary
                 keyTitle={key.title}
-                priceCents={(key as any).price_cents || 9900}
+                priceCents={key.price_cents || 9900}
                 whatUnlocks={key.outcome || getKeySituation(key.slug).whatThisPrevents}
               />
             )}
@@ -582,7 +591,7 @@ export default function KeyDetailPage() {
                   transition={{ delay: 0.4, type: 'spring' }}
                   className="text-xl sm:text-2xl font-bold dark:text-white"
                 >
-                  ${((key as any).price_cents || 9900) / 100}
+                  ${(key.price_cents || 9900) / 100}
                 </motion.div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">One-time, permanent access</div>
               </motion.div>
@@ -673,7 +682,7 @@ export default function KeyDetailPage() {
                         Add to Keyring
                       </motion.button>
                       <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                        Secure checkout via Stripe • ${((key as any).price_cents || 9900) / 100} one-time
+                        Secure checkout via Stripe • ${(key.price_cents || 9900) / 100} one-time
                       </p>
                     </>
                   ) : (
@@ -702,7 +711,7 @@ export default function KeyDetailPage() {
                         Sign In to Unlock
                       </motion.button>
                       <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                        Unlock for ${((key as any).price_cents || 9900) / 100}
+                        Unlock for ${(key.price_cents || 9900) / 100}
                       </p>
                     </>
                   )}
@@ -745,5 +754,28 @@ export default function KeyDetailPage() {
       </div>
       </div>
     </>
+  );
+}
+
+export default function KeyDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-4"
+          />
+          <p className="text-gray-600 dark:text-gray-400">Loading key...</p>
+        </motion.div>
+      </div>
+    }>
+      <KeyDetailContent />
+    </Suspense>
   );
 }

@@ -221,7 +221,7 @@ export default function PricingPage() {
                 Can I change plans later?
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any charges.
+                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we&apos;ll prorate any charges.
               </p>
             </div>
             <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm">
@@ -229,7 +229,7 @@ export default function PricingPage() {
                 What happens if I exceed my limits?
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                You'll receive a notification when you're approaching your limits. Once exceeded, you'll need to upgrade to continue using the feature.
+                You&apos;ll receive a notification when you&apos;re approaching your limits. Once exceeded, you&apos;ll need to upgrade to continue using the feature.
               </p>
             </div>
             <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm">

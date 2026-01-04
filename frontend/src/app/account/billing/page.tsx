@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
@@ -9,11 +9,7 @@ export default function AccountBillingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    openBillingPortal();
-  }, []);
-
-  const openBillingPortal = async () => {
+  const openBillingPortal = useCallback(async () => {
     try {
       setLoading(true);
       const supabase = createClient();
@@ -39,11 +35,16 @@ export default function AccountBillingPage() {
 
       const data = await response.json();
       window.location.href = data.url;
-    } catch (err: any) {
-      setError(err.message || 'Failed to open billing portal');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to open billing portal');
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    openBillingPortal();
+  }, [openBillingPortal]);
 
   if (loading) {
     return (

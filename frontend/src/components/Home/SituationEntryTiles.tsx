@@ -31,15 +31,15 @@ const situations: SituationTile[] = [
   },
   {
     id: 'inherited-system',
-    situation: "I inherited a system I don't fully trust",
-    description: 'Get Keys that help you understand, document, and safely modify systems you didn\'t build.',
+    situation: "I inherited a system I don&apos;t fully trust",
+    description: 'Get Keys that help you understand, document, and safely modify systems you didn&apos;t build.',
     icon: '🔍',
     route: '/marketplace',
     filters: { situation: 'understanding', category: 'documentation' },
   },
   {
     id: 'only-understander',
-    situation: "I don't want to be the only one who understands this",
+    situation: "I don&apos;t want to be the only one who understands this",
     description: 'Find Keys that help you share knowledge and reduce single points of failure.',
     icon: '👥',
     route: '/marketplace',

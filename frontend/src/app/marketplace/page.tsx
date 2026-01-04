@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,24 +47,15 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    checkAuth();
-    fetchKeys();
-  }, [keyTypeFilter, categoryFilter, searchQuery]);
-
-  useEffect(() => {
-    fetchRecommendations();
-  }, [isAuthenticated]);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     setIsAuthenticated(!!user);
-  };
+  }, []);
 
-  const fetchKeys = async () => {
+  const fetchKeys = useCallback(async () => {
     try {
       setLoading(true);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -108,9 +99,9 @@ export default function MarketplacePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [keyTypeFilter, categoryFilter, searchQuery]);
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     try {
       if (isAuthenticated) {
         const supabase = createClient();
@@ -146,7 +137,16 @@ export default function MarketplacePage() {
       // Fallback to demo recommendations on error
       setRecommendations(DEMO_DISCOVERY_RECOMMENDATIONS);
     }
-  };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    checkAuth();
+    fetchKeys();
+  }, [checkAuth, fetchKeys]);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [fetchRecommendations]);
 
   const recordDiscoveryClick = async (keyId: string, reason: string) => {
     if (!isAuthenticated) return;
@@ -254,7 +254,7 @@ export default function MarketplacePage() {
             className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
           >
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Demo Mode:</strong> You're viewing sample Keys.{' '}
+              <strong>Demo Mode:</strong> You&apos;re viewing sample Keys.{' '}
               <Link href="/signup" className="underline font-semibold hover:text-blue-900 dark:hover:text-blue-100">
                 Sign up
               </Link>

@@ -22,7 +22,7 @@ export function WelcomingHero() {
         transition={{ delay: 0.1, duration: 0.6 }}
         className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6 leading-tight"
       >
-        You're not behind.
+        You&apos;re not behind.
         <br />
         <span className="text-blue-600 dark:text-blue-400">You already have the tools.</span>
       </motion.h1>
@@ -46,7 +46,7 @@ export function WelcomingHero() {
           <strong className="font-semibold">What KEYS is:</strong> Structured assets (notebooks, prompts, workflows) that unlock capability in Cursor, Jupyter, GitHub, Stripe, and more.
         </p>
         <p className="text-sm sm:text-base text-blue-800 dark:text-blue-200 mt-3 leading-relaxed">
-          <strong className="font-semibold">What KEYS isn't:</strong> A framework, an AI autopilot, or an execution engine. KEYS is the keyring—you own the tools.
+          <strong className="font-semibold">What KEYS isn&apos;t:</strong> A framework, an AI autopilot, or an execution engine. KEYS is the keyring—you own the tools.
         </p>
       </motion.div>
     </section>

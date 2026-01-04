@@ -18,7 +18,7 @@ export default function ComparePage() {
             Keys vs. Competitors
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            See how Keys compares to ChatGPT, Claude, Cursor, and Jasper. We're the only AI co-founder with security guarantees, institutional memory, and holistic business support.
+            See how Keys compares to ChatGPT, Claude, Cursor, and Jasper. We&apos;re the only AI co-founder with security guarantees, institutional memory, and holistic business support.
           </p>
         </div>
 
@@ -30,7 +30,7 @@ export default function ComparePage() {
               Security & Compliance Guarantees
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              We're the only one that guarantees security and compliance. We're liable if we miss vulnerabilities. Competitors aren't.
+              We&apos;re the only one that guarantees security and compliance. We&apos;re liable if we miss vulnerabilities. Competitors aren&apos;t.
             </p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-slate-700">
@@ -39,7 +39,7 @@ export default function ComparePage() {
               Institutional Memory
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Your failures become prevention rules. We remember what didn't work so it never happens again. Competitors don't.
+              Your failures become prevention rules. We remember what didn&apos;t work so it never happens again. Competitors don&apos;t.
             </p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-slate-700">
@@ -61,7 +61,7 @@ export default function ComparePage() {
         {/* Guarantees Section */}
         <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-lg border border-gray-200 dark:border-slate-700 mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-8">
-            Keys' Unique Guarantees
+            Keys&apos; Unique Guarantees
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <GuaranteeBadge type="security" />
@@ -71,7 +71,7 @@ export default function ComparePage() {
           </div>
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Why Guarantees Matter:</strong> One prevented security incident saves $10K-$100K+. One prevented compliance violation saves $50K-$500K+ in fines. We're liable if we miss something. Competitors aren't.
+              <strong>Why Guarantees Matter:</strong> One prevented security incident saves $10K-$100K+. One prevented compliance violation saves $50K-$500K+ in fines. We&apos;re liable if we miss something. Competitors aren&apos;t.
             </p>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default function ComparePage() {
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-2">❌ What Competitors Don't</h3>
+              <h3 className="text-lg font-semibold mb-2">❌ What Competitors Don&apos;t</h3>
               <ul className="space-y-2 text-sm">
                 <li>• No security guarantees</li>
                 <li>• No institutional memory</li>

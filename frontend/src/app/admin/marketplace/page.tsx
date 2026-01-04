@@ -85,7 +85,7 @@ export default function AdminMarketplacePage() {
               onChange={(e) => setDryRun(e.target.checked)}
               className="w-4 h-4"
             />
-            <span>Dry run (validate only, don't publish)</span>
+            <span>Dry run (validate only, don&apos;t publish)</span>
           </label>
         </div>
 

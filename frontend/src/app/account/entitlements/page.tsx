@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -23,11 +23,7 @@ export default function EntitlementsPage() {
     tenantType: string;
   } | null>(null);
 
-  useEffect(() => {
-    fetchEntitlements();
-  }, []);
-
-  const fetchEntitlements = async () => {
+  const fetchEntitlements = useCallback(async () => {
     try {
       setLoading(true);
       const supabase = createClient();
@@ -58,12 +54,17 @@ export default function EntitlementsPage() {
         tenantType: data.tenantType,
       });
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load entitlements');
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Failed to load entitlements');
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    fetchEntitlements();
+  }, [fetchEntitlements]);
 
   if (loading) {
     return (
@@ -109,7 +110,7 @@ export default function EntitlementsPage() {
 
       {entitlements.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-600 mb-4">You don't have any pack entitlements yet.</p>
+          <p className="text-gray-600 mb-4">You don&apos;t have any pack entitlements yet.</p>
           <Link
             href="/marketplace"
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
