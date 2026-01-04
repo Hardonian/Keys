@@ -5,6 +5,8 @@ import { UpgradePrompt } from '@/components/Upsell/UpgradePrompt';
 import { FeatureAvailabilityBadge } from '@/components/Features/FeatureAvailabilityBadge';
 import { KeysLogo } from '@/components/Logo';
 import { HeroSection } from '@/components/Hero/HeroSection';
+import { WelcomingHero } from '@/components/Home/WelcomingHero';
+import { SituationEntryTiles } from '@/components/Home/SituationEntryTiles';
 
 export const metadata: Metadata = {
   title: 'KEYS - The Keyring to Modern Tools',
@@ -17,9 +19,24 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main id="main-content" className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* Hero Section with Visual Impact */}
-      <HeroSection />
+    <main id="main-content" className="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Welcoming Hero Section */}
+      <div className="w-full max-w-6xl mx-auto py-8 sm:py-12">
+        <WelcomingHero />
+        
+        {/* Situation-Based Entry Tiles */}
+        <SituationEntryTiles />
+        
+        {/* Discovery Flow Link */}
+        <div className="w-full max-w-6xl mx-auto mb-8 text-center">
+          <Link
+            href="/discover"
+            className="inline-block px-6 py-3 bg-white dark:bg-slate-800 border-2 border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Not sure where to start? Take a guided tour →
+          </Link>
+        </div>
+      </div>
 
         {/* Supporting Message Section */}
         <div className="max-w-4xl mx-auto text-center space-y-6 mb-8 sm:mb-12">

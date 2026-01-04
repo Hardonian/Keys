@@ -8,6 +8,11 @@ import { staggerContainerVariants, scaleVariants } from '@/systems/motion/varian
 import Script from 'next/script';
 import { toast } from '@/components/Toast';
 import { getDemoKey, DEMO_KEYS, type DemoKey } from '@/services/demoData';
+import { KeyViewTabs, ViewType } from '@/components/KeyDetail/KeyViewTabs';
+import { KeyViewContent } from '@/components/KeyDetail/KeyViewContent';
+import { getKeySituation } from '@/utils/keySituations';
+import { PreCheckoutSummary } from '@/components/Purchase/PreCheckoutSummary';
+import { ValueReminder } from '@/components/KeyDetail/ValueReminder';
 
 interface Key {
   id: string;
@@ -45,6 +50,7 @@ export default function KeyDetailPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
+  const [activeView, setActiveView] = useState<ViewType>('skim');
 
   useEffect(() => {
     checkAuth();
@@ -423,18 +429,22 @@ export default function KeyDetailPage() {
             ))}
           </motion.div>
 
-          {key.description && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="prose dark:prose-invert mb-6 sm:mb-8 max-w-none"
-            >
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-sm sm:text-base leading-relaxed">
-                {key.description}
-              </p>
-            </motion.div>
-          )}
+          {/* View Tabs */}
+          <KeyViewTabs activeView={activeView} onViewChange={setActiveView} />
+
+          {/* View Content */}
+          <KeyViewContent
+            view={activeView}
+            keyData={{
+              title: key.title,
+              description: key.description,
+              whenYouNeedThis: getKeySituation(key.slug).whenYouNeedThis,
+              whatThisPrevents: getKeySituation(key.slug).whatThisPrevents,
+              outcome: key.outcome,
+              keyType: key.key_type,
+              category: key.category,
+            }}
+          />
 
           {key.tags && key.tags.length > 0 && (
             <motion.div
@@ -548,6 +558,15 @@ export default function KeyDetailPage() {
           className="lg:col-span-1"
         >
           <div className="border rounded-lg p-4 sm:p-6 sticky top-4 dark:bg-slate-800 dark:border-slate-700">
+            {/* Pre-Checkout Summary */}
+            {!key.hasAccess && (
+              <PreCheckoutSummary
+                keyTitle={key.title}
+                priceCents={(key as any).price_cents || 9900}
+                whatUnlocks={key.outcome || getKeySituation(key.slug).whatThisPrevents}
+              />
+            )}
+
             {/* Pricing */}
             {!key.hasAccess && (
               <motion.div
@@ -556,7 +575,7 @@ export default function KeyDetailPage() {
                 transition={{ delay: 0.35 }}
                 className="mb-4 pb-4 border-b dark:border-slate-700"
               >
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Price</div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Investment</div>
                 <motion.div
                   initial={{ scale: 0.9 }}
                   animate={{ scale: 1 }}
@@ -565,7 +584,7 @@ export default function KeyDetailPage() {
                 >
                   ${((key as any).price_cents || 9900) / 100}
                 </motion.div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">One-time purchase, perpetual access</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">One-time, permanent access</div>
               </motion.div>
             )}
 
@@ -649,12 +668,12 @@ export default function KeyDetailPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handlePurchase}
-                        className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm sm:text-base"
+                        className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       >
-                        Unlock KEY for ${((key as any).price_cents || 9900) / 100}
+                        Add to Keyring
                       </motion.button>
                       <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                        Secure checkout via Stripe
+                        Secure checkout via Stripe • ${((key as any).price_cents || 9900) / 100} one-time
                       </p>
                     </>
                   ) : (
@@ -702,6 +721,11 @@ export default function KeyDetailPage() {
                 <div className="text-xs sm:text-sm font-semibold mb-2 dark:text-gray-200">What This Unlocks</div>
                 <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{key.outcome}</div>
               </motion.div>
+            )}
+
+            {/* Value Reminder for Owned Keys */}
+            {key.hasAccess && (
+              <ValueReminder keyTitle={key.title} version={selectedVersion || key.version} />
             )}
 
             {/* Prerequisites */}

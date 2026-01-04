@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedCard } from '@/systems/motion/primitives/AnimatedCard';
 import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
 import { getDemoKeys, DEMO_DISCOVERY_RECOMMENDATIONS, type DemoKey } from '@/services/demoData';
+import { SituationKeyCard } from '@/components/Marketplace/SituationKeyCard';
+import { getKeySituation, groupKeysBySituation, situationGroupLabels } from '@/utils/keySituations';
 
 interface Key {
   id: string;
@@ -380,7 +382,7 @@ export default function MarketplacePage() {
         </motion.div>
       </div>
 
-      {/* Key Grid */}
+      {/* Keys Grid - Grouped by Situation */}
       <main id="main-content">
         <AnimatePresence mode="wait">
           {keys.length === 0 && !loading ? (
@@ -403,7 +405,7 @@ export default function MarketplacePage() {
                     setCategoryFilter('');
                     setSearchQuery('');
                   }}
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                  className="text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
                 >
                   clear all filters
                 </button>
@@ -411,7 +413,7 @@ export default function MarketplacePage() {
               {keys.some(k => k.isDemo) && (
                 <Link
                   href="/signup"
-                  className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   Sign up for full access
                 </Link>
@@ -423,65 +425,50 @@ export default function MarketplacePage() {
               variants={staggerContainerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+              className="space-y-8 sm:space-y-12"
             >
-              {keys.map((key, index) => (
-                <motion.div
-                  key={key.id}
-                  variants={scaleVariants}
-                  custom={index}
-                  layout
-                >
-                  <Link
-                    href={`/marketplace/${key.slug}`}
-                    className="block border rounded-lg p-4 sm:p-6 hover:shadow-lg transition-all duration-200 dark:bg-slate-800 dark:border-slate-700 group"
+              {Object.entries(groupKeysBySituation(keys)).map(([group, groupKeys]) => {
+                if (groupKeys.length === 0) return null;
+                
+                return (
+                  <motion.section
+                    key={group}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-4 sm:space-y-6"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg sm:text-xl font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {key.title}
-                      </h3>
-                      <motion.span
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs rounded whitespace-nowrap ml-2"
-                      >
-                        {key.key_type}
-                      </motion.span>
+                    <div className="flex items-center gap-3 mb-4">
+                      <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                        {situationGroupLabels[group] || situationGroupLabels['other']}
+                      </h2>
+                      <div className="flex-1 h-px bg-gray-200 dark:bg-slate-700" />
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {groupKeys.length} {groupKeys.length === 1 ? 'Key' : 'Keys'}
+                      </span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                      {key.description || 'No description available'}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {key.category && (
-                        <motion.span
-                          whileHover={{ scale: 1.05 }}
-                          className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded"
-                        >
-                          {key.category}
-                        </motion.span>
-                      )}
-                      {key.difficulty && (
-                        <motion.span
-                          whileHover={{ scale: 1.05 }}
-                          className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded"
-                        >
-                          {key.difficulty}
-                        </motion.span>
-                      )}
-                      {key.maturity && (
-                        <motion.span
-                          whileHover={{ scale: 1.05 }}
-                          className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded"
-                        >
-                          {key.maturity}
-                        </motion.span>
-                      )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      {groupKeys.map((key, index) => {
+                        const situation = getKeySituation(key.slug);
+                        return (
+                          <SituationKeyCard
+                            key={key.id}
+                            id={key.id}
+                            slug={key.slug}
+                            title={key.title}
+                            description={key.description}
+                            whenYouNeedThis={situation.whenYouNeedThis}
+                            whatThisPrevents={situation.whatThisPrevents}
+                            hasAccess={false} // TODO: Get from API
+                            keyType={key.key_type}
+                            category={key.category}
+                            index={index}
+                          />
+                        );
+                      })}
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                      Version {key.version} • {key.license_spdx}
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+                  </motion.section>
+                );
+              })}
             </motion.div>
           ) : null}
         </AnimatePresence>
