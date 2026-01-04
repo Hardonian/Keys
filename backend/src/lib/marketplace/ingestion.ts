@@ -12,14 +12,14 @@ import {
   assetsIndexSchema,
   type UnifiedKeyMetadata,
 } from './key-schemas.js';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const ASSETS_ROOT = process.env.KEYS_ASSETS_ROOT || resolve(process.cwd(), '../../keys-assets');
+const ASSETS_ROOT = process.env.KEYS_ASSETS_ROOT || resolve(process.cwd(), '../keys-assets');
 
 /**
  * Get storage path for a key asset
