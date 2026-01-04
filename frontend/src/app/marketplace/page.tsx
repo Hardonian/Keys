@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedCard } from '@/systems/motion/primitives/AnimatedCard';
 import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
+import { getDemoKeys, DEMO_DISCOVERY_RECOMMENDATIONS, type DemoKey } from '@/services/demoData';
 
 interface Key {
   id: string;
@@ -21,7 +22,8 @@ interface Key {
   license_spdx: string;
   outcome?: string;
   maturity?: 'starter' | 'operator' | 'scale' | 'enterprise';
-  created_at: string;
+  created_at?: string;
+  isDemo?: boolean;
 }
 
 interface DiscoveryRecommendation {
@@ -49,8 +51,11 @@ export default function MarketplacePage() {
   useEffect(() => {
     checkAuth();
     fetchKeys();
-    fetchRecommendations();
   }, [keyTypeFilter, categoryFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [isAuthenticated]);
 
   const checkAuth = async () => {
     const supabase = createClient();
@@ -69,46 +74,78 @@ export default function MarketplacePage() {
       if (categoryFilter) params.append('category', categoryFilter);
       if (searchQuery) params.append('search', searchQuery);
 
-      const response = await fetch(`${apiUrl}/marketplace/keys?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch keys');
+      try {
+        const response = await fetch(`${apiUrl}/marketplace/keys?${params.toString()}`);
+        if (response.ok) {
+          const data = await response.json();
+          setKeys(data.keys || []);
+          setError(null);
+          return;
+        }
+      } catch (apiErr) {
+        // Fall through to demo data
       }
 
-      const data = await response.json();
-      setKeys(data.keys || []);
+      // Fallback to demo data for non-authenticated users or API failures
+      const demoKeys = getDemoKeys({
+        key_type: keyTypeFilter || undefined,
+        category: categoryFilter || undefined,
+        search: searchQuery || undefined,
+      });
+      
+      // Convert demo keys to Key format
+      const convertedKeys: Key[] = demoKeys.map(demoKey => ({
+        ...demoKey,
+        created_at: new Date().toISOString(),
+        isDemo: true,
+      }));
+      
+      setKeys(convertedKeys);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to load marketplace');
+      // Even if demo data fails, show empty state gracefully
+      setKeys([]);
+      setError(null);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchRecommendations = async () => {
-    if (!isAuthenticated) return;
-
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      if (isAuthenticated) {
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      if (!session) return;
+        if (session) {
+          try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+            const response = await fetch(`${apiUrl}/marketplace/discover`, {
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            });
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/marketplace/discover`, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setRecommendations(data.recommendations || []);
+            if (response.ok) {
+              const data = await response.json();
+              if (data.recommendations && data.recommendations.length > 0) {
+                setRecommendations(data.recommendations);
+                return;
+              }
+            }
+          } catch (apiErr) {
+            // Fall through to demo recommendations
+          }
+        }
       }
+
+      // Always show demo recommendations for showcase (even if authenticated but no API)
+      setRecommendations(DEMO_DISCOVERY_RECOMMENDATIONS);
     } catch (err) {
-      // Silently fail - recommendations are optional
-      console.error('Failed to fetch recommendations:', err);
+      // Fallback to demo recommendations on error
+      setRecommendations(DEMO_DISCOVERY_RECOMMENDATIONS);
     }
   };
 
@@ -170,9 +207,26 @@ export default function MarketplacePage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center text-red-600 dark:text-red-400"
+          className="text-center max-w-md mx-auto"
         >
-          Error: {error}
+          <div className="mb-4 text-6xl" aria-hidden="true">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Unable to load marketplace
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {error}
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              setError(null);
+              fetchKeys();
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </motion.button>
         </motion.div>
       </div>
     );
@@ -194,10 +248,25 @@ export default function MarketplacePage() {
           Discover and unlock practical capability in Cursor, Jupyter, Node.js, and more. 
           Each key unlocks a specific workflow, component, or runbook you can integrate into your projects.
         </p>
+        {keys.some(k => k.isDemo) && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+          >
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>Demo Mode:</strong> You're viewing sample Keys.{' '}
+              <Link href="/signup" className="underline font-semibold hover:text-blue-900 dark:hover:text-blue-100">
+                Sign up
+              </Link>
+              {' '}to access the full marketplace.
+            </p>
+          </motion.div>
+        )}
 
         {/* Discovery Recommendations */}
         <AnimatePresence>
-          {isAuthenticated && recommendations.length > 0 && (
+          {recommendations.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -314,17 +383,41 @@ export default function MarketplacePage() {
       {/* Key Grid */}
       <main id="main-content">
         <AnimatePresence mode="wait">
-          {keys.length === 0 ? (
+          {keys.length === 0 && !loading ? (
             <motion.div
               key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-center py-12 text-gray-500 dark:text-gray-400"
+              className="text-center py-12"
             >
-              No keys found. Try adjusting your filters.
+              <div className="mb-4 text-6xl" aria-hidden="true">🔍</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                No keys found
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Try adjusting your filters or{' '}
+                <button
+                  onClick={() => {
+                    setKeyTypeFilter('');
+                    setCategoryFilter('');
+                    setSearchQuery('');
+                  }}
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  clear all filters
+                </button>
+              </p>
+              {keys.some(k => k.isDemo) && (
+                <Link
+                  href="/signup"
+                  className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Sign up for full access
+                </Link>
+              )}
             </motion.div>
-          ) : (
+          ) : keys.length > 0 ? (
             <motion.div
               key="grid"
               variants={staggerContainerVariants}
@@ -390,7 +483,7 @@ export default function MarketplacePage() {
                 </motion.div>
               ))}
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </main>
 

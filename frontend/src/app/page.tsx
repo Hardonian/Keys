@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import { SocialProofWithRealMetrics } from '@/components/CRO/SocialProofWithRealMetrics';
 import { UpgradePrompt } from '@/components/Upsell/UpgradePrompt';
 import { FeatureAvailabilityBadge } from '@/components/Features/FeatureAvailabilityBadge';
+import { KeysLogo } from '@/components/Logo';
+import { HeroSection } from '@/components/Hero/HeroSection';
 
 export const metadata: Metadata = {
   title: 'KEYS - The Keyring to Modern Tools',
@@ -17,67 +19,7 @@ export default function Home() {
   return (
     <main id="main-content" className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Hero Section with Visual Impact */}
-      <div className="max-w-6xl w-full">
-        {/* Hero Image/Visual Section */}
-        <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
-          {/* Gradient Background with Animated Elements */}
-          <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 sm:p-12 lg:p-16 rounded-2xl shadow-2xl">
-            {/* Animated Background Pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 left-0 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
-              <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-300 rounded-full blur-3xl animate-pulse delay-1000"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-300 rounded-full blur-3xl animate-pulse delay-500"></div>
-            </div>
-            
-            {/* Content */}
-            <div className="relative z-10 text-center space-y-6 sm:space-y-8">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
-                <span className="text-white text-sm font-semibold">🔑 The Keyring to Modern Tools</span>
-              </div>
-              
-              {/* Main Heading */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight drop-shadow-lg">
-                You Already Have{' '}
-                <span className="bg-gradient-to-r from-yellow-200 via-pink-200 to-purple-200 bg-clip-text text-transparent">
-                  The Tools
-                </span>
-              </h1>
-              
-              {/* Subheading */}
-              <p className="text-xl sm:text-2xl md:text-3xl text-white/95 max-w-3xl mx-auto leading-relaxed font-semibold drop-shadow-md">
-                Here are{' '}
-                <span className="text-yellow-200 font-bold">the keys to unlock them</span>
-              </p>
-              
-              {/* Value Proposition */}
-              <div className="max-w-4xl mx-auto space-y-4">
-                <p className="text-lg sm:text-xl text-white/90 leading-relaxed">
-                  KEYS is a marketplace of structured assets (notebooks, prompts, workflows, playbooks) 
-                  that unlock practical, repeatable capability from external tools—without competing with them.
-                </p>
-                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
-                  <Link href="/marketplace" className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-colors">
-                    <span className="text-white text-sm font-medium">🔧 Cursor Keys</span>
-                    <FeatureAvailabilityBadge status="available" className="!text-xs !px-1.5 !py-0.5" />
-                  </Link>
-                  <Link href="/marketplace" className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-colors">
-                    <span className="text-white text-sm font-medium">📊 Jupyter Keys</span>
-                    <FeatureAvailabilityBadge status="available" className="!text-xs !px-1.5 !py-0.5" />
-                  </Link>
-                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2">
-                    <span className="text-white text-sm font-medium">⚙️ GitHub Keys</span>
-                    <FeatureAvailabilityBadge status="coming-soon" className="!text-xs !px-1.5 !py-0.5" />
-                  </div>
-                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2">
-                    <span className="text-white text-sm font-medium">💳 Stripe Keys</span>
-                    <FeatureAvailabilityBadge status="coming-soon" className="!text-xs !px-1.5 !py-0.5" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <HeroSection />
 
         {/* Supporting Message Section */}
         <div className="max-w-4xl mx-auto text-center space-y-6 mb-8 sm:mb-12">
@@ -129,6 +71,17 @@ export default function Home() {
           >
             <span className="relative z-10">Browse Keys</span>
             <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" aria-hidden="true" />
+          </Link>
+          <Link
+            href="/marketplace?demo=true"
+            className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-300 dark:focus:ring-purple-800 min-w-[200px] text-center border-2 border-white/20"
+            aria-label="Try demo preview"
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <span>✨</span>
+              <span>Try Demo</span>
+            </span>
+            <span className="absolute inset-0 bg-gradient-to-r from-purple-700 to-pink-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" aria-hidden="true" />
           </Link>
           <Link
             href="/profile"

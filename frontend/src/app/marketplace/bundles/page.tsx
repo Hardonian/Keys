@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
+import { toast } from '@/components/Toast';
 
 interface Bundle {
   id: string;
@@ -36,7 +37,16 @@ export default function BundlesPage() {
   useEffect(() => {
     checkAuth();
     fetchBundles();
-  }, [bundleType]);
+    
+    // Handle purchase completion
+    if (searchParams?.get('purchased') === 'true') {
+      toast.success('Bundle purchase successful! Your KEYS are now unlocked.');
+      // Refetch to update entitlements
+      setTimeout(() => {
+        fetchBundles();
+      }, 1000);
+    }
+  }, [bundleType, searchParams]);
 
   const checkAuth = async () => {
     const supabase = createClient();
@@ -140,9 +150,10 @@ export default function BundlesPage() {
       }
 
       const data = await response.json();
+      toast.info('Redirecting to checkout...');
       window.location.href = data.url;
     } catch (err: any) {
-      alert(err.message || 'Failed to start purchase');
+      toast.error(err.message || 'Failed to start purchase. Please try again.');
     }
   };
 

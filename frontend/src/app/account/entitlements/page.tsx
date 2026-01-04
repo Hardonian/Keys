@@ -76,7 +76,24 @@ export default function EntitlementsPage() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600">Error: {error}</div>
+        <div className="text-center max-w-md mx-auto">
+          <div className="mb-4 text-6xl" aria-hidden="true">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Unable to load entitlements
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {error}
+          </p>
+          <button
+            onClick={() => {
+              setError(null);
+              fetchEntitlements();
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }

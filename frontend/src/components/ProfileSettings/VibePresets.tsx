@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/services/supabaseClient';
+import { toast } from '@/components/Toast';
 // VibeConfig imported but not directly used - kept for type reference
 
 interface VibePreset {
@@ -77,14 +78,15 @@ export function VibePresets({
       setPresetName('');
       setShowSaveModal(false);
       fetchPresets();
+      toast.success('Preset saved successfully');
     } catch (error) {
       console.error('Error saving preset:', error);
-      alert('Failed to save preset');
+      toast.error('Failed to save preset. Please try again.');
     }
   }
 
   async function deletePreset(presetId: string) {
-    if (!confirm('Are you sure you want to delete this preset?')) return;
+    if (!window.confirm('Are you sure you want to delete this preset?')) return;
 
     try {
       const { error } = await supabase
@@ -94,9 +96,10 @@ export function VibePresets({
 
       if (error) throw error;
       fetchPresets();
+      toast.success('Preset deleted');
     } catch (error) {
       console.error('Error deleting preset:', error);
-      alert('Failed to delete preset');
+      toast.error('Failed to delete preset. Please try again.');
     }
   }
 

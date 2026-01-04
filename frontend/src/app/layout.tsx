@@ -20,10 +20,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://keys.dev'),
   title: {
-    default: 'Keys - Your AI Co-Founder for Operational Automation',
-    template: '%s | Keys',
+    default: 'KEYS - The Keyring to Modern Tools',
+    template: '%s | KEYS',
   },
-  description: 'Your day-to-day AI co-founder that works alongside Cursor. Operational automation, business process intelligence, and institutional memory. No equity, just results.',
+  description: 'You already have the tools. Here are the keys to unlock them. KEYS is a marketplace of structured assets (notebooks, prompts, workflows) that unlock practical capability in Cursor, Jupyter, GitHub, Stripe, and more.',
   keywords: [
     'AI cofounder',
     'product development',
@@ -70,9 +70,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    siteName: 'Keys',
-    title: 'Keys - Your AI Co-Founder for Operational Automation',
-    description: 'Your day-to-day AI co-founder that works alongside Cursor. Operational automation, business process intelligence, and institutional memory.',
+    siteName: 'KEYS',
+    title: 'KEYS - The Keyring to Modern Tools',
+    description: 'You already have the tools. Here are the keys to unlock them. KEYS is a marketplace of structured assets that unlock practical capability in Cursor, Jupyter, GitHub, Stripe, and more.',
     images: [
       {
         url: '/og-image.png',
@@ -84,8 +84,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Keys - Your AI Co-Founder for Operational Automation',
-    description: 'Your day-to-day AI co-founder that works alongside Cursor. Operational automation and business process intelligence.',
+    title: 'KEYS - The Keyring to Modern Tools',
+    description: 'You already have the tools. Here are the keys to unlock them. KEYS unlocks practical capability in Cursor, Jupyter, GitHub, Stripe, and more.',
     images: ['/og-image.png'],
     creator: '@cursorventure',
   },

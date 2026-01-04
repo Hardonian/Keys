@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
 import Script from 'next/script';
+import { toast } from '@/components/Toast';
+import { getDemoKey, DEMO_KEYS, type DemoKey } from '@/services/demoData';
 
 interface Key {
   id: string;
@@ -27,11 +29,14 @@ interface Key {
   hasAccess?: boolean;
   relatedKeys?: Array<{ id: string; slug: string; title: string; reason: string }>;
   versions?: Array<{ version: string; created_at: string; changelog_md_path?: string }>;
+  price_cents?: number;
+  isDemo?: boolean;
 }
 
 export default function KeyDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
   const [key, setKey] = useState<Key | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +49,16 @@ export default function KeyDetailPage() {
   useEffect(() => {
     checkAuth();
     fetchKey();
-  }, [slug]);
+    
+    // Handle purchase completion
+    if (searchParams?.get('purchased') === 'true') {
+      toast.success('Purchase successful! Your KEY is now unlocked.');
+      // Refetch to update access status
+      setTimeout(() => {
+        fetchKey();
+      }, 1000);
+    }
+  }, [slug, searchParams]);
 
   const checkAuth = async () => {
     const supabase = createClient();
@@ -62,34 +76,63 @@ export default function KeyDetailPage() {
         data: { session },
       } = await supabase.auth.getSession();
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const headers: HeadersInit = {};
-      if (session?.access_token) {
-        headers.Authorization = `Bearer ${session.access_token}`;
-      }
-
-      const response = await fetch(`${apiUrl}/marketplace/keys/${slug}`, { headers });
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('KEY not found');
+      // Try API first
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const headers: HeadersInit = {};
+        if (session?.access_token) {
+          headers.Authorization = `Bearer ${session.access_token}`;
         }
-        throw new Error('Failed to fetch KEY');
+
+        const response = await fetch(`${apiUrl}/marketplace/keys/${slug}`, { headers });
+        if (response.ok) {
+          const data = await response.json();
+          setKey(data.key);
+          setSelectedVersion(data.key.version);
+          setError(null);
+
+          // Track view analytics
+          if (session && data.key.id) {
+            trackView(data.key.id, session.access_token);
+          }
+
+          // Fetch preview if available
+          if (data.key.preview_html_path) {
+            fetchPreview(data.key.preview_public, session?.access_token);
+          }
+          return;
+        }
+      } catch (apiErr) {
+        // Fall through to demo data
       }
 
-      const data = await response.json();
-      setKey(data.key);
-      setSelectedVersion(data.key.version);
-      setError(null);
+      // Fallback to demo data
+      const demoKey = getDemoKey(slug);
+      if (demoKey) {
+        // Get related demo keys (exclude current)
+        const relatedDemoKeys = DEMO_KEYS.filter(k => k.id !== demoKey.id).slice(0, 3).map(k => ({
+          id: k.id,
+          slug: k.slug,
+          title: k.title,
+          reason: `Similar ${k.key_type} key for ${k.category.toLowerCase()}`,
+        }));
 
-      // Track view analytics
-      if (session && data.key.id) {
-        trackView(data.key.id, session.access_token);
+        const convertedKey: Key = {
+          ...demoKey,
+          hasAccess: false,
+          relatedKeys: relatedDemoKeys,
+          versions: [{ version: demoKey.version, created_at: new Date().toISOString() }],
+          price_cents: demoKey.price_cents,
+          isDemo: true,
+        };
+        setKey(convertedKey);
+        setSelectedVersion(demoKey.version);
+        setError(null);
+        return;
       }
 
-      // Fetch preview if available
-      if (data.key.preview_html_path) {
-        fetchPreview(data.key.preview_public, session?.access_token);
-      }
+      // If not found in demo data and API failed, show error
+      throw new Error('KEY not found');
     } catch (err: any) {
       setError(err.message || 'Failed to load KEY');
     } finally {
@@ -167,17 +210,18 @@ export default function KeyDetailPage() {
       if (!response.ok) {
         const error = await response.json();
         if (response.status === 403) {
-          alert(error.message || 'You do not have access to this KEY. Please unlock it first.');
+          toast.error(error.message || 'You do not have access to this KEY. Please unlock it first.');
         } else {
-          alert(error.message || 'Failed to download KEY');
+          toast.error(error.message || 'Failed to download KEY');
         }
         return;
       }
 
       const data = await response.json();
+      toast.success('Download starting...');
       window.location.href = data.downloadUrl;
     } catch (err: any) {
-      alert(err.message || 'Failed to download KEY');
+      toast.error(err.message || 'Failed to download KEY');
     } finally {
       setDownloading(false);
     }
@@ -220,9 +264,10 @@ export default function KeyDetailPage() {
       }
 
       const data = await response.json();
+      toast.info('Redirecting to checkout...');
       window.location.href = data.url;
     } catch (err: any) {
-      alert(err.message || 'Failed to start purchase');
+      toast.error(err.message || 'Failed to start purchase. Please try again.');
     }
   };
 
@@ -251,17 +296,36 @@ export default function KeyDetailPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
+          className="text-center max-w-md mx-auto"
         >
-          <div className="text-red-600 dark:text-red-400 mb-4">Error: {error || 'Key not found'}</div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push('/marketplace')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Back to Marketplace
-          </motion.button>
+          <div className="mb-4 text-6xl" aria-hidden="true">🔍</div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {error?.includes('not found') || !key ? 'KEY not found' : 'Unable to load KEY'}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {error || 'The KEY you\'re looking for doesn\'t exist or has been removed.'}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                setError(null);
+                fetchKey();
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/marketplace')}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+            >
+              Browse Marketplace
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     );
@@ -579,17 +643,50 @@ export default function KeyDetailPage() {
                 </>
               ) : (
                 <>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handlePurchase}
-                    className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm sm:text-base"
-                  >
-                    Unlock KEY for ${((key as any).price_cents || 9900) / 100}
-                  </motion.button>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                    Secure checkout via Stripe
-                  </p>
+                  {isAuthenticated ? (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handlePurchase}
+                        className="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm sm:text-base"
+                      >
+                        Unlock KEY for ${((key as any).price_cents || 9900) / 100}
+                      </motion.button>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                        Secure checkout via Stripe
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mb-3"
+                      >
+                        <p className="text-xs text-blue-800 dark:text-blue-200 mb-2">
+                          <strong>Demo Preview:</strong> This is a sample KEY for showcase.
+                        </p>
+                        <Link
+                          href="/signup"
+                          className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                        >
+                          Sign up to unlock →
+                        </Link>
+                      </motion.div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => router.push('/signin?returnUrl=' + encodeURIComponent(`/marketplace/${slug}`))}
+                        className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors font-medium text-sm sm:text-base"
+                      >
+                        Sign In to Unlock
+                      </motion.button>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                        Unlock for ${((key as any).price_cents || 9900) / 100}
+                      </p>
+                    </>
+                  )}
                 </>
               )}
             </motion.div>

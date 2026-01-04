@@ -1,0 +1,1 @@
+export { KeysLogo } from './KeysLogo';
