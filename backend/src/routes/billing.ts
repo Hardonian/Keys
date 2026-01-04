@@ -199,22 +199,68 @@ router.post(
         const userId = session.client_reference_id || session.metadata?.userId;
 
         if (userId) {
-          // Get tier information from price ID
-          const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
-          const priceId = lineItems.data[0]?.price?.id || '';
-          const { tier, guaranteeCoverage, integrationAccess } = getTierFromPriceId(priceId);
+          // Check if this is a marketplace pack purchase
+          const packSlug = session.metadata?.packSlug;
+          const packId = session.metadata?.packId;
 
-          // Update user subscription status and tier
-          await supabase
-            .from('user_profiles')
-            .update({
-              subscription_status: 'active',
-              subscription_tier: tier,
-              stripe_customer_id: session.customer as string,
-              guarantee_coverage: guaranteeCoverage,
-              integration_access: integrationAccess,
-            })
-            .eq('user_id', userId);
+          if (packSlug || packId) {
+            // Grant marketplace entitlement
+            try {
+              const { grantEntitlement, resolveTenantContext } = await import('../lib/marketplace/entitlements.js');
+              const tenant = await resolveTenantContext(userId);
+
+              // Resolve pack_id if slug was provided
+              let resolvedPackId = packId;
+              if (!resolvedPackId && packSlug) {
+                const { data: pack } = await supabase
+                  .from('marketplace_packs')
+                  .select('id')
+                  .eq('slug', packSlug)
+                  .single();
+                if (pack) {
+                  resolvedPackId = pack.id;
+                }
+              }
+
+              if (resolvedPackId) {
+                const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+                const priceId = lineItems.data[0]?.price?.id || '';
+                const subscriptionId = session.subscription as string | null;
+
+                await grantEntitlement(
+                  tenant.tenantId,
+                  tenant.tenantType,
+                  resolvedPackId,
+                  'stripe',
+                  {
+                    stripeSubscriptionId: subscriptionId || undefined,
+                    stripePriceId: priceId || undefined,
+                  }
+                );
+              }
+            } catch (error) {
+              console.error('Failed to grant marketplace entitlement:', error);
+              // Don't fail the webhook, but log the error
+            }
+          } else {
+            // Regular subscription purchase
+            // Get tier information from price ID
+            const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+            const priceId = lineItems.data[0]?.price?.id || '';
+            const { tier, guaranteeCoverage, integrationAccess } = getTierFromPriceId(priceId);
+
+            // Update user subscription status and tier
+            await supabase
+              .from('user_profiles')
+              .update({
+                subscription_status: 'active',
+                subscription_tier: tier,
+                stripe_customer_id: session.customer as string,
+                guarantee_coverage: guaranteeCoverage,
+                integration_access: integrationAccess,
+              })
+              .eq('user_id', userId);
+          }
         }
         break;
       }
@@ -231,21 +277,58 @@ router.post(
           .single();
 
         if (profile) {
-          // Get tier information from subscription items
+          // Check if this subscription is for marketplace packs
           const priceId = subscription.items.data[0]?.price?.id || '';
-          const { tier, guaranteeCoverage, integrationAccess } = getTierFromPriceId(priceId);
-          
-          const isActive = subscription.status === 'active';
-          
-          await supabase
-            .from('user_profiles')
-            .update({
-              subscription_status: isActive ? 'active' : 'inactive',
-              subscription_tier: isActive ? tier : 'free',
-              guarantee_coverage: isActive ? guaranteeCoverage : [],
-              integration_access: isActive ? integrationAccess : [],
-            })
-            .eq('user_id', profile.user_id);
+          const productId = subscription.items.data[0]?.price?.product as string;
+
+          // Check if product metadata indicates marketplace pack
+          let isMarketplaceSubscription = false;
+          if (productId) {
+            try {
+              const product = await stripe.products.retrieve(productId);
+              isMarketplaceSubscription = product.metadata?.type === 'marketplace_pack';
+            } catch {
+              // Ignore errors
+            }
+          }
+
+          if (isMarketplaceSubscription) {
+            // Handle marketplace subscription updates
+            const isActive = subscription.status === 'active';
+            
+            // Find entitlements linked to this subscription
+            const { data: entitlements } = await supabase
+              .from('marketplace_entitlements')
+              .select('id, pack_id')
+              .eq('stripe_subscription_id', subscription.id);
+
+            if (entitlements) {
+              for (const entitlement of entitlements) {
+                await supabase
+                  .from('marketplace_entitlements')
+                  .update({
+                    status: isActive ? 'active' : 'inactive',
+                    ends_at: isActive ? null : new Date().toISOString(),
+                  })
+                  .eq('id', entitlement.id);
+              }
+            }
+          } else {
+            // Regular subscription update
+            const { tier, guaranteeCoverage, integrationAccess } = getTierFromPriceId(priceId);
+            
+            const isActive = subscription.status === 'active';
+            
+            await supabase
+              .from('user_profiles')
+              .update({
+                subscription_status: isActive ? 'active' : 'inactive',
+                subscription_tier: isActive ? tier : 'free',
+                guarantee_coverage: isActive ? guaranteeCoverage : [],
+                integration_access: isActive ? integrationAccess : [],
+              })
+              .eq('user_id', profile.user_id);
+          }
         }
         break;
       }

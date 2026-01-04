@@ -21,6 +21,7 @@ import { exportRouter } from './routes/export.js';
 import { moatMetricsRouter } from './routes/moat-metrics.js';
 import { apmRouter } from './routes/apm.js';
 import { auditRouter } from './routes/audit.js';
+import { marketplaceRouter } from './routes/marketplace.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { optionalAuthMiddleware, authMiddleware } from './middleware/auth.js';
 import { userRateLimiterMiddleware, apiRateLimiter } from './middleware/rateLimit.js';
@@ -156,6 +157,9 @@ app.use('/apm', apmRouter);
 
 // Audit routes (require auth, admin only)
 app.use('/audit', auditRouter);
+
+// Marketplace routes (public listing, auth required for downloads)
+app.use('/marketplace', marketplaceRouter);
 
 // Initialize WebSocket server
 const wsServer = new WebSocketServer();
