@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
+import { toast } from '@/components/Toast';
 
 interface Entitlement {
   keyId: string;
@@ -15,13 +16,23 @@ interface Entitlement {
 
 export default function AccountKeysPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [entitlements, setEntitlements] = useState<Entitlement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEntitlements();
-  }, []);
+    
+    // Handle purchase completion
+    if (searchParams?.get('purchased') === 'true') {
+      toast.success('Purchase successful! Your KEYS are now unlocked.');
+      // Refetch to show new entitlements
+      setTimeout(() => {
+        fetchEntitlements();
+      }, 1000);
+    }
+  }, [searchParams]);
 
   const fetchEntitlements = async () => {
     try {
@@ -60,7 +71,7 @@ export default function AccountKeysPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading your Keyring...</div>
+        <div className="text-center">Loading your Keys...</div>
       </div>
     );
   }
@@ -68,7 +79,24 @@ export default function AccountKeysPage() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600">Error: {error}</div>
+        <div className="text-center max-w-md mx-auto">
+          <div className="mb-4 text-6xl" aria-hidden="true">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Unable to load your Keys
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {error}
+          </p>
+          <button
+            onClick={() => {
+              setError(null);
+              fetchEntitlements();
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }

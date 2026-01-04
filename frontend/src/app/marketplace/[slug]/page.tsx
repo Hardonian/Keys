@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
 import Script from 'next/script';
+import { toast } from '@/components/Toast';
 
 interface Key {
   id: string;
@@ -32,6 +33,7 @@ interface Key {
 export default function KeyDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
   const [key, setKey] = useState<Key | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,16 @@ export default function KeyDetailPage() {
   useEffect(() => {
     checkAuth();
     fetchKey();
-  }, [slug]);
+    
+    // Handle purchase completion
+    if (searchParams?.get('purchased') === 'true') {
+      toast.success('Purchase successful! Your KEY is now unlocked.');
+      // Refetch to update access status
+      setTimeout(() => {
+        fetchKey();
+      }, 1000);
+    }
+  }, [slug, searchParams]);
 
   const checkAuth = async () => {
     const supabase = createClient();
@@ -167,17 +178,18 @@ export default function KeyDetailPage() {
       if (!response.ok) {
         const error = await response.json();
         if (response.status === 403) {
-          alert(error.message || 'You do not have access to this KEY. Please unlock it first.');
+          toast.error(error.message || 'You do not have access to this KEY. Please unlock it first.');
         } else {
-          alert(error.message || 'Failed to download KEY');
+          toast.error(error.message || 'Failed to download KEY');
         }
         return;
       }
 
       const data = await response.json();
+      toast.success('Download starting...');
       window.location.href = data.downloadUrl;
     } catch (err: any) {
-      alert(err.message || 'Failed to download KEY');
+      toast.error(err.message || 'Failed to download KEY');
     } finally {
       setDownloading(false);
     }
@@ -220,9 +232,10 @@ export default function KeyDetailPage() {
       }
 
       const data = await response.json();
+      toast.info('Redirecting to checkout...');
       window.location.href = data.url;
     } catch (err: any) {
-      alert(err.message || 'Failed to start purchase');
+      toast.error(err.message || 'Failed to start purchase. Please try again.');
     }
   };
 
@@ -251,17 +264,36 @@ export default function KeyDetailPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
+          className="text-center max-w-md mx-auto"
         >
-          <div className="text-red-600 dark:text-red-400 mb-4">Error: {error || 'Key not found'}</div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push('/marketplace')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Back to Marketplace
-          </motion.button>
+          <div className="mb-4 text-6xl" aria-hidden="true">🔍</div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {error?.includes('not found') || !key ? 'KEY not found' : 'Unable to load KEY'}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {error || 'The KEY you\'re looking for doesn\'t exist or has been removed.'}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                setError(null);
+                fetchKey();
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/marketplace')}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+            >
+              Browse Marketplace
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     );
