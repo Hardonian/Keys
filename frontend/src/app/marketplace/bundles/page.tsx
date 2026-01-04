@@ -41,6 +41,37 @@ function BundlesContent() {
     setIsAuthenticated(!!user);
   }, []);
 
+  const fetchDiscounts = useCallback(async (bundlesList: Bundle[]) => {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) return;
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const discountMap: Record<string, BundleDiscount> = {};
+
+    for (const bundle of bundlesList) {
+      try {
+        const response = await fetch(`${apiUrl}/marketplace/bundles/${bundle.slug}/discount`, {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (response.ok) {
+          const discount = await response.json();
+          discountMap[bundle.id] = discount;
+        }
+      } catch {
+        // Silently fail
+      }
+    }
+
+    setDiscounts(discountMap);
+  }, []);
+
   const fetchBundles = useCallback(async () => {
     try {
       setLoading(true);
@@ -81,37 +112,6 @@ function BundlesContent() {
       }, 1000);
     }
   }, [bundleType, searchParams, checkAuth, fetchBundles]);
-
-  const fetchDiscounts = useCallback(async (bundlesList: Bundle[]) => {
-    const supabase = createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) return;
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const discountMap: Record<string, BundleDiscount> = {};
-
-    for (const bundle of bundlesList) {
-      try {
-        const response = await fetch(`${apiUrl}/marketplace/bundles/${bundle.slug}/discount`, {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-
-        if (response.ok) {
-          const discount = await response.json();
-          discountMap[bundle.id] = discount;
-        }
-      } catch {
-        // Silently fail
-      }
-    }
-
-    setDiscounts(discountMap);
-  }, []);
 
   const handlePurchase = useCallback(async (bundleSlug: string) => {
     if (!isAuthenticated) {
