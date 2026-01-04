@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '../utils/logger.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -75,7 +76,11 @@ export async function hasEntitlement(
       entitlementId: entitlement.id,
     };
   } catch (error) {
-    console.error('Error checking entitlement:', error);
+    logger.error('Error checking entitlement', error as Error, {
+      tenantId,
+      tenantType,
+      keyIdOrSlug,
+    });
     // Fail closed - no access on error
     return { hasAccess: false };
   }

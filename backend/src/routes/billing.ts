@@ -4,6 +4,7 @@ import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validation.js';
 import { z } from 'zod';
 import Stripe from 'stripe';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
@@ -182,7 +183,10 @@ router.post(
       const rawBody = req.body instanceof Buffer ? req.body : Buffer.from(JSON.stringify(req.body));
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err) {
-      console.error('Webhook signature verification failed:', err);
+      logger.error('Webhook signature verification failed', err as Error, {
+        requestId: req.headers['x-request-id'] as string,
+        eventId: req.body?.id,
+      });
       return res.status(400).json({ error: 'Invalid signature' });
     }
 
@@ -204,12 +208,21 @@ router.post(
       return res.json({ received: true, duplicate: true });
     }
 
-    // Record event processing start
-    await supabase.from('stripe_webhook_events').insert({
+    // Record event processing start (with error handling)
+    const { error: insertError } = await supabase.from('stripe_webhook_events').insert({
       stripe_event_id: event.id,
       event_type: event.type,
-      status: 'processed',
+      status: 'processing', // Start as 'processing', update to 'processed' on success
     });
+
+    if (insertError && !insertError.message.includes('duplicate')) {
+      logger.error('Failed to record webhook event', insertError as any, {
+        requestId: req.headers['x-request-id'] as string,
+        eventId: event.id,
+        eventType: event.type,
+      });
+      // Continue processing even if recording fails
+    }
 
     // Handle different event types
     switch (event.type) {
@@ -268,7 +281,12 @@ router.post(
                 });
               }
             } catch (error) {
-              console.error('Failed to grant marketplace key entitlement:', error);
+              logger.error('Failed to grant marketplace key entitlement', error as Error, {
+                requestId: req.headers['x-request-id'] as string,
+                userId,
+                keyId: resolvedKeyId,
+                eventId: event.id,
+              });
               // Don't fail the webhook, but log the error
             }
           } else if (purchaseType === 'bundle' && (bundleSlug || bundleId)) {
@@ -316,7 +334,12 @@ router.post(
                 }
               }
             } catch (error) {
-              console.error('Failed to grant bundle entitlements:', error);
+              logger.error('Failed to grant bundle entitlements', error as Error, {
+                requestId: req.headers['x-request-id'] as string,
+                userId,
+                bundleId: resolvedBundleId,
+                eventId: event.id,
+              });
               // Don't fail the webhook, but log the error
             }
           } else {
@@ -515,7 +538,12 @@ router.post(
                     entitlement.tenant_type
                   );
                 } catch (error) {
-                  console.error('Failed to revoke entitlement:', error);
+                  logger.error('Failed to revoke entitlement', error as Error, {
+                    requestId: req.headers['x-request-id'] as string,
+                    tenantId: entitlement.tenant_id,
+                    keyId: entitlement.key_id,
+                    eventId: event.id,
+                  });
                 }
               }
             }
@@ -574,7 +602,12 @@ router.post(
                         .eq('tenant_type', tenant.tenantType)
                         .eq('key_id', keyId);
                     } catch (error) {
-                      console.error('Failed to revoke entitlement on refund:', error);
+                      logger.error('Failed to revoke entitlement on refund', error as Error, {
+                        requestId: req.headers['x-request-id'] as string,
+                        userId,
+                        keyId,
+                        eventId: event.id,
+                      });
                     }
                   }
                 } else if (purchaseType === 'bundle') {
@@ -593,7 +626,12 @@ router.post(
                         try {
                           await revokeEntitlement(tenant.tenantId, keyId, tenant.tenantType);
                         } catch (error) {
-                          console.error('Failed to revoke bundle entitlement on refund:', error);
+                          logger.error('Failed to revoke bundle entitlement on refund', error as Error, {
+                            requestId: req.headers['x-request-id'] as string,
+                            userId,
+                            bundleId,
+                            eventId: event.id,
+                          });
                         }
                       }
                     }
@@ -602,15 +640,37 @@ router.post(
               }
             }
           } catch (error) {
-            console.error('Failed to process refund:', error);
+            logger.error('Failed to process refund', error as Error, {
+              requestId: req.headers['x-request-id'] as string,
+              chargeId: charge.id,
+              eventId: event.id,
+            });
           }
         }
         break;
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.warn('Unhandled Stripe event type', {
+          requestId: req.headers['x-request-id'] as string,
+          eventType: event.type,
+          eventId: event.id,
+        });
     }
+
+    // Mark event as successfully processed
+    await supabase
+      .from('stripe_webhook_events')
+      .update({ status: 'processed' })
+      .eq('stripe_event_id', event.id)
+      .catch((err) => {
+        // Log but don't fail if update fails
+        logger.warn('Failed to update webhook event status', {
+          requestId: req.headers['x-request-id'] as string,
+          eventId: event.id,
+          error: err,
+        });
+      });
 
     res.json({ received: true });
   })

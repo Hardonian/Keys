@@ -160,6 +160,9 @@ export default function MarketplacePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded">
+        Skip to main content
+      </a>
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-4">KEYS Marketplace</h1>
         <p className="text-gray-600 mb-6">
@@ -201,16 +204,26 @@ export default function MarketplacePage() {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
+          <label htmlFor="search-keys" className="sr-only">
+            Search keys
+          </label>
           <input
+            id="search-keys"
             type="text"
             placeholder="Search keys..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search keys"
             className="px-4 py-2 border rounded-lg flex-1 min-w-[200px]"
           />
+          <label htmlFor="key-type-filter" className="sr-only">
+            Filter by key type
+          </label>
           <select
+            id="key-type-filter"
             value={keyTypeFilter}
             onChange={(e) => setKeyTypeFilter(e.target.value)}
+            aria-label="Filter by key type"
             className="px-4 py-2 border rounded-lg"
           >
             <option value="">All Types</option>
@@ -221,23 +234,31 @@ export default function MarketplacePage() {
             ))}
           </select>
           {categories.length > 0 && (
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg"
-            >
-              <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+            <>
+              <label htmlFor="category-filter" className="sr-only">
+                Filter by category
+              </label>
+              <select
+                id="category-filter"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                aria-label="Filter by category"
+                className="px-4 py-2 border rounded-lg"
+              >
+                <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </>
           )}
         </div>
       </div>
 
       {/* Key Grid */}
+      <main id="main-content">
       {keys.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           No keys found. Try adjusting your filters.
@@ -283,6 +304,7 @@ export default function MarketplacePage() {
           ))}
         </div>
       )}
+      </main>
 
       {/* Bundles Section */}
       <div className="mt-12">

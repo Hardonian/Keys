@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { codeRepoAdapter } from '../integrations/codeRepoAdapter.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 const supabase = createClient(
@@ -44,7 +45,10 @@ router.post('/code-repo', async (req, res) => {
     const userId = await getUserIdFromRepo(webhook.repository);
 
     if (!userId) {
-      console.warn(`No user found for repository: ${webhook.repository}`);
+      logger.warn('No user found for repository', {
+        repository: webhook.repository,
+        eventType,
+      });
       return res.status(200).json({ received: true }); // Return 200 to acknowledge webhook
     }
 
@@ -70,19 +74,29 @@ router.post('/code-repo', async (req, res) => {
       .single();
 
     if (saveError) {
-      console.error('Error saving code repo webhook event:', saveError);
+      logger.error('Error saving code repo webhook event', saveError as any, {
+        userId,
+        eventType,
+        repository: webhook.repository,
+      });
       return res.status(500).json({ error: 'Failed to save event' });
     }
 
     // Trigger background processing (async, don't wait)
     processWebhookEvent(userId, eventRecord).catch((error) => {
-      console.error('Error processing webhook event:', error);
+      logger.error('Error processing webhook event', error as Error, {
+        userId,
+        eventId: eventRecord.id,
+        eventType,
+      });
     });
 
     // Acknowledge webhook immediately
     res.status(200).json({ received: true, eventId: eventRecord.id });
   } catch (error) {
-    console.error('Error processing code repo webhook:', error);
+    logger.error('Error processing code repo webhook', error as Error, {
+      repository: req.body?.repository,
+    });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -124,18 +138,29 @@ router.post('/supabase', async (req, res) => {
       .single();
 
     if (saveError) {
-      console.error('Error saving Supabase webhook event:', saveError);
+      logger.error('Error saving Supabase webhook event', saveError as any, {
+        userId,
+        eventType,
+        table,
+      });
       return res.status(500).json({ error: 'Failed to save event' });
     }
 
     // Trigger background processing
     processWebhookEvent(userId, eventRecord).catch((error) => {
-      console.error('Error processing webhook event:', error);
+      logger.error('Error processing webhook event', error as Error, {
+        userId,
+        eventId: eventRecord.id,
+        eventType,
+      });
     });
 
     res.status(200).json({ received: true, eventId: eventRecord.id });
   } catch (error) {
-    console.error('Error processing Supabase webhook:', error);
+    logger.error('Error processing Supabase webhook', error as Error, {
+      table: req.body?.table,
+      eventType: req.body?.event_type,
+    });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -256,7 +281,10 @@ async function processWebhookEvent(userId: string, eventRecord: any) {
         .eq('id', eventRecord.id);
     }
   } catch (error) {
-    console.error('Error processing webhook event:', error);
+    logger.error('Error processing webhook event', error as Error, {
+      userId,
+      eventId: eventRecord.id,
+    });
   }
 }
 
