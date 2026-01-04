@@ -46,7 +46,7 @@ export function generateKeyMetadata(key: {
       key.category,
       ...key.tags,
       'keys marketplace',
-    ].filter(Boolean),
+    ].filter((kw): kw is string => Boolean(kw)),
     openGraph: {
       title: `${key.title} - KEYS Marketplace`,
       description: key.description || `Discover ${key.title} on KEYS Marketplace`,

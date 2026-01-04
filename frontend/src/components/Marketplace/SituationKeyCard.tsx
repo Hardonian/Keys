@@ -17,7 +17,7 @@ interface SituationKeyCardProps {
 }
 
 export function SituationKeyCard({
-  id,
+  id: _id, // eslint-disable-line @typescript-eslint/no-unused-vars
   slug,
   title,
   description,

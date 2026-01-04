@@ -24,7 +24,7 @@ export function HeroSection() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: 'easeOut',
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   };
@@ -35,7 +35,7 @@ export function HeroSection() {
       scale: 1,
       rotate: 0,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 200,
         damping: 15,
         duration: 0.8,
@@ -49,7 +49,7 @@ export function HeroSection() {
       opacity: 1,
       transition: {
         duration: 1,
-        ease: 'easeIn',
+        ease: [0.4, 0, 1, 1] as const,
       },
     },
   };

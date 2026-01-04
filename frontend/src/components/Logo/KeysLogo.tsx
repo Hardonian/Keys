@@ -16,7 +16,7 @@ export function KeysLogo({ size = 64, animated = true, className = '' }: KeysLog
       opacity: 1,
       transition: {
         duration: 0.5,
-        ease: 'easeOut',
+        ease: [0.4, 0, 0.2, 1] as const,
       },
     },
   };
@@ -28,7 +28,7 @@ export function KeysLogo({ size = 64, animated = true, className = '' }: KeysLog
       scale: 1,
       transition: {
         delay: 0.2,
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 200,
         damping: 15,
       },
@@ -42,7 +42,7 @@ export function KeysLogo({ size = 64, animated = true, className = '' }: KeysLog
       opacity: 1,
       transition: {
         delay: 0.4,
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 150,
         damping: 12,
       },

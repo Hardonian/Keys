@@ -28,7 +28,7 @@ export default function AdminMarketplacePage() {
       let parsedJson;
       try {
         parsedJson = JSON.parse(libraryJson);
-      } catch (err) {
+      } catch {
         throw new Error('Invalid JSON format');
       }
 

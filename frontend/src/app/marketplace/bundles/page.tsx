@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from '@/components/Toast';
 
@@ -105,7 +104,7 @@ export default function BundlesPage() {
           const discount = await response.json();
           discountMap[bundle.id] = discount;
         }
-      } catch (err) {
+      } catch {
         // Silently fail
       }
     }

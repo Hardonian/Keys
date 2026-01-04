@@ -3,8 +3,6 @@ import { Metadata } from 'next';
 import { SocialProofWithRealMetrics } from '@/components/CRO/SocialProofWithRealMetrics';
 import { UpgradePrompt } from '@/components/Upsell/UpgradePrompt';
 import { FeatureAvailabilityBadge } from '@/components/Features/FeatureAvailabilityBadge';
-import { KeysLogo } from '@/components/Logo';
-import { HeroSection } from '@/components/Hero/HeroSection';
 import { WelcomingHero } from '@/components/Home/WelcomingHero';
 import { SituationEntryTiles } from '@/components/Home/SituationEntryTiles';
 
@@ -224,7 +222,6 @@ export default function Home() {
             </Link>
           </div>
         </nav>
-      </div>
 
       {/* Social Proof Section */}
       <SocialProofWithRealMetrics />

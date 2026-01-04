@@ -3,12 +3,12 @@
 import { motion } from 'framer-motion';
 
 interface PreCheckoutSummaryProps {
-  keyTitle: string;
-  priceCents: number;
+  keyTitle?: string; // eslint-disable-line @typescript-eslint/no-unused-vars
+  priceCents?: number; // eslint-disable-line @typescript-eslint/no-unused-vars
   whatUnlocks: string;
 }
 
-export function PreCheckoutSummary({ keyTitle, priceCents, whatUnlocks }: PreCheckoutSummaryProps) {
+export function PreCheckoutSummary({ whatUnlocks }: PreCheckoutSummaryProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}

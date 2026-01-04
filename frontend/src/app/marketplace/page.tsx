@@ -2,12 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AnimatedCard } from '@/systems/motion/primitives/AnimatedCard';
 import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
-import { getDemoKeys, DEMO_DISCOVERY_RECOMMENDATIONS, type DemoKey } from '@/services/demoData';
+import { getDemoKeys, DEMO_DISCOVERY_RECOMMENDATIONS } from '@/services/demoData';
 import { SituationKeyCard } from '@/components/Marketplace/SituationKeyCard';
 import { getKeySituation, groupKeysBySituation, situationGroupLabels } from '@/utils/keySituations';
 
@@ -40,7 +38,6 @@ interface DiscoveryRecommendation {
 }
 
 export default function MarketplacePage() {
-  const router = useRouter();
   const [keys, setKeys] = useState<Key[]>([]);
   const [recommendations, setRecommendations] = useState<DiscoveryRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,7 +81,7 @@ export default function MarketplacePage() {
           setError(null);
           return;
         }
-      } catch (apiErr) {
+      } catch {
         // Fall through to demo data
       }
 
@@ -104,7 +101,7 @@ export default function MarketplacePage() {
       
       setKeys(convertedKeys);
       setError(null);
-    } catch (err: any) {
+    } catch {
       // Even if demo data fails, show empty state gracefully
       setKeys([]);
       setError(null);
@@ -137,7 +134,7 @@ export default function MarketplacePage() {
                 return;
               }
             }
-          } catch (apiErr) {
+          } catch {
             // Fall through to demo recommendations
           }
         }
@@ -145,7 +142,7 @@ export default function MarketplacePage() {
 
       // Always show demo recommendations for showcase (even if authenticated but no API)
       setRecommendations(DEMO_DISCOVERY_RECOMMENDATIONS);
-    } catch (err) {
+    } catch {
       // Fallback to demo recommendations on error
       setRecommendations(DEMO_DISCOVERY_RECOMMENDATIONS);
     }
@@ -380,7 +377,7 @@ export default function MarketplacePage() {
             </>
           )}
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Keys Grid - Grouped by Situation */}
       <main id="main-content">

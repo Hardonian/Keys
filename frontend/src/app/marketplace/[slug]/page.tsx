@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { motion, AnimatePresence } from 'framer-motion';
-import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
+import { motion } from 'framer-motion';
 import Script from 'next/script';
 import { toast } from '@/components/Toast';
-import { getDemoKey, DEMO_KEYS, type DemoKey } from '@/services/demoData';
+import { getDemoKey, DEMO_KEYS } from '@/services/demoData';
 import { KeyViewTabs, ViewType } from '@/components/KeyDetail/KeyViewTabs';
 import { KeyViewContent } from '@/components/KeyDetail/KeyViewContent';
 import { getKeySituation } from '@/utils/keySituations';
@@ -108,7 +108,7 @@ export default function KeyDetailPage() {
           }
           return;
         }
-      } catch (apiErr) {
+      } catch {
         // Fall through to demo data
       }
 
@@ -160,7 +160,7 @@ export default function KeyDetailPage() {
           key_id: keyId,
         }),
       });
-    } catch (err) {
+    } catch {
       // Silently fail
     }
   };
@@ -415,7 +415,7 @@ export default function KeyDetailPage() {
               key.difficulty && { label: key.difficulty, className: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' },
               key.maturity && { label: key.maturity, className: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200' },
               { label: key.license_spdx, className: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' },
-            ].filter(Boolean).map((badge, idx) => (
+            ].filter((badge): badge is { label: string; className: string } => Boolean(badge)).map((badge, idx) => (
               <motion.span
                 key={idx}
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -548,7 +548,7 @@ export default function KeyDetailPage() {
               </div>
             </motion.div>
           )}
-        </div>
+        </motion.div>
 
         {/* Sidebar */}
         <motion.div

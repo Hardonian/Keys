@@ -1,8 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
 export type ViewType = 'skim' | 'visual' | 'step-by-step' | 'narrative';
 
 interface KeyViewTabsProps {
