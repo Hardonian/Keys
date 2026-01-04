@@ -1,298 +1,301 @@
-# KEYS Revenue Engine — Pricing Model
+# KEYS Pricing Model
 
 **Version**: 1.0.0  
-**Last Updated**: 2024-12-30  
-**Status**: Production — Canonical pricing model for KEYS marketplace  
-**Purpose**: Define SKUs, bundles, subscriptions, and value justification
+**Last Updated**: 2025-01-XX  
+**Status**: Pre-Hardening — Commercial Operational  
+**Purpose**: Complete pricing structure for KEYS marketplace
 
 ---
 
-## Core Revenue Principles
+## Pricing Philosophy
 
-1. **Access is granted only by server-verified entitlement**
-2. **UI reflects entitlement; it never defines it**
-3. **Stripe is the source of truth for payment events**
-4. **KEYS is the source of truth for access state**
-5. **Revocation must work as reliably as granting**
-6. **Pricing must be explainable to a buyer in one sentence**
+KEYS pricing is based on **value delivered**, not cost to produce. Each KEY solves a specific problem that would otherwise require:
+- Time investment (hours of research, trial-and-error)
+- Risk exposure (security vulnerabilities, compliance gaps)
+- Opportunity cost (delayed features, missed deadlines)
 
----
-
-## Pricing Structure Overview
-
-KEYS revenue model supports three purchase types:
-
-1. **Individual KEY purchases** — One-time, perpetual access
-2. **Bundles** — Multiple KEYS at discounted price
-3. **Subscription Tier** — Access to all current + future KEYS
+**Fair pricing** means:
+- Individual KEYS priced at fraction of consultant cost
+- Bundles provide clear value (discount vs. sum of parts)
+- Upgrades credit owned KEYS (no double charging)
+- Subscription provides unlimited access for power users
 
 ---
 
-## A) Individual KEYS
+## SKU Structure
 
-### Pricing Tiers
+### A) Individual KEYS (One-Time Purchase)
 
-#### Starter Tier ($49 - $99)
-- **Target**: Individual developers, small projects
-- **Problem Solved**: Common development tasks (UI components, simple integrations)
-- **Time Saved**: 2-4 hours of development
-- **Risk Avoided**: Low (non-critical features)
-- **Who Buys**: Solo developers, side projects
-- **Why Fair**: Engineer rate ($50-100/hr) × time saved (2-4hr) = $100-400 value. KEY price ($49-99) = 2-8x ROI.
+#### Pricing Tiers by Maturity
 
-**Example KEYS**:
-- `node-ui-component` ($49)
-- `next-auth-integration` ($79)
-- `jupyter-data-viz` ($99)
+| Maturity | Price Range | Rationale |
+|----------|-------------|-----------|
+| **Starter** | $29 - $49 | Basic patterns, quick wins. Replaces 2-4 hours of research. |
+| **Operator** | $79 - $149 | Production-ready patterns. Replaces 4-8 hours of implementation + testing. |
+| **Scale** | $199 - $299 | Enterprise patterns with compliance. Replaces 8-16 hours + security review. |
+| **Enterprise** | $399 - $599 | Complex, multi-system patterns. Replaces 16+ hours + architecture review. |
 
-#### Operator Tier ($99 - $199)
-- **Target**: Production applications, teams
-- **Problem Solved**: Production-critical features (webhooks, RLS, background jobs)
-- **Time Saved**: 4-8 hours + prevents critical bugs
-- **Risk Avoided**: Medium ($500-2,000 in security/compliance risk)
-- **Who Buys**: Engineering teams, production apps
-- **Why Fair**: Engineer rate ($100-150/hr) × time saved (4-8hr) + risk avoided ($500-2k) = $900-3,200 value. KEY price ($99-199) = 4-32x ROI.
+#### Pricing by Key Type
 
-**Example KEYS**:
-- `stripe-webhook-entitlement` ($149)
-- `supabase-rls-guard` ($179)
-- `background-reconciliation` ($199)
+| Key Type | Base Price | Adjustment Factor |
+|----------|------------|-------------------|
+| **Runbook KEYS** | $99 | +$50 for P0/P1 severity (incident response value) |
+| **Node/Next KEYS** | $79 | +$30 for integration type (complexity) |
+| **Jupyter KEYS** | $49 | +$20 for enterprise maturity (compliance value) |
 
-#### Scale Tier ($199 - $299)
-- **Target**: Enterprise applications, critical systems
-- **Problem Solved**: Compliance, audit, policy enforcement
-- **Time Saved**: 8-16 hours + prevents major incidents
-- **Risk Avoided**: High ($2,000-10,000 in security/compliance/outage risk)
-- **Who Buys**: Enterprise teams, regulated industries
-- **Why Fair**: Engineer rate ($150-200/hr) × time saved (8-16hr) + risk avoided ($2k-10k) = $3,200-13,200 value. KEY price ($199-299) = 10-66x ROI.
+#### Example SKUs
 
-**Example KEYS**:
-- `audit-log-capture` ($249)
-- `policy-enforcement` ($279)
-- `compliance-validation` ($299)
+**Runbook: Stripe Webhook Failure**
+- **Slug**: `stripe-webhook-failure`
+- **Maturity**: `operator`
+- **Severity**: P2
+- **Price**: $99
+- **Problem Solved**: Diagnose and resolve webhook delivery failures
+- **Time Saved**: 4-6 hours of debugging + documentation
+- **Risk Avoided**: Payment processing failures, customer churn
+- **Buyer Persona**: SRE, DevOps engineer, backend lead
+- **Why Fair**: Consultant would charge $500-800 for same analysis
 
-### Update Policy
+**Node Key: Audit Log Capture**
+- **Slug**: `audit-log-capture`
+- **Maturity**: `operator`
+- **Key Type**: `ui`
+- **Price**: $79
+- **Problem Solved**: Compliance-ready audit log dashboard widget
+- **Time Saved**: 3-4 hours of implementation + testing
+- **Risk Avoided**: Compliance gaps, audit failures
+- **Buyer Persona**: Full-stack developer, compliance officer
+- **Why Fair**: Component library equivalent costs $200-400/year
 
-**Perpetual KEYS**:
-- One-time purchase grants lifetime access
-- Updates included for purchased version
-- Major version upgrades may require repurchase (clearly communicated)
-
-**Scope**:
-- **User scope**: Purchased by individual, accessible to that user
-- **Tenant scope**: Purchased by organization, accessible to all org members
+**Jupyter Key: Webhook Event Analysis**
+- **Slug**: `jupyter-webhook-event-analysis`
+- **Maturity**: `operator`
+- **Price**: $49
+- **Problem Solved**: Analysis notebook for webhook delivery patterns
+- **Time Saved**: 2-3 hours of notebook creation + validation
+- **Risk Avoided**: Missing failure patterns, incomplete analysis
+- **Buyer Persona**: Data analyst, SRE with analysis needs
+- **Why Fair**: Custom analysis notebook development costs $150-300
 
 ---
 
-## B) Bundles
+### B) Bundles (One-Time Purchase)
 
-Bundles group related KEYS at a discount. Bundle price < sum of individual prices.
+Bundles provide **discounts** and **curated collections** for common use cases.
 
-### Bundle Types
+#### Starter Bundle
+- **Slug**: `starter-bundle`
+- **Price**: $199 (vs. $247 individual)
+- **Discount**: 19% off
+- **Contents**:
+  - 3 Starter KEYS ($29 each = $87)
+  - 2 Operator KEYS ($79 each = $158)
+  - **Total Individual**: $247
+  - **Bundle Price**: $199
+- **Problem Solved**: Get started with essential patterns
+- **Time Saved**: 10-15 hours total
+- **Buyer Persona**: New team, solo developer, startup
+- **Why Fair**: Bulk discount reflects commitment
 
-#### Starter Bundle ($199)
-- **KEYS Included**: 3-4 starter-tier KEYS
-- **Individual Price**: $147-396
-- **Bundle Price**: $199
-- **Discount**: 0-49% (depends on KEYS included)
-- **Problem Solved**: Complete starter capability set
-- **Time Saved**: 6-16 hours
-- **Who Buys**: New developers, small projects
-- **Why Fair**: Removes decision fatigue, proves complete solution works together
+#### Operator Bundle
+- **Slug**: `operator-bundle`
+- **Price**: $499 (vs. $647 individual)
+- **Discount**: 23% off
+- **Contents**:
+  - 5 Operator KEYS ($79-149 each)
+  - 2 Runbook KEYS ($99 each)
+  - **Total Individual**: $647
+  - **Bundle Price**: $499
+- **Problem Solved**: Production-ready operational patterns
+- **Time Saved**: 20-30 hours total
+- **Buyer Persona**: SRE team, operations lead, scaling startup
+- **Why Fair**: Operational excellence requires multiple patterns
 
-#### Operator Bundle ($399)
-- **KEYS Included**: 4-5 operator-tier KEYS
-- **Individual Price**: $396-995
-- **Bundle Price**: $399
-- **Discount**: 0-60% (depends on KEYS included)
-- **Problem Solved**: Complete production-ready capability set
-- **Time Saved**: 16-40 hours + prevents production incidents
-- **Who Buys**: Engineering teams building production apps
-- **Why Fair**: Complete solution reduces integration risk, saves 20-40 hours
+#### Pro Bundle
+- **Slug**: `pro-bundle`
+- **Price**: $1,299 (vs. $1,797 individual)
+- **Discount**: 28% off
+- **Contents**:
+  - All Starter KEYS (5 keys)
+  - All Operator KEYS (8 keys)
+  - All Runbook KEYS (6 keys)
+  - **Total Individual**: $1,797
+  - **Bundle Price**: $1,299
+- **Problem Solved**: Complete pattern library
+- **Time Saved**: 50-70 hours total
+- **Buyer Persona**: Engineering team, established company
+- **Why Fair**: Maximum value for comprehensive coverage
 
-**Example**: Billing & Entitlements Bundle
-- `stripe-webhook-entitlement` ($149)
-- `subscription-status-component` ($49)
-- `usage-metering` ($99)
-- `billing-dashboard` ($49)
-- **Individual Total**: $346
-- **Bundle Price**: $399 (15% premium for complete solution, removes buyer risk)
+---
 
-#### Pro Bundle ($599)
-- **KEYS Included**: 5-7 scale-tier KEYS
-- **Individual Price**: $995-2,093
-- **Bundle Price**: $599
-- **Discount**: 40-71%
-- **Problem Solved**: Complete enterprise capability set
-- **Time Saved**: 40-112 hours + prevents compliance violations
-- **Who Buys**: Enterprise teams, regulated industries
-- **Why Fair**: Massive discount removes buyer risk, unlocks complete compliance stack
+### C) Subscription Tier (Catalog Access)
 
-**Example**: Compliance & Audit Bundle
-- `audit-log-capture` ($249)
-- `policy-enforcement` ($279)
-- `compliance-validation` ($299)
-- `evidence-generation` ($199)
-- **Individual Total**: $1,026
-- **Bundle Price**: $599 (42% discount, removes buyer risk)
+**Pro Subscription**
+- **Price**: $99/month or $999/year (17% annual discount)
+- **Access**: All KEYS (current + future)
+- **Problem Solved**: Unlimited access for power users
+- **Time Saved**: Unlimited (access all patterns)
+- **Buyer Persona**: Agency, consulting firm, large team
+- **Why Fair**: 
+  - Monthly: Break-even at 2-3 KEY purchases/month
+  - Annual: Break-even at 10 KEY purchases/year
+  - Future KEYS included (ongoing value)
 
-### Bundle Ownership Credit
+**Enterprise Subscription**
+- **Price**: Custom (contact sales)
+- **Access**: All KEYS + priority support + custom patterns
+- **Problem Solved**: Enterprise-wide access + support
+- **Buyer Persona**: Large organization, multiple teams
+- **Why Fair**: Volume discount + support value
 
-**Rule**: Owned KEYS reduce bundle price.
+---
 
-**Calculation**:
-1. Sum individual prices of KEYS in bundle
-2. Subtract prices of already-owned KEYS
-3. Bundle price = max(0, original bundle price - owned KEY credits)
+## Upgrade Paths & Credits
+
+### Individual KEY → Bundle
+
+**Rule**: Owned KEYS reduce bundle price by their individual price.
 
 **Example**:
-- Bundle price: $399
-- Owned KEYS in bundle: $149 + $49 = $198
-- Final price: $399 - $198 = $201
+- User owns: `audit-log-capture` ($79), `stripe-webhook-entitlement` ($99)
+- Wants: Operator Bundle ($499)
+- Credit: $79 + $99 = $178
+- **Final Price**: $499 - $178 = $321
 
-**Why Fair**: Customer already paid for those KEYS. No double charging.
+**Fairness**: No double charging. User pays only for new KEYS.
 
----
+### Bundle → Subscription
 
-## C) Subscription Tier
+**Rule**: Bundle purchase credits up to 50% of first-year subscription.
 
-### Catalog Access Subscription ($999/year)
+**Example**:
+- User owns: Pro Bundle ($1,299)
+- Wants: Pro Subscription ($999/year)
+- Credit: min($1,299, $999 * 0.5) = $499.50
+- **First Year Price**: $999 - $499.50 = $499.50
 
-- **Access**: All current KEYS (all types: Node, Next, Jupyter, Runbook)
-- **Future KEYS**: Access to all new KEYS released during subscription period
-- **Updates**: Lifetime updates to all KEYS accessed during subscription
-- **Support**: Community support
-- **Target**: Individual developers, small teams
-
-**Problem Solved**: Unlimited capability unlocks without per-KEY decisions
-
-**Time Saved**: Unlimited (no per-KEY purchase decisions)
-
-**Who Buys**: Developers who need multiple KEYS, teams building multiple projects
-
-**Why Fair**:
-- Average KEY price: $149
-- Keys per year: 10-15 keys
-- Individual cost: $1,490-2,235
-- Subscription price: $999/year
-- **Savings**: $491-1,236/year (33-55% discount)
-
-**Cancellation Policy**:
-- Cancel anytime
-- Access continues until end of billing period
-- No refunds for partial periods (standard SaaS practice)
-- Future KEYS not accessible after cancellation
-
-**Grace Period**:
-- 7-day grace period after payment failure
-- Access continues during grace period
-- After grace period: Access revoked, subscription marked `past_due`
+**Fairness**: Prevents abuse (max 50% credit) while rewarding commitment.
 
 ---
 
-## SKU Catalog
+## Pricing Rationale by Problem Type
 
-### Individual KEYS
+### Security & Compliance KEYS
+- **Higher Price**: $149-299
+- **Rationale**: Security gaps cost $10k+ in breaches, compliance failures cost $50k+ in fines
+- **Value Prop**: "Prevent a $50k compliance fine for $199"
 
-| SKU | Type | Price | Tier | Problem Solved | Time Saved | Risk Avoided |
-|-----|------|-------|------|----------------|------------|--------------|
-| `node-ui-component` | Node | $49 | Starter | UI component library | 2-3 hours | Low |
-| `next-auth-integration` | Next | $79 | Starter | Auth integration | 3-4 hours | Low |
-| `jupyter-data-viz` | Jupyter | $99 | Starter | Data visualization | 4 hours | Low |
-| `stripe-webhook-entitlement` | Node | $149 | Operator | Webhook verification | 4-6 hours | $500-1k |
-| `supabase-rls-guard` | Node | $179 | Operator | RLS enforcement | 6-8 hours | $1k-2k |
-| `background-reconciliation` | Node | $199 | Operator | Data reconciliation | 8 hours | $1k-2k |
-| `audit-log-capture` | Node | $249 | Scale | Audit logging | 8-12 hours | $2k-5k |
-| `policy-enforcement` | Node | $279 | Scale | Policy enforcement | 12-16 hours | $5k-10k |
-| `compliance-validation` | Node | $299 | Scale | Compliance checks | 12-16 hours | $5k-10k |
+### Operational KEYS (Runbooks)
+- **Higher Price**: $99-199
+- **Rationale**: Incident response time = customer trust + revenue
+- **Value Prop**: "Resolve incidents 4x faster, prevent customer churn"
 
-### Bundles
+### Development KEYS
+- **Standard Price**: $79-149
+- **Rationale**: Developer time = $100-200/hour
+- **Value Prop**: "Save 4-8 hours of implementation time"
 
-| SKU | Price | KEYS Included | Individual Total | Discount |
-|-----|-------|---------------|------------------|----------|
-| `starter-bundle` | $199 | 3-4 starter KEYS | $147-396 | 0-49% |
-| `operator-bundle` | $399 | 4-5 operator KEYS | $396-995 | 0-60% |
-| `pro-bundle` | $599 | 5-7 scale KEYS | $995-2,093 | 40-71% |
-
-### Subscriptions
-
-| SKU | Price | Period | Access |
-|-----|-------|--------|--------|
-| `catalog-access` | $999 | Year | All current + future KEYS |
+### Analysis KEYS (Jupyter)
+- **Lower Price**: $49-99
+- **Rationale**: Analysis notebooks are reusable but less critical
+- **Value Prop**: "Reusable analysis patterns for consistent insights"
 
 ---
 
-## Value Justification Framework
+## Buyer Personas & Pricing Sensitivity
 
-Every SKU must answer:
+### Solo Developer / Startup Founder
+- **Price Sensitivity**: High
+- **Preferred**: Starter Bundle ($199) or individual Starter KEYS ($29-49)
+- **Value Frame**: "Time saved = feature shipped faster"
 
-1. **What problem does this solve?**
-   - Clear, specific problem statement
-   - Who has this problem?
+### SRE / DevOps Engineer
+- **Price Sensitivity**: Medium
+- **Preferred**: Operator Bundle ($499) or individual Operator KEYS ($79-149)
+- **Value Frame**: "Operational excellence = reliability = job security"
 
-2. **How much time does this save?**
-   - Conservative estimate (hours)
-   - Engineer rate assumption ($50-200/hr)
+### Engineering Team Lead
+- **Price Sensitivity**: Low
+- **Preferred**: Pro Bundle ($1,299) or Pro Subscription ($99/month)
+- **Value Frame**: "Team productivity = faster delivery = competitive advantage"
 
-3. **What risk does this avoid?**
-   - Security vulnerabilities
-   - Compliance violations
-   - Production outages
-   - Dollar value estimate
-
-4. **Who buys this?**
-   - Buyer persona
-   - Use case
-
-5. **Why is this price fair?**
-   - Value calculation: (Time saved × rate) + Risk avoided
-   - ROI: Value / Price
-   - Must be 2x+ ROI minimum
+### Enterprise / Compliance Officer
+- **Price Sensitivity**: Very Low
+- **Preferred**: Enterprise Subscription (custom)
+- **Value Frame**: "Compliance coverage = risk mitigation = legal protection"
 
 ---
 
-## Pricing Enforcement
+## Fairness Guarantees
 
-### Server-Side Only
-
-- Entitlement checks: Server-side validation only
-- Never trust client claims
-- Database lookup required for all access
-
-### Stripe Integration
-
-- Stripe products created for each SKU
-- Stripe prices linked to internal SKUs
-- Webhooks update entitlements
-- No client-side price IDs
-
-### Idempotency
-
-- Checkout sessions: Idempotent creation
-- Webhook events: Idempotent processing
-- Entitlement grants: Upsert logic prevents duplicates
+1. **No Double Charging**: Owned KEYS always credit upgrades
+2. **Transparent Pricing**: All prices visible before purchase
+3. **Refund Policy**: 30-day refund for unused KEYS (no questions asked)
+4. **Perpetual Access**: One-time purchases = lifetime access
+5. **Fair Upgrades**: Upgrade paths always credit previous purchases
 
 ---
 
-## Revenue Leakage Prevention
+## Competitive Positioning
 
-### Rules
+### vs. Hiring Consultants
+- **Consultant**: $150-300/hour × 8 hours = $1,200-2,400
+- **KEYS**: $79-299 one-time
+- **Savings**: 90-95% cost reduction
 
-1. **No client-only access path**: All downloads require server-side entitlement check
-2. **No enumeration**: Cannot list KEYS without entitlement
-3. **No IDOR**: Cannot access KEYS by guessing IDs
-4. **Time-bound signed URLs**: Download URLs expire after 1 hour
-5. **Audit trail**: All access attempts logged
+### vs. Building In-House
+- **In-House**: 8-16 hours × $100/hour = $800-1,600
+- **KEYS**: $79-299 one-time
+- **Savings**: 70-85% cost reduction + proven patterns
 
-### Enforcement Points
-
-- Download endpoint: `GET /marketplace/keys/:slug/download`
-- Signed URL generation: Server-side only
-- Entitlement check: Before signed URL generation
-- Analytics: All access attempts tracked
+### vs. Component Libraries
+- **Library Subscription**: $200-500/year (limited patterns)
+- **KEYS Bundle**: $199-1,299 one-time (perpetual access)
+- **Savings**: Break-even in 1-2 years, then free
 
 ---
 
-## Version History
+## Revenue Projections (Conservative)
 
-- **1.0.0** (2024-12-30): Initial pricing model definition
+### Assumptions
+- 100 new users/month
+- 20% purchase rate (20 purchases/month)
+- Average order value: $99 (mix of individual + bundles)
+- Monthly recurring revenue (subscriptions): $99 × 10 subscribers = $990
+
+### Monthly Revenue
+- One-time purchases: 20 × $99 = $1,980
+- Subscriptions: $990
+- **Total**: $2,970/month
+
+### Annual Revenue (Year 1)
+- One-time purchases: $1,980 × 12 = $23,760
+- Subscriptions: $990 × 12 = $11,880
+- **Total**: $35,640/year
+
+**Note**: These are conservative estimates. Actual revenue depends on:
+- Marketing effectiveness
+- Product-market fit
+- Customer retention
+- Bundle adoption
+
+---
+
+## Pricing Updates Policy
+
+- **Price Changes**: Existing customers keep purchased KEYS at purchase price
+- **New KEYS**: Priced according to maturity/type matrix
+- **Bundle Updates**: New KEYS added to bundles don't change bundle price
+- **Subscription**: Price locked for annual subscribers during subscription period
+
+---
+
+## Conclusion
+
+KEYS pricing is designed to be:
+- **Fair**: Fraction of consultant/in-house cost
+- **Transparent**: Clear value proposition for each SKU
+- **Flexible**: Multiple purchase options (individual, bundle, subscription)
+- **Upgrade-Friendly**: Credits for owned KEYS
+
+The model prioritizes **customer value** over maximum revenue extraction, building trust and long-term relationships.

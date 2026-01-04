@@ -93,10 +93,141 @@ async function ingestRunbookKey(slug: string, metadata: any): Promise<UnifiedKey
 }
 
 /**
- * Ingest a single jupyter key (from library.json)
+ * Parse Jupyter keys from markdown catalog
+ */
+function parseJupyterKeysFromMarkdown(mdContent: string): Array<{
+  slug: string;
+  title: string;
+  description?: string;
+  version: string;
+  license_spdx: string;
+  tags: string[];
+  outcome?: string;
+  maturity?: 'starter' | 'operator' | 'scale' | 'enterprise';
+  category?: string;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  runtime_minutes?: number;
+  preview_public?: boolean;
+  assets?: {
+    zip?: string;
+    preview_html?: string;
+    cover?: string;
+    changelog_md?: string;
+  };
+  sha256?: string;
+}> {
+  const keys: Array<any> = [];
+  const sections = mdContent.split(/^### \d+\./m);
+  
+  for (const section of sections.slice(1)) { // Skip header
+    const lines = section.split('\n');
+    const metadata: any = {
+      tags: [],
+      assets: {},
+    };
+    
+    for (const line of lines) {
+      if (line.startsWith('**Title**:')) {
+        metadata.title = line.replace('**Title**:', '').trim();
+      } else if (line.startsWith('**Slug**:')) {
+        metadata.slug = line.replace('**Slug**:', '').trim();
+      } else if (line.startsWith('**What It Unlocks**:')) {
+        metadata.description = line.replace('**What It Unlocks**:', '').trim();
+      } else if (line.startsWith('**Runtime**:')) {
+        // Extract maturity from runtime line if present
+        const runtimeLine = line.replace('**Runtime**:', '').trim();
+        if (runtimeLine.includes('operator')) {
+          metadata.maturity = 'operator';
+        } else if (runtimeLine.includes('starter')) {
+          metadata.maturity = 'starter';
+        }
+      } else if (line.startsWith('**Maturity**:')) {
+        const maturity = line.replace('**Maturity**:', '').trim().toLowerCase();
+        if (['starter', 'operator', 'scale', 'enterprise'].includes(maturity)) {
+          metadata.maturity = maturity;
+        }
+      } else if (line.startsWith('**Referenced By**:')) {
+        // Extract tags from references
+        const refLine = line.replace('**Referenced By**:', '').trim();
+        if (refLine.includes('Runbook:')) {
+          const runbookMatch = refLine.match(/Runbook:\s*`([^`]+)`/);
+          if (runbookMatch) {
+            metadata.tags.push(`runbook:${runbookMatch[1]}`);
+          }
+        }
+      }
+    }
+    
+    // Set defaults
+    if (!metadata.version) metadata.version = '1.0.0';
+    if (!metadata.license_spdx) metadata.license_spdx = 'MIT';
+    if (!metadata.maturity) metadata.maturity = 'operator';
+    if (!metadata.preview_public) metadata.preview_public = true;
+    
+    // Set outcome based on description
+    if (metadata.description) {
+      if (metadata.description.toLowerCase().includes('analysis')) {
+        metadata.outcome = 'analysis';
+      } else if (metadata.description.toLowerCase().includes('validation')) {
+        metadata.outcome = 'validation';
+      } else if (metadata.description.toLowerCase().includes('reconciliation')) {
+        metadata.outcome = 'reconciliation';
+      }
+    }
+    
+    // Set category based on title/description
+    if (metadata.title) {
+      if (metadata.title.toLowerCase().includes('webhook')) {
+        metadata.category = 'webhook-analysis';
+      } else if (metadata.title.toLowerCase().includes('data')) {
+        metadata.category = 'data-analysis';
+      } else if (metadata.title.toLowerCase().includes('ai')) {
+        metadata.category = 'ai-analysis';
+      } else if (metadata.title.toLowerCase().includes('job')) {
+        metadata.category = 'job-analysis';
+      }
+    }
+    
+    // Set default zip path
+    if (!metadata.assets.zip) {
+      metadata.assets.zip = `jupyter/${metadata.slug}/latest/key.zip`;
+    }
+    
+    if (metadata.slug && metadata.title) {
+      keys.push(metadata);
+    }
+  }
+  
+  return keys;
+}
+
+/**
+ * Ingest a single jupyter key (from library.json or parsed markdown)
  */
 async function ingestJupyterKey(metadata: any): Promise<UnifiedKeyMetadata> {
-  const validated = jupyterKeySchema.parse(metadata);
+  // Try to validate as full schema first, otherwise use partial
+  let validated: any;
+  try {
+    validated = jupyterKeySchema.parse(metadata);
+  } catch {
+    // Partial validation for markdown-parsed keys
+    validated = {
+      slug: metadata.slug,
+      title: metadata.title,
+      description: metadata.description,
+      version: metadata.version || '1.0.0',
+      license_spdx: metadata.license_spdx || 'MIT',
+      tags: metadata.tags || [],
+      category: metadata.category,
+      difficulty: metadata.difficulty,
+      runtime_minutes: metadata.runtime_minutes,
+      preview_public: metadata.preview_public ?? true,
+      assets: metadata.assets || { zip: `jupyter/${metadata.slug}/latest/key.zip` },
+      sha256: metadata.sha256,
+      outcome: metadata.outcome,
+      maturity: metadata.maturity || 'operator',
+    };
+  }
   
   return {
     slug: validated.slug,
@@ -110,16 +241,18 @@ async function ingestJupyterKey(metadata: any): Promise<UnifiedKeyMetadata> {
     difficulty: validated.difficulty,
     runtime_minutes: validated.runtime_minutes,
     preview_public: validated.preview_public,
-    zip_path: validated.assets.zip
+    outcome: validated.outcome,
+    maturity: validated.maturity,
+    zip_path: validated.assets?.zip
       ? getKeyAssetPath('jupyter', validated.slug, validated.version, 'zip')
-      : undefined,
-    preview_html_path: validated.assets.preview_html
+      : getKeyAssetPath('jupyter', validated.slug, validated.version, 'zip'),
+    preview_html_path: validated.assets?.preview_html
       ? getKeyAssetPath('jupyter', validated.slug, validated.version, 'preview_html')
       : undefined,
-    cover_path: validated.assets.cover
+    cover_path: validated.assets?.cover
       ? getKeyAssetPath('jupyter', validated.slug, validated.version, 'cover')
       : undefined,
-    changelog_md_path: validated.assets.changelog_md
+    changelog_md_path: validated.assets?.changelog_md
       ? getKeyAssetPath('jupyter', validated.slug, validated.version, 'changelog_md')
       : undefined,
     sha256: validated.sha256,
@@ -228,18 +361,45 @@ export async function ingestAllKeys(): Promise<{
       }
     }
 
-    // Ingest jupyter keys from library.json (if exists)
-    const libraryJsonPath = join(ASSETS_ROOT, 'dist', 'library.json');
-    if (existsSync(libraryJsonPath)) {
+    // Ingest jupyter keys from markdown catalog
+    const jupyterKeysMdPath = join(ASSETS_ROOT, 'jupyter-keys-md', 'JUPYTER_KEYS_LIBRARY.md');
+    if (existsSync(jupyterKeysMdPath)) {
       try {
-        const libraryData = JSON.parse(readFileSync(libraryJsonPath, 'utf-8'));
-        const validated = assetsIndexSchema.parse(libraryData);
+        const mdContent = readFileSync(jupyterKeysMdPath, 'utf-8');
+        const jupyterKeys = parseJupyterKeysFromMarkdown(mdContent);
+        
+        for (const keyMetadata of jupyterKeys) {
+          try {
+            const unified = await ingestJupyterKey(keyMetadata);
+            
+            // Upsert to database
+            const { error } = await supabase
+              .from('marketplace_keys')
+              .upsert(unified, { onConflict: 'slug' });
 
-        // Note: Jupyter keys are typically ingested from external library.json
-        // This is a placeholder - in production, you'd fetch from the notebook repository
-        logger.info('Jupyter keys ingestion from library.json not yet implemented');
+            if (error) {
+              throw new Error(`Database error: ${error.message}`);
+            }
+
+            // Create version record
+            const keyId = (await supabase.from('marketplace_keys').select('id').eq('slug', unified.slug).single()).data?.id;
+            if (keyId) {
+              await supabase.from('marketplace_key_versions').upsert({
+                key_id: keyId,
+                version: unified.version,
+                zip_path: unified.zip_path,
+                changelog_md_path: unified.changelog_md_path,
+              }, { onConflict: 'key_id,version' });
+            }
+
+            success++;
+          } catch (error: any) {
+            errors.push({ slug: keyMetadata.slug || 'unknown', error: error.message || 'Unknown error' });
+            logger.error(`Failed to ingest jupyter key ${keyMetadata.slug}:`, error);
+          }
+        }
       } catch (error: any) {
-        logger.error('Failed to ingest jupyter keys:', error);
+        logger.error('Failed to ingest jupyter keys from markdown:', error);
       }
     }
 

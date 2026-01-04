@@ -361,6 +361,17 @@ export default function KeyDetailPage() {
         {/* Sidebar */}
         <div className="lg:col-span-1">
           <div className="border rounded-lg p-6 sticky top-4">
+            {/* Pricing */}
+            {!key.hasAccess && (
+              <div className="mb-4 pb-4 border-b">
+                <div className="text-sm text-gray-600 mb-1">Price</div>
+                <div className="text-2xl font-bold">
+                  ${((key as any).price_cents || 9900) / 100}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">One-time purchase, perpetual access</div>
+              </div>
+            )}
+
             <div className="mb-4">
               <div className="text-sm text-gray-600 mb-2">Version</div>
               <div className="font-semibold">{selectedVersion || key.version}</div>
@@ -396,14 +407,35 @@ export default function KeyDetailPage() {
                   )}
                 </>
               ) : (
-                <button
-                  onClick={handlePurchase}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Unlock KEY
-                </button>
+                <>
+                  <button
+                    onClick={handlePurchase}
+                    className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Unlock KEY for ${((key as any).price_cents || 9900) / 100}
+                  </button>
+                  <p className="text-xs text-gray-500 text-center">
+                    Secure checkout via Stripe
+                  </p>
+                </>
               )}
             </div>
+
+            {/* What This Unlocks */}
+            {key.outcome && (
+              <div className="mt-6 pt-6 border-t">
+                <div className="text-sm font-semibold mb-2">What This Unlocks</div>
+                <div className="text-sm text-gray-600">{key.outcome}</div>
+              </div>
+            )}
+
+            {/* Prerequisites */}
+            {key.maturity && (
+              <div className="mt-4">
+                <div className="text-sm font-semibold mb-2">Maturity Level</div>
+                <div className="text-sm text-gray-600 capitalize">{key.maturity}</div>
+              </div>
+            )}
           </div>
         </div>
       </div>
