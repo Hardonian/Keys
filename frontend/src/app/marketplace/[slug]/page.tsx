@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainerVariants, scaleVariants } from '@/systems/motion/variants';
 import Script from 'next/script';
 import { toast } from '@/components/Toast';
-import { getDemoKey, type DemoKey } from '@/services/demoData';
+import { getDemoKey, DEMO_KEYS, type DemoKey } from '@/services/demoData';
 
 interface Key {
   id: string;
@@ -29,6 +29,8 @@ interface Key {
   hasAccess?: boolean;
   relatedKeys?: Array<{ id: string; slug: string; title: string; reason: string }>;
   versions?: Array<{ version: string; created_at: string; changelog_md_path?: string }>;
+  price_cents?: number;
+  isDemo?: boolean;
 }
 
 export default function KeyDetailPage() {
@@ -107,11 +109,21 @@ export default function KeyDetailPage() {
       // Fallback to demo data
       const demoKey = getDemoKey(slug);
       if (demoKey) {
+        // Get related demo keys (exclude current)
+        const relatedDemoKeys = DEMO_KEYS.filter(k => k.id !== demoKey.id).slice(0, 3).map(k => ({
+          id: k.id,
+          slug: k.slug,
+          title: k.title,
+          reason: `Similar ${k.key_type} key for ${k.category.toLowerCase()}`,
+        }));
+
         const convertedKey: Key = {
           ...demoKey,
           hasAccess: false,
-          relatedKeys: [],
+          relatedKeys: relatedDemoKeys,
           versions: [{ version: demoKey.version, created_at: new Date().toISOString() }],
+          price_cents: demoKey.price_cents,
+          isDemo: true,
         };
         setKey(convertedKey);
         setSelectedVersion(demoKey.version);
@@ -119,6 +131,7 @@ export default function KeyDetailPage() {
         return;
       }
 
+      // If not found in demo data and API failed, show error
       throw new Error('KEY not found');
     } catch (err: any) {
       setError(err.message || 'Failed to load KEY');

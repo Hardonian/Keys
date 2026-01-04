@@ -51,8 +51,11 @@ export default function MarketplacePage() {
   useEffect(() => {
     checkAuth();
     fetchKeys();
-    fetchRecommendations();
   }, [keyTypeFilter, categoryFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [isAuthenticated]);
 
   const checkAuth = async () => {
     const supabase = createClient();
@@ -117,22 +120,28 @@ export default function MarketplacePage() {
         } = await supabase.auth.getSession();
 
         if (session) {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-          const response = await fetch(`${apiUrl}/marketplace/discover`, {
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          });
+          try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+            const response = await fetch(`${apiUrl}/marketplace/discover`, {
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            });
 
-          if (response.ok) {
-            const data = await response.json();
-            setRecommendations(data.recommendations || []);
-            return;
+            if (response.ok) {
+              const data = await response.json();
+              if (data.recommendations && data.recommendations.length > 0) {
+                setRecommendations(data.recommendations);
+                return;
+              }
+            }
+          } catch (apiErr) {
+            // Fall through to demo recommendations
           }
         }
       }
 
-      // Fallback to demo recommendations for showcase
+      // Always show demo recommendations for showcase (even if authenticated but no API)
       setRecommendations(DEMO_DISCOVERY_RECOMMENDATIONS);
     } catch (err) {
       // Fallback to demo recommendations on error
@@ -374,17 +383,41 @@ export default function MarketplacePage() {
       {/* Key Grid */}
       <main id="main-content">
         <AnimatePresence mode="wait">
-          {keys.length === 0 ? (
+          {keys.length === 0 && !loading ? (
             <motion.div
               key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-center py-12 text-gray-500 dark:text-gray-400"
+              className="text-center py-12"
             >
-              No keys found. Try adjusting your filters.
+              <div className="mb-4 text-6xl" aria-hidden="true">🔍</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                No keys found
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Try adjusting your filters or{' '}
+                <button
+                  onClick={() => {
+                    setKeyTypeFilter('');
+                    setCategoryFilter('');
+                    setSearchQuery('');
+                  }}
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  clear all filters
+                </button>
+              </p>
+              {keys.some(k => k.isDemo) && (
+                <Link
+                  href="/signup"
+                  className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Sign up for full access
+                </Link>
+              )}
             </motion.div>
-          ) : (
+          ) : keys.length > 0 ? (
             <motion.div
               key="grid"
               variants={staggerContainerVariants}
@@ -450,7 +483,7 @@ export default function MarketplacePage() {
                 </motion.div>
               ))}
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </main>
 
