@@ -208,6 +208,19 @@ export async function createKeyCheckoutSession(
     },
   });
 
+  // Track checkout started event
+  const { resolveTenantContext } = await import('./entitlements.js');
+  const tenant = await resolveTenantContext(userId);
+  await supabase.from('marketplace_analytics').insert({
+    event_type: 'checkout_started',
+    key_id: key.id,
+    user_id: userId,
+    tenant_id: tenant.tenantId,
+    tenant_type: tenant.tenantType,
+    stripe_session_id: session.id,
+    amount: key.price_cents || 0,
+  });
+
   return {
     sessionId: session.id,
     url: session.url || '',
@@ -273,6 +286,25 @@ export async function createBundleCheckoutSession(
       bundleSlug: bundle.slug,
       purchaseType: 'bundle',
     },
+  });
+
+  // Track checkout started event
+  const { resolveTenantContext } = await import('./entitlements.js');
+  const tenant = await resolveTenantContext(userId);
+  const { data: bundleData } = await supabase
+    .from('marketplace_bundles')
+    .select('price_cents')
+    .eq('id', bundle.id)
+    .single();
+  
+  await supabase.from('marketplace_analytics').insert({
+    event_type: 'checkout_started',
+    bundle_id: bundle.id,
+    user_id: userId,
+    tenant_id: tenant.tenantId,
+    tenant_type: tenant.tenantType,
+    stripe_session_id: session.id,
+    amount: bundleData?.price_cents || 0,
   });
 
   return {

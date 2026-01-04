@@ -192,6 +192,25 @@ router.post(
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Check for duplicate event (idempotency)
+    const { data: existingEvent } = await supabase
+      .from('stripe_webhook_events')
+      .select('id, status')
+      .eq('stripe_event_id', event.id)
+      .single();
+
+    if (existingEvent) {
+      // Event already processed
+      return res.json({ received: true, duplicate: true });
+    }
+
+    // Record event processing start
+    await supabase.from('stripe_webhook_events').insert({
+      stripe_event_id: event.id,
+      event_type: event.type,
+      status: 'processed',
+    });
+
     // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -344,7 +363,8 @@ router.post(
           if (productId) {
             try {
               const product = await stripe.products.retrieve(productId);
-              isMarketplaceSubscription = product.metadata?.type === 'marketplace_pack';
+              isMarketplaceSubscription = product.metadata?.type === 'marketplace_pack' || 
+                                         product.metadata?.subscription_type === 'catalog_access';
             } catch {
               // Ignore errors
             }
@@ -353,11 +373,14 @@ router.post(
           if (isMarketplaceSubscription) {
             // Handle marketplace subscription updates
             const isActive = subscription.status === 'active';
+            const periodEnd = subscription.current_period_end 
+              ? new Date(subscription.current_period_end * 1000).toISOString()
+              : null;
             
             // Find entitlements linked to this subscription
             const { data: entitlements } = await supabase
               .from('marketplace_entitlements')
-              .select('id, pack_id')
+              .select('id, key_id')
               .eq('stripe_subscription_id', subscription.id);
 
             if (entitlements) {
@@ -366,7 +389,7 @@ router.post(
                   .from('marketplace_entitlements')
                   .update({
                     status: isActive ? 'active' : 'inactive',
-                    ends_at: isActive ? null : new Date().toISOString(),
+                    ends_at: isActive ? null : periodEnd,
                   })
                   .eq('id', entitlement.id);
               }
@@ -376,16 +399,210 @@ router.post(
             const { tier, guaranteeCoverage, integrationAccess } = getTierFromPriceId(priceId);
             
             const isActive = subscription.status === 'active';
+            const periodEnd = subscription.current_period_end 
+              ? new Date(subscription.current_period_end * 1000).toISOString()
+              : null;
             
             await supabase
               .from('user_profiles')
               .update({
-                subscription_status: isActive ? 'active' : 'inactive',
+                subscription_status: isActive ? 'active' : (event.type === 'customer.subscription.deleted' ? 'canceled' : 'inactive'),
                 subscription_tier: isActive ? tier : 'free',
+                subscription_current_period_end: periodEnd,
                 guarantee_coverage: isActive ? guaranteeCoverage : [],
                 integration_access: isActive ? integrationAccess : [],
               })
               .eq('user_id', profile.user_id);
+          }
+        }
+        break;
+      }
+
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = invoice.subscription as string;
+        const customerId = invoice.customer as string;
+
+        if (subscriptionId) {
+          // Find subscription entitlements and extend them
+          const { data: entitlements } = await supabase
+            .from('marketplace_entitlements')
+            .select('id')
+            .eq('stripe_subscription_id', subscriptionId);
+
+          if (entitlements) {
+            const periodEnd = invoice.period_end 
+              ? new Date(invoice.period_end * 1000).toISOString()
+              : null;
+
+            for (const entitlement of entitlements) {
+              await supabase
+                .from('marketplace_entitlements')
+                .update({
+                  status: 'active',
+                  ends_at: periodEnd,
+                })
+                .eq('id', entitlement.id);
+            }
+          }
+
+          // Update user subscription status
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('user_id')
+            .eq('stripe_customer_id', customerId)
+            .single();
+
+          if (profile) {
+            await supabase
+              .from('user_profiles')
+              .update({
+                subscription_status: 'active',
+                subscription_current_period_end: invoice.period_end 
+                  ? new Date(invoice.period_end * 1000).toISOString()
+                  : null,
+              })
+              .eq('user_id', profile.user_id);
+          }
+        }
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = invoice.subscription as string;
+        const customerId = invoice.customer as string;
+
+        if (subscriptionId) {
+          // Check payment attempt count
+          const attemptCount = invoice.attempt_count || 0;
+          const daysSinceFailure = invoice.next_payment_attempt 
+            ? Math.floor((invoice.next_payment_attempt * 1000 - Date.now()) / (1000 * 60 * 60 * 24))
+            : 0;
+
+          // Grace period: 7 days
+          if (attemptCount === 1 && daysSinceFailure <= 7) {
+            // First failure: Mark past_due, keep access
+            const { data: profile } = await supabase
+              .from('user_profiles')
+              .select('user_id')
+              .eq('stripe_customer_id', customerId)
+              .single();
+
+            if (profile) {
+              await supabase
+                .from('user_profiles')
+                .update({
+                  subscription_status: 'past_due',
+                })
+                .eq('user_id', profile.user_id);
+            }
+          } else {
+            // After grace period: Revoke access
+            const { revokeEntitlement, resolveTenantContext } = await import('../lib/marketplace/entitlements.js');
+            
+            const { data: entitlements } = await supabase
+              .from('marketplace_entitlements')
+              .select('tenant_id, tenant_type, key_id')
+              .eq('stripe_subscription_id', subscriptionId);
+
+            if (entitlements) {
+              for (const entitlement of entitlements) {
+                try {
+                  await revokeEntitlement(
+                    entitlement.tenant_id,
+                    entitlement.key_id,
+                    entitlement.tenant_type
+                  );
+                } catch (error) {
+                  console.error('Failed to revoke entitlement:', error);
+                }
+              }
+            }
+
+            // Update subscription status
+            const { data: profile } = await supabase
+              .from('user_profiles')
+              .select('user_id')
+              .eq('stripe_customer_id', customerId)
+              .single();
+
+            if (profile) {
+              await supabase
+                .from('user_profiles')
+                .update({
+                  subscription_status: 'inactive',
+                })
+                .eq('user_id', profile.user_id);
+            }
+          }
+        }
+        break;
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        
+        // Find checkout session from charge
+        const paymentIntentId = charge.payment_intent as string;
+        
+        if (paymentIntentId) {
+          try {
+            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+            const sessionId = paymentIntent.metadata?.checkout_session_id;
+
+            if (sessionId) {
+              const session = await stripe.checkout.sessions.retrieve(sessionId);
+              const userId = session.client_reference_id || session.metadata?.userId;
+              const purchaseType = session.metadata?.purchaseType;
+
+              if (userId) {
+                const { revokeEntitlement, resolveTenantContext } = await import('../lib/marketplace/entitlements.js');
+                const tenant = await resolveTenantContext(userId);
+
+                if (purchaseType === 'key') {
+                  const keyId = session.metadata?.keyId;
+                  if (keyId) {
+                    try {
+                      await revokeEntitlement(tenant.tenantId, keyId, tenant.tenantType);
+                      
+                      // Mark entitlement as refunded
+                      await supabase
+                        .from('marketplace_entitlements')
+                        .update({ status: 'inactive' })
+                        .eq('tenant_id', tenant.tenantId)
+                        .eq('tenant_type', tenant.tenantType)
+                        .eq('key_id', keyId);
+                    } catch (error) {
+                      console.error('Failed to revoke entitlement on refund:', error);
+                    }
+                  }
+                } else if (purchaseType === 'bundle') {
+                  const bundleId = session.metadata?.bundleId;
+                  if (bundleId) {
+                    // Get all keys in bundle
+                    const { data: bundle } = await supabase
+                      .from('marketplace_bundles')
+                      .select('key_ids')
+                      .eq('id', bundleId)
+                      .single();
+
+                    if (bundle) {
+                      const keyIds = bundle.key_ids as string[];
+                      for (const keyId of keyIds) {
+                        try {
+                          await revokeEntitlement(tenant.tenantId, keyId, tenant.tenantType);
+                        } catch (error) {
+                          console.error('Failed to revoke bundle entitlement on refund:', error);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Failed to process refund:', error);
           }
         }
         break;
