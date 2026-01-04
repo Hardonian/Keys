@@ -1,0 +1,57 @@
+{
+  "slug": "stripe-webhook-entitlement",
+  "title": "Stripe Webhook Entitlement Key",
+  "description": "Unlocks Stripe webhook verification and entitlement checking for subscription-based features",
+  "tool": "next",
+  "key_type": ["route", "integration"],
+  "runtime": "node",
+  "version": "1.0.0",
+  "side_effects": [
+    "Creates POST /api/webhooks/stripe route handler",
+    "Verifies Stripe webhook signatures",
+    "Checks user entitlements from Stripe subscriptions",
+    "Updates local database with subscription status"
+  ],
+  "required_env": [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET"
+  ],
+  "optional_env": [
+    "STRIPE_API_VERSION"
+  ],
+  "exposed_routes": [
+    {
+      "path": "/api/webhooks/stripe",
+      "method": ["POST"],
+      "description": "Stripe webhook handler for subscription events",
+      "auth_required": false,
+      "tenant_scope": "per-request-tenant-id"
+    }
+  ],
+  "tenant_scope": "per-request-tenant-id",
+  "compatibility": {
+    "node": ">=18.0.0",
+    "next": ">=13.0.0",
+    "typescript": ">=5.0.0"
+  },
+  "dependencies": [
+    {
+      "name": "stripe",
+      "version": "^12.0.0",
+      "required": true,
+      "description": "Stripe SDK for webhook verification and API calls"
+    }
+  ],
+  "outcome": "monetization",
+  "maturity": "operator",
+  "tags": ["stripe", "webhook", "subscription", "entitlement"],
+  "license_spdx": "MIT",
+  "author": {
+    "name": "KEYS Team"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

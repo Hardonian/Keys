@@ -1,0 +1,46 @@
+{
+  "slug": "audit-log-capture",
+  "title": "Audit Log Capture Key",
+  "description": "Unlocks audit log dashboard widget for tracking user actions",
+  "tool": "next",
+  "key_type": ["ui"],
+  "runtime": "next",
+  "version": "1.0.0",
+  "side_effects": [
+    "Exports React component for audit log display",
+    "Queries database for audit log entries",
+    "Renders audit log UI"
+  ],
+  "required_env": [
+    "DATABASE_URL"
+  ],
+  "optional_env": [
+    "AUDIT_LOG_RETENTION_DAYS"
+  ],
+  "tenant_scope": "per-user-tenant-id",
+  "compatibility": {
+    "node": ">=18.0.0",
+    "next": ">=13.0.0",
+    "react": ">=18.0.0",
+    "typescript": ">=5.0.0"
+  },
+  "dependencies": [
+    {
+      "name": "react",
+      "version": "^18.0.0",
+      "required": true
+    }
+  ],
+  "outcome": "compliance",
+  "maturity": "operator",
+  "tags": ["audit-log", "dashboard", "compliance", "ui"],
+  "license_spdx": "MIT",
+  "author": {
+    "name": "KEYS Team"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

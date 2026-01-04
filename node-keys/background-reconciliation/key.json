@@ -1,0 +1,46 @@
+{
+  "slug": "background-reconciliation",
+  "title": "Background Reconciliation Job Key",
+  "description": "Unlocks automated background reconciliation of subscription data with Stripe",
+  "tool": "node",
+  "key_type": ["job"],
+  "runtime": "node",
+  "version": "1.0.0",
+  "side_effects": [
+    "Runs scheduled background job",
+    "Queries Stripe API for subscription data",
+    "Updates local database with reconciliation results",
+    "Sends email notifications on discrepancies"
+  ],
+  "required_env": [
+    "STRIPE_SECRET_KEY",
+    "DATABASE_URL"
+  ],
+  "optional_env": [
+    "RECONCILIATION_SCHEDULE",
+    "EMAIL_NOTIFICATION_ENABLED"
+  ],
+  "tenant_scope": "per-user-tenant-id",
+  "compatibility": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": [
+    {
+      "name": "stripe",
+      "version": "^12.0.0",
+      "required": true
+    }
+  ],
+  "outcome": "automation",
+  "maturity": "scale",
+  "tags": ["stripe", "reconciliation", "background-job", "cron"],
+  "license_spdx": "MIT",
+  "author": {
+    "name": "KEYS Team"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

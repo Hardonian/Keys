@@ -1,0 +1,38 @@
+{
+  "slug": "safe-cron-execution",
+  "title": "Safe Cron Execution Key",
+  "description": "Unlocks safe, idempotent cron job execution with locking and error handling",
+  "tool": "node",
+  "key_type": ["job"],
+  "runtime": "node",
+  "version": "1.0.0",
+  "side_effects": [
+    "Creates distributed lock for cron execution",
+    "Prevents concurrent execution of same job",
+    "Logs execution results",
+    "Handles errors gracefully"
+  ],
+  "required_env": [
+    "DATABASE_URL"
+  ],
+  "optional_env": [
+    "LOCK_TIMEOUT_SECONDS"
+  ],
+  "tenant_scope": "global",
+  "compatibility": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": [],
+  "outcome": "automation",
+  "maturity": "operator",
+  "tags": ["cron", "job", "locking", "idempotent"],
+  "license_spdx": "MIT",
+  "author": {
+    "name": "KEYS Team"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

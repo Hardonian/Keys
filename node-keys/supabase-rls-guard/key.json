@@ -1,0 +1,42 @@
+{
+  "slug": "supabase-rls-guard",
+  "title": "Supabase RLS Guard Key",
+  "description": "Unlocks Row-Level Security (RLS) policies for tenant isolation in Supabase",
+  "tool": "node",
+  "key_type": ["data"],
+  "runtime": "node",
+  "version": "1.0.0",
+  "side_effects": [
+    "Creates RLS policies on subscriptions table",
+    "Creates RLS policies on users table",
+    "Enables RLS on tables",
+    "Creates database functions for tenant isolation"
+  ],
+  "required_env": [
+    "DATABASE_URL"
+  ],
+  "tenant_scope": "per-user-tenant-id",
+  "compatibility": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": [
+    {
+      "name": "@supabase/supabase-js",
+      "version": "^2.0.0",
+      "required": true,
+      "description": "Supabase client for database operations"
+    }
+  ],
+  "outcome": "compliance",
+  "maturity": "operator",
+  "tags": ["supabase", "rls", "security", "tenant-isolation"],
+  "license_spdx": "MIT",
+  "author": {
+    "name": "KEYS Team"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}
