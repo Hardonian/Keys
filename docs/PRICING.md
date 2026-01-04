@@ -7,18 +7,20 @@
 ### Free Tier
 - **Price:** $0/month
 - **Features:**
-  - Basic AI companion chat
-  - Limited prompt generations (TBD: exact limit)
-  - Access to public templates
+  - Access to free Cursor Keys (prompt packs)
+  - Access to free Jupyter Keys (notebook packs)
+  - Limited key downloads (TBD: exact limit)
   - Community support
 
 ### Pro Tier
 - **Price:** TBD (e.g., $29/month)
 - **Features:**
   - Everything in Free
-  - Unlimited prompt generations
-  - Custom templates
-  - Template sharing
+  - Unlimited key downloads
+  - Access to all Cursor Keys
+  - Access to all Jupyter Keys
+  - Custom key creation
+  - Key sharing
   - Priority support
   - Advanced analytics
 
@@ -38,7 +40,7 @@
 
 1. **Usage Metering**
    - **Location:** `backend/src/services/usageMetering.ts`
-   - **Checks:** Before agent orchestration, template creation
+   - **Checks:** Before key downloads, key creation
    - **Response:** Returns `{ allowed: false, reason: 'limit_exceeded' }`
 
 2. **Entitlement Middleware**
@@ -72,7 +74,7 @@
 
 ### Usage Metrics
 Stored in `usage_metrics` table:
-- `metric_type`: `runs`, `tokens`, `templates`, `exports`
+- `metric_type`: `key_downloads`, `cursor_keys`, `jupyter_keys`, `exports`
 - `metric_value`: Count for the period
 - `period_start`, `period_end`: Time window
 

@@ -1,4 +1,8 @@
-# Hardonia AI Companion - Backend
+# KEYS Backend
+
+**The backend infrastructure for KEYS—the keyring to modern tools.**
+
+This backend serves the KEYS marketplace, managing keys (notebooks, prompts, workflows) that unlock capability in external tools like Cursor, Jupyter, GitHub, Stripe, and more.
 
 ## Background Event Loop Service
 

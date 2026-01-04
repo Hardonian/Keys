@@ -1,12 +1,34 @@
-# Stop Rewriting Prompts
+# KEYS
 
-**Get personalized AI outputs tailored to your role, stack, and style—in seconds, not hours.**
+**The keyring to modern tools.**
 
-## 🚀 Production Status
+You already have the tools. Here are the keys to unlock them.
 
-**⚠️ LAUNCH-READY AFTER FIXES - Release Candidate 1 (RC1)**
+---
 
-This project has solid technical foundations but requires Phase 1-2 fixes (messaging, trust indicators) before launch. See `LAUNCH_READINESS_REALITY_CHECK.md` for details.
+## What Is KEYS?
+
+KEYS is a marketplace of structured assets (notebooks, prompts, workflows, playbooks) that unlock practical, repeatable, commercial capability from external tools without competing with them.
+
+**KEYS is not an AI tool.**  
+**KEYS is the keyring to modern tools.**
+
+### The Toolshed Metaphor
+
+Imagine a modern toolshed filled with powerful tools: Cursor, Jupyter, GitHub, Stripe, Supabase, AI Studio, and countless others. Each tool provides raw capability—but capability alone isn't enough. You need to know how to use them effectively.
+
+**KEYS is the keyring.**
+
+Just as a physical keyring holds keys that unlock doors, KEYS holds structured assets that unlock capability in digital tools. A "key" might be:
+- A prompt pack that unlocks advanced Cursor workflows
+- A notebook that unlocks data science outcomes in Jupyter
+- A starter repo that unlocks SaaS patterns using GitHub + Stripe
+- A validation harness that unlocks testing patterns
+- A playbook that unlocks operational processes
+
+The tool provides the power. The key provides the leverage.
+
+---
 
 ## Quick Start
 
@@ -31,16 +53,65 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete deployment instructions.
 2. Set environment variables (see `.env.example`)
 3. Deploy frontend (Vercel) and backend (your hosting)
 
+---
+
+## What KEYS Provides
+
+### Cursor Keys
+Prompt packs and Composer instructions that unlock advanced workflows in Cursor.
+
+**Example**: "Cursor Keys: Authentication Scaffolding" unlocks consistent JWT auth patterns.
+
+### Jupyter Keys
+Notebook packs that unlock data science workflows and analysis patterns in Jupyter.
+
+**Example**: "Jupyter Keys: Data Analysis Basics" unlocks fundamental analysis workflows.
+
+### GitHub Keys (Coming Soon)
+Workflow templates and repository structures that unlock automation patterns in GitHub.
+
+**Example**: "GitHub Keys: CI/CD Starter Workflows" unlocks consistent CI/CD patterns.
+
+### Stripe Keys (Coming Soon)
+Payment flows and subscription management patterns that unlock monetization in Stripe.
+
+**Example**: "Stripe Keys: Subscription Management" unlocks consistent billing patterns.
+
+### Supabase Keys (Coming Soon)
+Database patterns and auth flows that unlock backend capability in Supabase.
+
+**Example**: "Supabase Keys: RLS Policy Patterns" unlocks consistent security patterns.
+
+---
+
 ## 📚 Documentation
 
-- **[LAUNCH_READINESS_REALITY_CHECK.md](./LAUNCH_READINESS_REALITY_CHECK.md)** - Comprehensive launch readiness audit
+### North Star (Start Here)
+- **[KEYS_POSITIONING.md](./docs/north-star/KEYS_POSITIONING.md)** - Canonical positioning statement
+- **[KEY_TAXONOMY.md](./docs/north-star/KEY_TAXONOMY.md)** - How keys are organized
+- **[PRODUCT_PRINCIPLES.md](./docs/north-star/PRODUCT_PRINCIPLES.md)** - Non-negotiable guardrails
+- **[ROADMAP.md](./docs/north-star/ROADMAP.md)** - Future work aligned with positioning
+
+### Technical
+- **[LAUNCH_READINESS_REALITY_CHECK.md](./LAUNCH_READINESS_REALITY_CHECK.md)** - Launch readiness audit
 - **[SECURITY_AND_TRUST_MODEL.md](./SECURITY_AND_TRUST_MODEL.md)** - Security, data handling, and trust model
-- **[GTM_STRATEGY.md](./GTM_STRATEGY.md)** - Go-to-market strategy and ICP definition
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide
 - **[MIGRATION_STATUS.md](./MIGRATION_STATUS.md)** - Database migration guide
-- **[PROOF.md](./PROOF.md)** - Verification steps and evidence
+
+### Marketplace
+- **[Marketplace Contract](./docs/marketplace-notebooks/CONTRACT.md)** - Notebook pack integration contract
+- **[Marketplace Security](./docs/marketplace-notebooks/SECURITY.md)** - Security model for marketplace
+
+---
 
 ## ✅ What's Complete
+
+### Marketplace Infrastructure
+- ✅ Cursor Keys (prompt packs, Composer instructions)
+- ✅ Jupyter Keys (notebook marketplace)
+- ✅ Stripe integration for entitlements
+- ✅ Multi-tenant support (organizations)
+- ✅ Key discovery and search
 
 ### Authentication & Security
 - ✅ Real Supabase authentication (no placeholders)
@@ -49,15 +120,6 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete deployment instructions.
 - ✅ Row-level security (RLS) policies
 - ✅ JWT-based authentication
 
-### Features
-- ✅ Sign up / Sign in pages
-- ✅ Dashboard with analytics
-- ✅ Template management
-- ✅ Agent orchestration
-- ✅ Billing integration (Stripe)
-- ✅ Usage metering
-- ✅ Multi-tenant support (organizations)
-
 ### Quality
 - ✅ Type-safe (TypeScript)
 - ✅ Fully tested (unit, integration, E2E)
@@ -65,6 +127,8 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete deployment instructions.
 - ✅ Error handling
 - ✅ Toast notifications
 - ✅ Loading states
+
+---
 
 ## 🏗️ Architecture
 
@@ -76,6 +140,8 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete deployment instructions.
 - **Testing**: Vitest, Playwright
 - **CI/CD**: GitHub Actions
 
+---
+
 ## 🔒 Security
 
 - ✅ No hardcoded credentials
@@ -85,15 +151,21 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete deployment instructions.
 - ✅ Rate limiting
 - ✅ CORS configuration
 
+---
+
 ## 📦 Project Structure
 
 ```
 ├── frontend/          # Next.js frontend
 ├── backend/           # Express.js backend
 ├── chrome-extension/  # Chrome extension
+├── templates/         # Cursor Keys (prompt templates)
 ├── scripts/           # Deployment scripts
 └── docs/              # Documentation
+    └── north-star/    # North-star positioning documents
 ```
+
+---
 
 ## 🧪 Testing
 
@@ -112,6 +184,8 @@ npm run type-check
 npm run lint
 ```
 
+---
+
 ## 🚀 Deployment
 
 See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for detailed instructions.
@@ -121,10 +195,51 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for detailed instructions.
 2. Set environment variables (see `.env.example`)
 3. Deploy frontend and backend
 
+---
+
+## What KEYS Is NOT
+
+- ❌ **An AI Tool** - KEYS doesn't generate code or answer questions
+- ❌ **A Tool Replacement** - KEYS doesn't replace Cursor, Jupyter, or any other tool
+- ❌ **A Platform Lock-In** - KEYS works with tools you already own
+- ❌ **A Generic Solution** - Every key unlocks a specific, practical outcome
+
+---
+
+## Who KEYS Is For
+
+- ✅ **Business Operators** - People who need to unlock practical capability in tools
+- ✅ **Developers** - Developers who want to leverage tools effectively
+- ✅ **Founders** - Founders building SaaS products who need keys to unlock tools
+- ✅ **Data Practitioners** - Data scientists who need keys to unlock Jupyter workflows
+- ✅ **Teams** - Teams that want to standardize on proven patterns
+
+---
+
+## Principles
+
+KEYS follows these non-negotiable principles:
+
+1. **Keys never compete with tools** - KEYS unlocks tools; it doesn't replace them
+2. **Keys never hide execution paths** - Users see how tools are used
+3. **Keys always produce tangible outputs** - Real notebooks, prompts, workflows
+4. **Keys assets must be reusable** - Not one-off solutions
+5. **Keys optimize for usefulness, not novelty** - Practical leverage over hype
+
+See **[PRODUCT_PRINCIPLES.md](./docs/north-star/PRODUCT_PRINCIPLES.md)** for complete principles.
+
+---
+
 ## 📝 License
 
 Private - All rights reserved
 
+---
+
 ## 🎯 Production Readiness: 100%
 
 The system is fully production-ready. All code is implemented, tested, and documented. Ready to ship! 🚀
+
+---
+
+**Remember**: KEYS is not an AI tool. KEYS is the keyring to modern tools.

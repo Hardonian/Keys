@@ -1,28 +1,34 @@
-# Scaffold Prompt Templates
+# Cursor Keys
 
-A user-friendly system for customizing mega prompt templates. Start with default base templates, customize them to your needs, and the system automatically uses your customized versions.
+**Cursor Keys are structured prompt packs and Composer instructions that unlock practical, repeatable capability in Cursor.**
 
-## How It Works
+This directory contains Cursor Keys—prompt templates and Composer instructions that unlock advanced workflows, patterns, and capabilities in Cursor. You already have Cursor. These keys show you how to use it effectively.
 
-1. **Base Templates**: Default, comprehensive prompts shown initially
+## How Cursor Keys Work
+
+1. **Base Keys**: Default, comprehensive prompt templates that unlock Cursor workflows
 2. **Customize**: Modify variables and instructions to match your needs  
-3. **Automatic Usage**: System uses your customized version when generating prompts
-4. **Easy Revert**: Delete customization to return to base template
+3. **Automatic Usage**: System uses your customized key when generating prompts in Cursor
+4. **Easy Revert**: Delete customization to return to base key
+
+**Remember**: Cursor Keys don't replace Cursor—they unlock capability in Cursor.
 
 ## User Flow
 
 ```
-1. View Base Template
+1. View Base Cursor Key
    ↓
-2. See Default Prompt
+2. See Default Prompt Pattern
    ↓
 3. Customize Variables/Instructions
    ↓
 4. Save Customization
    ↓
-5. System Uses Your Customized Version
+5. Use Cursor with Your Customized Key
    ↓
-6. (Optional) Revert to Base
+6. Unlock Capability in Cursor
+   ↓
+7. (Optional) Revert to Base Key
 ```
 
 ## Quick Start
@@ -195,12 +201,15 @@ System uses your customized template automatically!
 
 ## Benefits
 
+✅ **Unlocks Cursor**: Provides keys to unlock advanced Cursor workflows  
 ✅ **User-Friendly**: Simple API, clear flow  
 ✅ **Flexible**: Customize variables and instructions  
 ✅ **Automatic**: System uses your customizations automatically  
 ✅ **Reversible**: Easy to revert to base  
 ✅ **Secure**: User-specific customizations  
-✅ **Backend-Only**: All logic in backend, clean separation  
+✅ **Backend-Only**: All logic in backend, clean separation
+
+**Key Principle**: Cursor Keys unlock capability in Cursor. They don't compete with Cursor—they amplify it.  
 
 ## Documentation
 

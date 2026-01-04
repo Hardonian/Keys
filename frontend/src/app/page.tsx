@@ -5,11 +5,11 @@ import { UpgradePrompt } from '@/components/Upsell/UpgradePrompt';
 import { FeatureAvailabilityBadge } from '@/components/Features/FeatureAvailabilityBadge';
 
 export const metadata: Metadata = {
-  title: 'Keys - Holistic AI for Everything | Your Business Co-Founder & Venture Partner',
-  description: 'Holistic AI that supports every step of the way. Business operations, image control, new ventures, and co-founder support—all in one comprehensive platform. While others stop at code, we support your entire business journey.',
+  title: 'KEYS - The Keyring to Modern Tools',
+  description: 'You already have the tools. Here are the keys to unlock them. KEYS is a marketplace of structured assets (notebooks, prompts, workflows) that unlock practical capability in Cursor, Jupyter, GitHub, Stripe, and more.',
   openGraph: {
-    title: 'Keys - Holistic AI for Everything | Your Business Co-Founder',
-    description: 'Your operational AI co-founder for business automation, image control, operations management, and venture strategy. Support every step of the way.',
+    title: 'KEYS - The Keyring to Modern Tools',
+    description: 'Unlock practical, repeatable capability from external tools. Cursor Keys, Jupyter Keys, GitHub Keys, and more.',
   },
 };
 
@@ -33,45 +33,45 @@ export default function Home() {
             <div className="relative z-10 text-center space-y-6 sm:space-y-8">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
-                <span className="text-white text-sm font-semibold">🚀 Your Business Co-Founder & Venture Partner</span>
+                <span className="text-white text-sm font-semibold">🔑 The Keyring to Modern Tools</span>
               </div>
               
               {/* Main Heading */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight drop-shadow-lg">
-                Holistic AI for{' '}
+                You Already Have{' '}
                 <span className="bg-gradient-to-r from-yellow-200 via-pink-200 to-purple-200 bg-clip-text text-transparent">
-                  Everything
+                  The Tools
                 </span>
               </h1>
               
               {/* Subheading */}
               <p className="text-xl sm:text-2xl md:text-3xl text-white/95 max-w-3xl mx-auto leading-relaxed font-semibold drop-shadow-md">
-                While others stop at code, we support{' '}
-                <span className="text-yellow-200 font-bold">every step of the way</span>
+                Here are{' '}
+                <span className="text-yellow-200 font-bold">the keys to unlock them</span>
               </p>
               
               {/* Value Proposition */}
               <div className="max-w-4xl mx-auto space-y-4">
                 <p className="text-lg sm:text-xl text-white/90 leading-relaxed">
-                  Your operational AI co-founder that handles business automation, process intelligence, 
-                  image control, operations management, and venture strategy—all in one comprehensive platform.
+                  KEYS is a marketplace of structured assets (notebooks, prompts, workflows, playbooks) 
+                  that unlock practical, repeatable capability from external tools—without competing with them.
                 </p>
                 <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
-                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2">
-                    <span className="text-white text-sm font-medium">🎯 Business Operations</span>
+                  <Link href="/marketplace" className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-colors">
+                    <span className="text-white text-sm font-medium">🔧 Cursor Keys</span>
                     <FeatureAvailabilityBadge status="available" className="!text-xs !px-1.5 !py-0.5" />
+                  </Link>
+                  <Link href="/marketplace" className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-colors">
+                    <span className="text-white text-sm font-medium">📊 Jupyter Keys</span>
+                    <FeatureAvailabilityBadge status="available" className="!text-xs !px-1.5 !py-0.5" />
+                  </Link>
+                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2">
+                    <span className="text-white text-sm font-medium">⚙️ GitHub Keys</span>
+                    <FeatureAvailabilityBadge status="coming-soon" className="!text-xs !px-1.5 !py-0.5" />
                   </div>
-                  <Link href="/image-control" className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-colors">
-                    <span className="text-white text-sm font-medium">🖼️ Image Control</span>
-                    <FeatureAvailabilityBadge status="coming-soon" className="!text-xs !px-1.5 !py-0.5" />
-                  </Link>
-                  <Link href="/venture-strategy" className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2 hover:bg-white/30 transition-colors">
-                    <span className="text-white text-sm font-medium">🚀 New Ventures</span>
-                    <FeatureAvailabilityBadge status="coming-soon" className="!text-xs !px-1.5 !py-0.5" />
-                  </Link>
                   <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 flex items-center gap-2">
-                    <span className="text-white text-sm font-medium">💼 Co-Founder Support</span>
-                    <FeatureAvailabilityBadge status="available" className="!text-xs !px-1.5 !py-0.5" />
+                    <span className="text-white text-sm font-medium">💳 Stripe Keys</span>
+                    <FeatureAvailabilityBadge status="coming-soon" className="!text-xs !px-1.5 !py-0.5" />
                   </div>
                 </div>
               </div>
@@ -83,36 +83,37 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center space-y-6 mb-8 sm:mb-12">
           <div className="p-6 sm:p-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-slate-700 shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Support Every Step of the Way
+              The Toolshed Metaphor
             </h2>
             <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
-              From initial concept to scaling operations, Keys is your comprehensive AI partner. 
-              We don't just automate—we understand your business, anticipate needs, and grow with you.
+              Imagine a modern toolshed filled with powerful tools: Cursor, Jupyter, GitHub, Stripe, Supabase, and more. 
+              Each tool provides raw capability—but capability alone isn't enough. You need to know how to use them effectively. 
+              <strong> KEYS is the keyring.</strong>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="text-2xl mb-2">🎨</div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Creative & Design</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Image generation, visual assets, brand consistency</p>
+                <div className="text-2xl mb-2">🔧</div>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Cursor Keys</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Unlock advanced workflows, prompt patterns, and code generation strategies in Cursor</p>
               </div>
               <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                <div className="text-2xl mb-2">⚙️</div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Operations & Process</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Workflow automation, process intelligence, efficiency</p>
+                <div className="text-2xl mb-2">📊</div>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Jupyter Keys</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Unlock data science workflows, analysis patterns, and validation harnesses in Jupyter</p>
               </div>
               <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                <div className="text-2xl mb-2">🚀</div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Strategy & Growth</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Venture planning, scaling strategies, business intelligence</p>
+                <div className="text-2xl mb-2">⚙️</div>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">GitHub Keys</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Unlock workflow automation, CI/CD patterns, and repository structures in GitHub</p>
               </div>
             </div>
           </div>
           
           <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 max-w-2xl mx-auto">
             <p className="text-sm sm:text-base text-green-800 dark:text-green-200">
-              <strong>Value:</strong> $29/month gets you a comprehensive AI co-founder for operational automation, 
-              image control, and business strategy. <strong>No equity, just results.</strong>{' '}
-              <Link href="/pricing#value-calculation" className="underline font-semibold hover:text-green-900 dark:hover:text-green-100">
+              <strong>Remember:</strong> KEYS is not an AI tool. KEYS is the keyring to modern tools. 
+              You already own the tools—KEYS gives you the keys to unlock them.{' '}
+              <Link href="/pricing" className="underline font-semibold hover:text-green-900 dark:hover:text-green-100">
                 See pricing
               </Link>
             </p>
@@ -122,11 +123,11 @@ export default function Home() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-4">
           <Link
-            href="/chat"
+            href="/marketplace"
             className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 min-w-[200px] text-center"
-            aria-label="Start chatting with your AI cofounder"
+            aria-label="Browse the keyring"
           >
-            <span className="relative z-10">Start Chatting</span>
+            <span className="relative z-10">Browse Keys</span>
             <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" aria-hidden="true" />
           </Link>
           <Link
@@ -141,66 +142,66 @@ export default function Home() {
         {/* Feature Cards - Holistic AI Capabilities */}
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-8">
-            Comprehensive AI That Goes Beyond Code
+            Keys That Unlock Tools
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transform hover:-translate-y-1">
-              <div className="text-3xl mb-3" aria-hidden="true">🤖</div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Business Co-Founder</h2>
+            <Link href="/marketplace" className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transform hover:-translate-y-1 relative block">
+              <div className="text-3xl mb-3" aria-hidden="true">🔧</div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Cursor Keys</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Your operational partner for new ventures. Strategic support, business automation, and co-founder-level intelligence—no equity required.
+                Unlock advanced workflows, prompt patterns, and code generation strategies in Cursor. Prompt packs and Composer instructions.
               </p>
-            </div>
-            <Link href="/image-control" className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transform hover:-translate-y-1 relative block">
-              <div className="absolute top-3 right-3">
-                <FeatureAvailabilityBadge status="coming-soon" />
-              </div>
-              <div className="text-3xl mb-3" aria-hidden="true">🖼️</div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Image Control & Design</h2>
+            </Link>
+            <Link href="/marketplace" className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transform hover:-translate-y-1 relative block">
+              <div className="text-3xl mb-3" aria-hidden="true">📊</div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Jupyter Keys</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Complete visual asset management. Generate, control, and optimize images for your brand. Beyond code—full creative control.
+                Unlock data science workflows, analysis patterns, and validation harnesses in Jupyter. Notebook packs and analysis templates.
               </p>
             </Link>
             <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-pink-300 dark:hover:border-pink-600 transform hover:-translate-y-1">
+              <div className="absolute top-3 right-3">
+                <FeatureAvailabilityBadge status="coming-soon" />
+              </div>
               <div className="text-3xl mb-3" aria-hidden="true">⚙️</div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Operations Management</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">GitHub Keys</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                End-to-end operational automation. Workflows, processes, and routine tasks handled intelligently. Support every step of the way.
+                Unlock workflow automation, CI/CD patterns, and repository structures in GitHub. Workflow templates and starter repos.
               </p>
             </div>
             <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-slate-700 hover:border-green-300 dark:hover:border-green-600 transform hover:-translate-y-1">
-              <div className="text-3xl mb-3" aria-hidden="true">🧠</div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Institutional Memory</h2>
+              <div className="absolute top-3 right-3">
+                <FeatureAvailabilityBadge status="coming-soon" />
+              </div>
+              <div className="text-3xl mb-3" aria-hidden="true">💳</div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Stripe Keys</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Build knowledge that grows with you. Your processes, decisions, and patterns become reusable intelligence for smarter operations.
+                Unlock payment flows, subscription management, and billing patterns in Stripe. Payment workflows and subscription templates.
               </p>
             </div>
           </div>
           
-          {/* Additional Holistic Features */}
+          {/* Additional Key Types */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
-            <Link href="/venture-strategy" className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-xl shadow-md border border-blue-200 dark:border-blue-800 relative block hover:shadow-lg transition-shadow">
-              <div className="absolute top-3 right-3">
-                <FeatureAvailabilityBadge status="coming-soon" />
-              </div>
-              <div className="text-2xl mb-2" aria-hidden="true">🚀</div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Venture Strategy</h3>
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-xl shadow-md border border-blue-200 dark:border-blue-800">
+              <div className="text-2xl mb-2" aria-hidden="true">🔑</div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Tool-Agnostic</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Strategic planning and growth intelligence for new ventures and scaling businesses.
+                Keys work with tools you already own. No lock-in, no platform requirements.
               </p>
-            </Link>
+            </div>
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-xl shadow-md border border-purple-200 dark:border-purple-800">
-              <div className="text-2xl mb-2" aria-hidden="true">🔗</div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Cursor Integration</h3>
+              <div className="text-2xl mb-2" aria-hidden="true">📦</div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Reusable Assets</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Seamlessly works with Cursor. Context-aware automation that understands your codebase and operational needs.
+                Keys are structured, reusable, and updatable. Not one-off solutions—proven patterns.
               </p>
             </div>
             <div className="bg-gradient-to-br from-pink-50 to-orange-50 dark:from-pink-900/20 dark:to-orange-900/20 p-6 rounded-xl shadow-md border border-pink-200 dark:border-pink-800">
-              <div className="text-2xl mb-2" aria-hidden="true">💡</div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Holistic Intelligence</h3>
+              <div className="text-2xl mb-2" aria-hidden="true">🎯</div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Outcome-Driven</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                AI that understands your entire business—not just code, but operations, strategy, and growth.
+                Every key unlocks a specific, practical outcome. No vague promises—tangible results.
               </p>
             </div>
           </div>

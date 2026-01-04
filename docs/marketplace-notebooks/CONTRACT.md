@@ -1,13 +1,15 @@
-# Marketplace Contract - Notebook Pack Library Integration
+# Marketplace Contract - Jupyter Keys Integration
 
 **Version**: 1.0.0  
-**Last Updated**: 2024-12-19
+**Last Updated**: 2024-12-30
 
-This document defines the contract between the Notebook Library repository and the Keys marketplace host for publishing and serving notebook packs.
+This document defines the contract between the Notebook Library repository and the KEYS marketplace host for publishing and serving Jupyter Keys (notebook packs).
 
 ## Overview
 
-The Notebook Library repository produces a `library.json` index file that describes available packs. Keys marketplace ingests this file and serves packs to entitled users via Stripe-gated downloads.
+The Notebook Library repository produces a `library.json` index file that describes available Jupyter Keys. KEYS marketplace ingests this file and serves Jupyter Keys to entitled users via Stripe-gated downloads.
+
+**Note**: Notebook packs are reframed as "Jupyter Keys"—structured assets that unlock practical capability in Jupyter.
 
 ## library.json Schema
 

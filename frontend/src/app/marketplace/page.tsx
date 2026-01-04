@@ -82,16 +82,16 @@ export default function MarketplacePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Notebook Pack Library</h1>
+        <h1 className="text-4xl font-bold mb-4">Jupyter Keys</h1>
         <p className="text-gray-600 mb-6">
-          Discover and download premium notebook packs for your projects
+          Unlock data science workflows, analysis patterns, and validation harnesses in Jupyter. You already have Jupyter—these keys show you how to use it effectively.
         </p>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
-          <input
+            <input
             type="text"
-            placeholder="Search packs..."
+            placeholder="Search Jupyter Keys..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="px-4 py-2 border rounded-lg flex-1 min-w-[200px]"
@@ -126,7 +126,7 @@ export default function MarketplacePage() {
       {/* Pack Grid */}
       {packs.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          No packs found. Try adjusting your filters.
+          No Jupyter Keys found. Try adjusting your filters.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

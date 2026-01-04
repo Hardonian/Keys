@@ -64,9 +64,9 @@ export default function PackDetailPage() {
       const response = await fetch(`${apiUrl}/marketplace/packs/${slug}`, { headers });
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Pack not found');
+          throw new Error('Jupyter Key not found');
         }
-        throw new Error('Failed to fetch pack');
+        throw new Error('Failed to fetch Jupyter Key');
       }
 
       const data = await response.json();
@@ -78,7 +78,7 @@ export default function PackDetailPage() {
         fetchPreview(data.pack.preview_public, session?.access_token);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load pack');
+      setError(err.message || 'Failed to load Jupyter Key');
     } finally {
       setLoading(false);
     }
@@ -131,9 +131,9 @@ export default function PackDetailPage() {
       if (!response.ok) {
         const error = await response.json();
         if (response.status === 403) {
-          alert(error.message || 'You do not have access to this pack. Please purchase it first.');
+          alert(error.message || 'You do not have access to this Jupyter Key. Please unlock it first.');
         } else {
-          alert(error.message || 'Failed to download pack');
+          alert(error.message || 'Failed to download Jupyter Key');
         }
         return;
       }
@@ -142,7 +142,7 @@ export default function PackDetailPage() {
       // Redirect to download URL
       window.location.href = data.downloadUrl;
     } catch (err: any) {
-      alert(err.message || 'Failed to download pack');
+      alert(err.message || 'Failed to download Jupyter Key');
     } finally {
       setDownloading(false);
     }
@@ -160,7 +160,7 @@ export default function PackDetailPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading pack...</div>
+        <div className="text-center">Loading Jupyter Key...</div>
       </div>
     );
   }
@@ -168,12 +168,12 @@ export default function PackDetailPage() {
   if (error || !pack) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600">Error: {error || 'Pack not found'}</div>
+        <div className="text-center text-red-600">Error: {error || 'Jupyter Key not found'}</div>
         <button
           onClick={() => router.push('/marketplace')}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
         >
-          Back to Marketplace
+          Back to Jupyter Keys
         </button>
       </div>
     );
@@ -185,7 +185,7 @@ export default function PackDetailPage() {
         onClick={() => router.push('/marketplace')}
         className="mb-6 text-blue-600 hover:underline"
       >
-        ← Back to Marketplace
+        ← Back to Jupyter Keys
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -243,10 +243,13 @@ export default function PackDetailPage() {
           {previewUrl && (
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4">Preview</h3>
+              <p className="text-sm text-gray-600 mb-2">
+                This Jupyter Key unlocks the following workflow in Jupyter:
+              </p>
               <iframe
                 src={previewUrl}
                 className="w-full h-96 border rounded-lg"
-                title="Pack Preview"
+                title="Jupyter Key Preview"
               />
             </div>
           )}
@@ -264,11 +267,11 @@ export default function PackDetailPage() {
               <div className="text-sm text-gray-600 mb-2">Status</div>
               {pack.hasAccess ? (
                 <span className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm">
-                  ✓ You have access
+                  ✓ Key unlocked
                 </span>
               ) : (
                 <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">
-                  🔒 Purchase required
+                  🔒 Key locked
                 </span>
               )}
             </div>
@@ -280,14 +283,14 @@ export default function PackDetailPage() {
                   disabled={downloading}
                   className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {downloading ? 'Preparing download...' : 'Download Pack'}
+                  {downloading ? 'Preparing download...' : 'Download Jupyter Key'}
                 </button>
               ) : (
                 <button
                   onClick={handlePurchase}
                   className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 >
-                  Purchase Pack
+                  Unlock Jupyter Key
                 </button>
               )}
             </div>

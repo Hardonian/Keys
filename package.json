@@ -1,7 +1,7 @@
 {
-  "name": "hardonia-ai-companion",
+  "name": "keys",
   "version": "1.0.0",
-  "description": "Personalized AI Companion Agent - Cursor for business operators",
+  "description": "The keyring to modern tools - A marketplace of structured assets that unlock practical capability in Cursor, Jupyter, GitHub, Stripe, and more",
   "private": true,
   "workspaces": [
     "frontend",
