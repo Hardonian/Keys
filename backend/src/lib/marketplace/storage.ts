@@ -78,7 +78,7 @@ export async function fileExists(path: string): Promise<boolean> {
 }
 
 /**
- * Generate storage path for a pack asset
+ * Generate storage path for a pack asset (legacy support)
  */
 export function getPackAssetPath(
   slug: string,
@@ -93,6 +93,25 @@ export function getPackAssetPath(
   }[assetType];
 
   return `packs/${slug}/${version}/${filename}`;
+}
+
+/**
+ * Generate storage path for a key asset
+ */
+export function getKeyAssetPath(
+  keyType: 'jupyter' | 'node' | 'next' | 'runbook',
+  slug: string,
+  version: string,
+  assetType: 'zip' | 'preview_html' | 'cover' | 'changelog_md'
+): string {
+  const filename = {
+    zip: 'key.zip',
+    preview_html: 'preview.html',
+    cover: 'cover.png',
+    changelog_md: 'changelog.md',
+  }[assetType];
+
+  return `keys/${keyType}/${slug}/${version}/${filename}`;
 }
 
 /**

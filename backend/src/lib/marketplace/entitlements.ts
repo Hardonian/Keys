@@ -14,32 +14,32 @@ export interface EntitlementCheck {
 }
 
 /**
- * Check if a tenant (org or user) has entitlement to a pack
+ * Check if a tenant (org or user) has entitlement to a key
  * Server-side only - never trust client claims
  */
 export async function hasEntitlement(
   tenantId: string,
   tenantType: TenantType,
-  packIdOrSlug: string
+  keyIdOrSlug: string
 ): Promise<EntitlementCheck> {
   try {
-    // First, resolve pack_id if slug was provided
-    let packId: string;
-    if (packIdOrSlug.length === 36 && packIdOrSlug.includes('-')) {
+    // First, resolve key_id if slug was provided
+    let keyId: string;
+    if (keyIdOrSlug.length === 36 && keyIdOrSlug.includes('-')) {
       // Looks like a UUID
-      packId = packIdOrSlug;
+      keyId = keyIdOrSlug;
     } else {
       // Assume it's a slug, look it up
-      const { data: pack } = await supabase
-        .from('marketplace_packs')
+      const { data: key } = await supabase
+        .from('marketplace_keys')
         .select('id')
-        .eq('slug', packIdOrSlug)
+        .eq('slug', keyIdOrSlug)
         .single();
 
-      if (!pack) {
+      if (!key) {
         return { hasAccess: false };
       }
-      packId = pack.id;
+      keyId = key.id;
     }
 
     // Check for active entitlement
@@ -48,7 +48,7 @@ export async function hasEntitlement(
       .select('id, ends_at, status')
       .eq('tenant_id', tenantId)
       .eq('tenant_type', tenantType)
-      .eq('pack_id', packId)
+      .eq('key_id', keyId)
       .eq('status', 'active')
       .single();
 
@@ -87,7 +87,7 @@ export async function hasEntitlement(
 export async function grantEntitlement(
   tenantId: string,
   tenantType: TenantType,
-  packId: string,
+  keyId: string,
   source: 'stripe' | 'manual',
   options?: {
     stripeSubscriptionId?: string;
@@ -101,7 +101,7 @@ export async function grantEntitlement(
       {
         tenant_id: tenantId,
         tenant_type: tenantType,
-        pack_id: packId,
+        key_id: keyId,
         source,
         status: 'active',
         stripe_subscription_id: options?.stripeSubscriptionId || null,
@@ -109,7 +109,7 @@ export async function grantEntitlement(
         ends_at: options?.endsAt?.toISOString() || null,
       },
       {
-        onConflict: 'tenant_id,pack_id,tenant_type',
+        onConflict: 'tenant_id,key_id,tenant_type',
       }
     )
     .select('id')
@@ -127,7 +127,7 @@ export async function grantEntitlement(
  */
 export async function revokeEntitlement(
   tenantId: string,
-  packId: string,
+  keyId: string,
   tenantType: TenantType
 ): Promise<void> {
   const { error } = await supabase
@@ -135,7 +135,7 @@ export async function revokeEntitlement(
     .update({ status: 'inactive' })
     .eq('tenant_id', tenantId)
     .eq('tenant_type', tenantType)
-    .eq('pack_id', packId);
+    .eq('key_id', keyId);
 
   if (error) {
     throw new Error(`Failed to revoke entitlement: ${error.message}`);
@@ -149,7 +149,7 @@ export async function getTenantEntitlements(
   tenantId: string,
   tenantType: TenantType
 ): Promise<Array<{
-  packId: string;
+  keyId: string;
   packSlug: string;
   packTitle: string;
   status: string;
@@ -158,10 +158,10 @@ export async function getTenantEntitlements(
   const { data, error } = await supabase
     .from('marketplace_entitlements')
     .select(`
-      pack_id,
+      key_id,
       status,
       ends_at,
-      marketplace_packs!inner(id, slug, title)
+      marketplace_keys!inner(id, slug, title)
     `)
     .eq('tenant_id', tenantId)
     .eq('tenant_type', tenantType)
@@ -172,9 +172,9 @@ export async function getTenantEntitlements(
   }
 
   return (data || []).map((ent) => ({
-    packId: ent.pack_id,
-    packSlug: (ent.marketplace_packs as any).slug,
-    packTitle: (ent.marketplace_packs as any).title,
+    keyId: ent.key_id,
+    packSlug: (ent.marketplace_keys as any).slug,
+    packTitle: (ent.marketplace_keys as any).title,
     status: ent.status,
     expiresAt: ent.ends_at ? new Date(ent.ends_at) : undefined,
   }));

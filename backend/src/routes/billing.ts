@@ -199,47 +199,105 @@ router.post(
         const userId = session.client_reference_id || session.metadata?.userId;
 
         if (userId) {
-          // Check if this is a marketplace pack purchase
-          const packSlug = session.metadata?.packSlug;
-          const packId = session.metadata?.packId;
+          // Check if this is a marketplace key or bundle purchase
+          const purchaseType = session.metadata?.purchaseType;
+          const keySlug = session.metadata?.keySlug;
+          const keyId = session.metadata?.keyId;
+          const bundleSlug = session.metadata?.bundleSlug;
+          const bundleId = session.metadata?.bundleId;
 
-          if (packSlug || packId) {
-            // Grant marketplace entitlement
+          if (purchaseType === 'key' && (keySlug || keyId)) {
+            // Grant marketplace key entitlement
             try {
               const { grantEntitlement, resolveTenantContext } = await import('../lib/marketplace/entitlements.js');
               const tenant = await resolveTenantContext(userId);
 
-              // Resolve pack_id if slug was provided
-              let resolvedPackId = packId;
-              if (!resolvedPackId && packSlug) {
-                const { data: pack } = await supabase
-                  .from('marketplace_packs')
+              // Resolve key_id if slug was provided
+              let resolvedKeyId = keyId;
+              if (!resolvedKeyId && keySlug) {
+                const { data: key } = await supabase
+                  .from('marketplace_keys')
                   .select('id')
-                  .eq('slug', packSlug)
+                  .eq('slug', keySlug)
                   .single();
-                if (pack) {
-                  resolvedPackId = pack.id;
+                if (key) {
+                  resolvedKeyId = key.id;
                 }
               }
 
-              if (resolvedPackId) {
+              if (resolvedKeyId) {
                 const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
                 const priceId = lineItems.data[0]?.price?.id || '';
-                const subscriptionId = session.subscription as string | null;
 
                 await grantEntitlement(
                   tenant.tenantId,
                   tenant.tenantType,
-                  resolvedPackId,
+                  resolvedKeyId,
                   'stripe',
                   {
-                    stripeSubscriptionId: subscriptionId || undefined,
                     stripePriceId: priceId || undefined,
                   }
                 );
+
+                // Track analytics
+                await supabase.from('marketplace_analytics').insert({
+                  event_type: 'purchase',
+                  key_id: resolvedKeyId,
+                  user_id: userId,
+                  tenant_id: tenant.tenantId,
+                  tenant_type: tenant.tenantType,
+                });
               }
             } catch (error) {
-              console.error('Failed to grant marketplace entitlement:', error);
+              console.error('Failed to grant marketplace key entitlement:', error);
+              // Don't fail the webhook, but log the error
+            }
+          } else if (purchaseType === 'bundle' && (bundleSlug || bundleId)) {
+            // Grant bundle entitlements
+            try {
+              const { grantEntitlement, resolveTenantContext } = await import('../lib/marketplace/entitlements.js');
+              const tenant = await resolveTenantContext(userId);
+
+              // Resolve bundle_id if slug was provided
+              let resolvedBundleId = bundleId;
+              if (!resolvedBundleId && bundleSlug) {
+                const { data: bundle } = await supabase
+                  .from('marketplace_bundles')
+                  .select('id, key_ids')
+                  .eq('slug', bundleSlug)
+                  .single();
+                if (bundle) {
+                  resolvedBundleId = bundle.id;
+                  
+                  // Grant entitlements for all keys in bundle
+                  const keyIds = bundle.key_ids as string[];
+                  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+                  const priceId = lineItems.data[0]?.price?.id || '';
+
+                  for (const keyId of keyIds) {
+                    await grantEntitlement(
+                      tenant.tenantId,
+                      tenant.tenantType,
+                      keyId,
+                      'stripe',
+                      {
+                        stripePriceId: priceId || undefined,
+                      }
+                    );
+                  }
+
+                  // Track analytics
+                  await supabase.from('marketplace_analytics').insert({
+                    event_type: 'bundle_upgrade',
+                    bundle_id: resolvedBundleId,
+                    user_id: userId,
+                    tenant_id: tenant.tenantId,
+                    tenant_type: tenant.tenantType,
+                  });
+                }
+              }
+            } catch (error) {
+              console.error('Failed to grant bundle entitlements:', error);
               // Don't fail the webhook, but log the error
             }
           } else {
