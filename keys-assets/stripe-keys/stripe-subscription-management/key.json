@@ -1,0 +1,39 @@
+{
+  "slug": "stripe-subscription-management",
+  "title": "Stripe Keys: Subscription Management",
+  "description": "Complete subscription lifecycle management for Stripe. Unlocks subscription creation, plan management, customer management, proration, upgrades/downgrades, and webhook handling with idempotency.",
+  "tool": "stripe",
+  "key_type": ["workflow"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "monetization",
+  "maturity": "operator",
+  "tags": ["stripe", "subscription", "billing", "monetization", "saas"],
+  "webhook_event_types": [
+    "customer.subscription.created",
+    "customer.subscription.updated",
+    "customer.subscription.deleted",
+    "customer.subscription.trial_will_end",
+    "invoice.payment_succeeded",
+    "invoice.payment_failed"
+  ],
+  "stripe_integration_level": "advanced",
+  "required_env": ["STRIPE_SECRET_KEY"],
+  "optional_env": ["STRIPE_WEBHOOK_SECRET", "STRIPE_API_VERSION"],
+  "dependencies": [
+    {
+      "name": "stripe",
+      "version": "^14.0.0",
+      "required": true
+    }
+  ],
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "slug": "supabase-realtime-subscription-patterns",
+  "title": "Supabase Keys: Real-time Subscription Patterns",
+  "description": "Real-time subscription patterns for Supabase. Unlocks real-time subscription setup, channel management patterns, event filtering patterns, connection management, and error handling.",
+  "tool": "supabase",
+  "key_type": ["template"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "automation",
+  "maturity": "operator",
+  "tags": ["supabase", "realtime", "subscriptions", "websockets", "events"],
+  "supabase_feature_type": "realtime",
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

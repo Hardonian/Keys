@@ -1,0 +1,37 @@
+{
+  "slug": "stripe-payment-flow-patterns",
+  "title": "Stripe Keys: Payment Flow Patterns",
+  "description": "One-time payment flows for Stripe. Unlocks payment intent creation, payment confirmation handling, error handling patterns, and basic webhook processing.",
+  "tool": "stripe",
+  "key_type": ["workflow"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "monetization",
+  "maturity": "starter",
+  "tags": ["stripe", "payment", "one-time", "monetization", "checkout"],
+  "webhook_event_types": [
+    "payment_intent.succeeded",
+    "payment_intent.payment_failed",
+    "charge.succeeded",
+    "charge.failed"
+  ],
+  "stripe_integration_level": "basic",
+  "required_env": ["STRIPE_SECRET_KEY"],
+  "optional_env": ["STRIPE_WEBHOOK_SECRET", "STRIPE_API_VERSION"],
+  "dependencies": [
+    {
+      "name": "stripe",
+      "version": "^14.0.0",
+      "required": true
+    }
+  ],
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

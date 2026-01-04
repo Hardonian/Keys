@@ -1,0 +1,28 @@
+{
+  "slug": "jupyter-production-ml-pipelines",
+  "title": "Jupyter Keys: Production ML Pipelines",
+  "description": "Production ML pipeline patterns for Jupyter. Unlocks production ML pipeline patterns, model serving patterns, A/B testing workflows, monitoring and alerting, and retraining workflows.",
+  "tool": "jupyter",
+  "key_type": ["notebook"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "automation",
+  "maturity": "scale",
+  "tags": ["jupyter", "ml", "production", "pipelines", "serving"],
+  "category": "ml-production",
+  "difficulty": "expert",
+  "runtime_minutes": 60,
+  "preview_public": true,
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  },
+  "assets": {
+    "zip": "jupyter-production-ml-pipelines/1.0.0/key.zip"
+  }
+}

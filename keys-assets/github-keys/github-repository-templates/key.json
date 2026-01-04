@@ -1,0 +1,22 @@
+{
+  "slug": "github-repository-templates",
+  "title": "GitHub Keys: Repository Templates",
+  "description": "Pre-configured repository structures for common project types. Unlocks SaaS starter, API starter, CLI starter, full-stack starter, and library starter templates with best practices structure.",
+  "tool": "github",
+  "key_type": ["template"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "automation",
+  "maturity": "starter",
+  "tags": ["github", "templates", "starter", "repository", "scaffolding"],
+  "github_template_type": "repository",
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

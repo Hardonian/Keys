@@ -89,6 +89,82 @@ export const runbookKeySchema = z.object({
 });
 
 /**
+ * Stripe Key schema (workflow keys for Stripe integration)
+ */
+export const stripeKeySchema = z.object({
+  ...baseKeySchema,
+  tool: z.literal('stripe'),
+  key_type: z.array(z.enum(['workflow'])).min(1),
+  webhook_event_types: z.array(z.string()).optional(), // Stripe event types handled
+  stripe_integration_level: z.enum(['basic', 'advanced', 'enterprise']).optional(),
+  required_env: z.array(z.string()).optional(), // e.g., ['STRIPE_SECRET_KEY']
+  optional_env: z.array(z.string()).optional(),
+  dependencies: z.array(z.object({
+    name: z.string(),
+    version: z.string(),
+    required: z.boolean(),
+  })).optional(),
+  documentation: z.object({
+    readme: z.string(),
+    quickstart: z.string(),
+    changelog: z.string(),
+  }),
+});
+
+/**
+ * GitHub Key schema (workflow/template keys for GitHub)
+ */
+export const githubKeySchema = z.object({
+  ...baseKeySchema,
+  tool: z.literal('github'),
+  key_type: z.array(z.enum(['workflow', 'template'])).min(1),
+  github_workflow_type: z.string().optional(), // 'ci', 'cd', 'test', 'deploy', etc.
+  github_template_type: z.string().optional(), // 'repository', 'issue', 'pr', etc.
+  documentation: z.object({
+    readme: z.string(),
+    quickstart: z.string(),
+    changelog: z.string(),
+  }),
+});
+
+/**
+ * Supabase Key schema (template/workflow keys for Supabase)
+ */
+export const supabaseKeySchema = z.object({
+  ...baseKeySchema,
+  tool: z.literal('supabase'),
+  key_type: z.array(z.enum(['template', 'workflow'])).min(1),
+  supabase_feature_type: z.string().optional(), // 'rls', 'auth', 'realtime', 'storage', etc.
+  required_env: z.array(z.string()).optional(),
+  optional_env: z.array(z.string()).optional(),
+  dependencies: z.array(z.object({
+    name: z.string(),
+    version: z.string(),
+    required: z.boolean(),
+  })).optional(),
+  documentation: z.object({
+    readme: z.string(),
+    quickstart: z.string(),
+    changelog: z.string(),
+  }),
+});
+
+/**
+ * Cursor Key schema (prompt/composer keys for Cursor)
+ */
+export const cursorKeySchema = z.object({
+  ...baseKeySchema,
+  tool: z.literal('cursor'),
+  key_type: z.array(z.enum(['prompt', 'composer'])).min(1),
+  cursor_prompt_type: z.string().optional(), // 'mega-prompt', 'composer-instruction', etc.
+  documentation: z.object({
+    readme: z.string(),
+    quickstart: z.string(),
+    changelog: z.string(),
+  }),
+});
+
+/**
  * Assets index schema (from build_assets_index.ts output)
  */
 export const assetsIndexSchema = z.object({
@@ -96,11 +172,19 @@ export const assetsIndexSchema = z.object({
   generated_at: z.string().datetime().optional(),
   runbooks: z.array(runbookKeySchema.partial()).default([]),
   node_keys: z.array(nodeKeySchema.partial()).default([]),
+  stripe_keys: z.array(stripeKeySchema.partial()).default([]),
+  github_keys: z.array(githubKeySchema.partial()).default([]),
+  supabase_keys: z.array(supabaseKeySchema.partial()).default([]),
+  cursor_keys: z.array(cursorKeySchema.partial()).default([]),
 });
 
 export type JupyterKeyMetadata = z.infer<typeof jupyterKeySchema>;
 export type NodeKeyMetadata = z.infer<typeof nodeKeySchema>;
 export type RunbookKeyMetadata = z.infer<typeof runbookKeySchema>;
+export type StripeKeyMetadata = z.infer<typeof stripeKeySchema>;
+export type GitHubKeyMetadata = z.infer<typeof githubKeySchema>;
+export type SupabaseKeyMetadata = z.infer<typeof supabaseKeySchema>;
+export type CursorKeyMetadata = z.infer<typeof cursorKeySchema>;
 export type AssetsIndex = z.infer<typeof assetsIndexSchema>;
 
 /**
@@ -108,7 +192,8 @@ export type AssetsIndex = z.infer<typeof assetsIndexSchema>;
  */
 export type UnifiedKeyMetadata = {
   slug: string;
-  key_type: 'jupyter' | 'node' | 'next' | 'runbook';
+  tool: 'jupyter' | 'node' | 'next' | 'runbook' | 'stripe' | 'github' | 'supabase' | 'cursor';
+  key_type: string | string[]; // Tool-specific: 'jupyter'/'runbook' for legacy, array for node/next, string for others
   title: string;
   description?: string;
   version: string;
@@ -124,9 +209,8 @@ export type UnifiedKeyMetadata = {
   preview_public?: boolean;
   
   // Node/Next-specific
-  tool?: 'node' | 'next';
   runtime?: 'node' | 'next';
-  key_types?: string[];
+  key_types?: string[]; // Array for node/next keys
   
   // Runbook-specific
   severity_level?: 'p0' | 'p1' | 'p2' | 'p3' | 'p4';
@@ -134,6 +218,29 @@ export type UnifiedKeyMetadata = {
   required_access_level?: 'read' | 'write' | 'admin';
   produces_evidence?: boolean;
   compliance_relevance?: string[];
+  
+  // Stripe-specific
+  webhook_event_types?: string[];
+  stripe_integration_level?: 'basic' | 'advanced' | 'enterprise';
+  
+  // GitHub-specific
+  github_workflow_type?: string;
+  github_template_type?: string;
+  
+  // Supabase-specific
+  supabase_feature_type?: string;
+  
+  // Cursor-specific
+  cursor_prompt_type?: string;
+  
+  // Common environment/dependencies
+  required_env?: string[];
+  optional_env?: string[];
+  dependencies?: Array<{
+    name: string;
+    version: string;
+    required: boolean;
+  }>;
   
   // Asset paths
   cover_path?: string;

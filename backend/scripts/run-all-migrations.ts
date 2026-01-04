@@ -91,6 +91,7 @@ function getMigrationFiles(): string[] {
     '011_enhance_template_system.sql',
     '012_add_rls_core_tables.sql',
     '013_add_billing_and_orgs.sql',
+    '020_extend_marketplace_new_tool_types.sql', // New migration for roadmap
   ].map((filename) => join(migrationsDir, filename));
 }
 

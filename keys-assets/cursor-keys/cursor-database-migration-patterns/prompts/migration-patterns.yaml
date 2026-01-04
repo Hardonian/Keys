@@ -1,0 +1,193 @@
+# Cursor Keys: Database Migration Patterns - Mega Prompt
+# Unlocks database migration generation patterns in Cursor
+
+---
+name: Database Migration Generation
+description: Generate production-ready database migrations with schema changes, data migrations, rollback procedures, and testing patterns
+version: 1.0.0
+
+# Context
+context:
+  database: "PostgreSQL / Supabase"
+  migration_tool: "Supabase Migrations / Flyway / Custom"
+  patterns:
+    - "Schema changes (CREATE, ALTER, DROP)"
+    - "Data migrations"
+    - "Rollback procedures"
+    - "Migration testing"
+    - "Idempotent migrations"
+
+# Instructions
+instructions: |
+  Generate a complete database migration with the following requirements:
+
+  1. **Migration Structure**:
+     - Use timestamped filename: YYYYMMDDHHMMSS_description.sql
+     - Include up migration (forward)
+     - Include down migration (rollback)
+     - Add comments explaining changes
+
+  2. **Schema Changes**:
+     - Use IF NOT EXISTS / IF EXISTS for idempotency
+     - Add proper constraints (NOT NULL, UNIQUE, FOREIGN KEY)
+     - Include indexes for performance
+     - Use transactions for atomicity
+
+  3. **Data Migrations**:
+     - Handle existing data gracefully
+     - Use UPDATE statements for data transformations
+     - Back up data before destructive changes
+     - Validate data before migration
+
+  4. **Rollback Procedures**:
+     - Provide complete rollback SQL
+     - Handle data restoration
+     - Test rollback before deploying
+
+  5. **Best Practices**:
+     - Never drop columns without backup
+     - Add columns as nullable first, then populate, then make NOT NULL
+     - Use CHECK constraints for data validation
+     - Add indexes after data migration
+
+# Examples
+examples:
+  - name: "Add Column Migration"
+    code: |
+      -- Migration: 20250101120000_add_user_bio.sql
+      -- Description: Add bio column to users table
+      
+      -- Up migration
+      BEGIN;
+      
+      -- Add column as nullable first
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS bio TEXT;
+      
+      -- Populate existing rows (if needed)
+      UPDATE users
+      SET bio = ''
+      WHERE bio IS NULL;
+      
+      -- Make column NOT NULL (optional, after data migration)
+      -- ALTER TABLE users
+      -- ALTER COLUMN bio SET NOT NULL;
+      
+      COMMIT;
+      
+      -- Down migration
+      BEGIN;
+      
+      ALTER TABLE users
+      DROP COLUMN IF EXISTS bio;
+      
+      COMMIT;
+
+  - name: "Create Table Migration"
+    code: |
+      -- Migration: 20250101120000_create_posts_table.sql
+      
+      BEGIN;
+      
+      CREATE TABLE IF NOT EXISTS posts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title TEXT NOT NULL,
+        content TEXT,
+        published BOOLEAN DEFAULT false,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      
+      CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id);
+      CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at);
+      
+      -- Enable RLS
+      ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+      
+      COMMIT;
+      
+      -- Down migration
+      BEGIN;
+      
+      DROP TABLE IF EXISTS posts;
+      
+      COMMIT;
+
+  - name: "Data Migration"
+    code: |
+      -- Migration: 20250101120000_migrate_user_emails.sql
+      
+      BEGIN;
+      
+      -- Backup original data (optional, in separate table)
+      CREATE TABLE IF NOT EXISTS user_emails_backup AS
+      SELECT id, email FROM users;
+      
+      -- Migrate data
+      UPDATE users
+      SET email = LOWER(TRIM(email))
+      WHERE email != LOWER(TRIM(email));
+      
+      -- Validate migration
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM users
+          WHERE email IS NULL OR email = ''
+        ) THEN
+          RAISE EXCEPTION 'Migration validation failed: empty emails found';
+        END IF;
+      END $$;
+      
+      COMMIT;
+      
+      -- Down migration
+      BEGIN;
+      
+      -- Restore from backup
+      UPDATE users u
+      SET email = b.email
+      FROM user_emails_backup b
+      WHERE u.id = b.id;
+      
+      DROP TABLE IF EXISTS user_emails_backup;
+      
+      COMMIT;
+
+# Patterns
+patterns:
+  add_column:
+    - "Add as nullable first"
+    - "Populate existing rows"
+    - "Add constraints after population"
+    - "Use IF NOT EXISTS"
+
+  create_table:
+    - "Include primary key"
+    - "Add foreign keys"
+    - "Add indexes"
+    - "Enable RLS if needed"
+    - "Add timestamps"
+
+  data_migration:
+    - "Backup data first"
+    - "Validate before commit"
+    - "Use transactions"
+    - "Handle edge cases"
+
+  rollback:
+    - "Complete rollback SQL"
+    - "Restore data if needed"
+    - "Test rollback"
+
+# Best Practices
+best_practices:
+  - "Always use transactions"
+  - "Make migrations idempotent (IF EXISTS/IF NOT EXISTS)"
+  - "Add indexes after data migration"
+  - "Test migrations on staging first"
+  - "Never drop columns without backup"
+  - "Add columns as nullable, then populate, then make NOT NULL"
+  - "Use CHECK constraints for validation"
+  - "Document breaking changes"

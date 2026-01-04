@@ -1,0 +1,30 @@
+{
+  "slug": "stripe-multi-product-billing",
+  "title": "Stripe Keys: Multi-Product Billing",
+  "description": "Multi-product subscription management for Stripe. Unlocks multi-product subscription management, complex pricing models, usage-based billing, revenue recognition patterns, and advanced analytics.",
+  "tool": "stripe",
+  "key_type": ["workflow"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "monetization",
+  "maturity": "scale",
+  "tags": ["stripe", "billing", "multi-product", "subscriptions", "pricing"],
+  "stripe_integration_level": "enterprise",
+  "required_env": ["STRIPE_SECRET_KEY"],
+  "dependencies": [
+    {
+      "name": "stripe",
+      "version": "^14.0.0",
+      "required": true
+    }
+  ],
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "slug": "github-issue-management-patterns",
+  "title": "GitHub Keys: Issue Management Patterns",
+  "description": "Issue management automation for GitHub. Unlocks issue labeling automation, issue triage workflows, PR review assignment patterns, issue linking patterns, and project board automation.",
+  "tool": "github",
+  "key_type": ["workflow"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "automation",
+  "maturity": "operator",
+  "tags": ["github", "issues", "automation", "workflows", "project-management"],
+  "github_workflow_type": "automation",
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

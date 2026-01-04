@@ -1,0 +1,22 @@
+{
+  "slug": "supabase-auth-flow-templates",
+  "title": "Supabase Keys: Auth Flow Templates",
+  "description": "Authentication flow templates for Supabase. Unlocks sign up/sign in patterns, password reset flows, email verification patterns, and social auth integration.",
+  "tool": "supabase",
+  "key_type": ["template"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "compliance",
+  "maturity": "starter",
+  "tags": ["supabase", "auth", "authentication", "signup", "signin", "password-reset"],
+  "supabase_feature_type": "auth",
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

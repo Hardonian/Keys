@@ -1,0 +1,22 @@
+{
+  "slug": "supabase-rls-policy-patterns",
+  "title": "Supabase Keys: RLS Policy Patterns",
+  "description": "Common Row-Level Security (RLS) policy patterns for Supabase. Unlocks multi-tenant security, user-based access control, organization-based access control, and audit logging patterns.",
+  "tool": "supabase",
+  "key_type": ["template"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "compliance",
+  "maturity": "operator",
+  "tags": ["supabase", "rls", "security", "compliance", "multi-tenant", "access-control"],
+  "supabase_feature_type": "rls",
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

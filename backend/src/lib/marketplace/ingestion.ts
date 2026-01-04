@@ -5,23 +5,27 @@ import {
   jupyterKeySchema,
   nodeKeySchema,
   runbookKeySchema,
+  stripeKeySchema,
+  githubKeySchema,
+  supabaseKeySchema,
+  cursorKeySchema,
   assetsIndexSchema,
   type UnifiedKeyMetadata,
 } from './key-schemas.js';
-import { logger } from '../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const ASSETS_ROOT = process.env.KEYS_ASSETS_ROOT || resolve(process.cwd(), '../../keys-assets');
+const ASSETS_ROOT = process.env.KEYS_ASSETS_ROOT || resolve(process.cwd(), '../keys-assets');
 
 /**
  * Get storage path for a key asset
  */
 function getKeyAssetPath(
-  keyType: 'jupyter' | 'node' | 'next' | 'runbook',
+  tool: string,
   slug: string,
   version: string,
   assetType: 'zip' | 'preview_html' | 'cover' | 'changelog_md'
@@ -33,7 +37,7 @@ function getKeyAssetPath(
     changelog_md: 'changelog.md',
   }[assetType];
 
-  return `keys/${keyType}/${slug}/${version}/${filename}`;
+  return `keys/${tool}/${slug}/${version}/${filename}`;
 }
 
 /**
@@ -46,7 +50,8 @@ async function ingestNodeKey(slug: string, metadata: any): Promise<UnifiedKeyMet
   
   return {
     slug: validated.slug,
-    key_type: keyType,
+    tool: validated.tool,
+    key_type: keyType, // Store tool name as key_type for backward compatibility
     title: validated.title,
     description: validated.description,
     version: validated.version,
@@ -54,12 +59,14 @@ async function ingestNodeKey(slug: string, metadata: any): Promise<UnifiedKeyMet
     tags: validated.tags || [],
     outcome: validated.outcome,
     maturity: validated.maturity,
-    tool: validated.tool,
     runtime: validated.runtime,
-    key_types: validated.key_type,
-    zip_path: getKeyAssetPath(keyType, slug, validated.version, 'zip'),
+    key_types: validated.key_type, // Store array in key_types JSONB column
+    required_env: validated.required_env,
+    optional_env: validated.optional_env,
+    dependencies: validated.dependencies,
+    zip_path: getKeyAssetPath(validated.tool, slug, validated.version, 'zip'),
     changelog_md_path: validated.documentation?.changelog
-      ? getKeyAssetPath(keyType, slug, validated.version, 'changelog_md')
+      ? getKeyAssetPath(validated.tool, slug, validated.version, 'changelog_md')
       : undefined,
   };
 }
@@ -72,7 +79,8 @@ async function ingestRunbookKey(slug: string, metadata: any): Promise<UnifiedKey
   
   return {
     slug: validated.slug,
-    key_type: 'runbook',
+    tool: 'runbook',
+    key_type: 'runbook', // Store tool name as key_type for backward compatibility
     title: validated.title,
     description: validated.description,
     version: validated.version,
@@ -88,6 +96,114 @@ async function ingestRunbookKey(slug: string, metadata: any): Promise<UnifiedKey
     zip_path: getKeyAssetPath('runbook', slug, validated.version, 'zip'),
     changelog_md_path: validated.documentation?.changelog
       ? getKeyAssetPath('runbook', slug, validated.version, 'changelog_md')
+      : undefined,
+  };
+}
+
+/**
+ * Ingest a single Stripe key
+ */
+async function ingestStripeKey(slug: string, metadata: any): Promise<UnifiedKeyMetadata> {
+  const validated = stripeKeySchema.parse(metadata);
+  
+  return {
+    slug: validated.slug,
+    tool: 'stripe',
+    key_type: validated.key_type[0] || 'workflow', // Store first key_type as string
+    title: validated.title,
+    description: validated.description,
+    version: validated.version,
+    license_spdx: validated.license_spdx,
+    tags: validated.tags || [],
+    outcome: validated.outcome,
+    maturity: validated.maturity,
+    webhook_event_types: validated.webhook_event_types,
+    stripe_integration_level: validated.stripe_integration_level,
+    required_env: validated.required_env,
+    optional_env: validated.optional_env,
+    dependencies: validated.dependencies,
+    zip_path: getKeyAssetPath('stripe', slug, validated.version, 'zip'),
+    changelog_md_path: validated.documentation?.changelog
+      ? getKeyAssetPath('stripe', slug, validated.version, 'changelog_md')
+      : undefined,
+  };
+}
+
+/**
+ * Ingest a single GitHub key
+ */
+async function ingestGitHubKey(slug: string, metadata: any): Promise<UnifiedKeyMetadata> {
+  const validated = githubKeySchema.parse(metadata);
+  
+  return {
+    slug: validated.slug,
+    tool: 'github',
+    key_type: validated.key_type[0] || 'workflow', // Store first key_type as string
+    title: validated.title,
+    description: validated.description,
+    version: validated.version,
+    license_spdx: validated.license_spdx,
+    tags: validated.tags || [],
+    outcome: validated.outcome,
+    maturity: validated.maturity,
+    github_workflow_type: validated.github_workflow_type,
+    github_template_type: validated.github_template_type,
+    zip_path: getKeyAssetPath('github', slug, validated.version, 'zip'),
+    changelog_md_path: validated.documentation?.changelog
+      ? getKeyAssetPath('github', slug, validated.version, 'changelog_md')
+      : undefined,
+  };
+}
+
+/**
+ * Ingest a single Supabase key
+ */
+async function ingestSupabaseKey(slug: string, metadata: any): Promise<UnifiedKeyMetadata> {
+  const validated = supabaseKeySchema.parse(metadata);
+  
+  return {
+    slug: validated.slug,
+    tool: 'supabase',
+    key_type: validated.key_type[0] || 'template', // Store first key_type as string
+    title: validated.title,
+    description: validated.description,
+    version: validated.version,
+    license_spdx: validated.license_spdx,
+    tags: validated.tags || [],
+    outcome: validated.outcome,
+    maturity: validated.maturity,
+    supabase_feature_type: validated.supabase_feature_type,
+    required_env: validated.required_env,
+    optional_env: validated.optional_env,
+    dependencies: validated.dependencies,
+    zip_path: getKeyAssetPath('supabase', slug, validated.version, 'zip'),
+    changelog_md_path: validated.documentation?.changelog
+      ? getKeyAssetPath('supabase', slug, validated.version, 'changelog_md')
+      : undefined,
+  };
+}
+
+/**
+ * Ingest a single Cursor key
+ */
+async function ingestCursorKey(slug: string, metadata: any): Promise<UnifiedKeyMetadata> {
+  const validated = cursorKeySchema.parse(metadata);
+  
+  return {
+    slug: validated.slug,
+    tool: 'cursor',
+    key_type: validated.key_type[0] || 'prompt', // Store first key_type as string
+    title: validated.title,
+    description: validated.description,
+    version: validated.version,
+    license_spdx: validated.license_spdx,
+    tags: validated.tags || [],
+    outcome: validated.outcome,
+    maturity: validated.maturity,
+    cursor_prompt_type: validated.cursor_prompt_type,
+    zip_path: getKeyAssetPath('cursor', slug, validated.version, 'zip'),
+    changelog_md_path: validated.documentation?.changelog
+      ? getKeyAssetPath('cursor', slug, validated.version, 'changelog_md')
       : undefined,
   };
 }
@@ -231,7 +347,8 @@ async function ingestJupyterKey(metadata: any): Promise<UnifiedKeyMetadata> {
   
   return {
     slug: validated.slug,
-    key_type: 'jupyter',
+    tool: 'jupyter',
+    key_type: 'jupyter', // Legacy: key_type = tool for jupyter
     title: validated.title,
     description: validated.description,
     version: validated.version,
@@ -403,6 +520,186 @@ export async function ingestAllKeys(): Promise<{
       }
     }
 
+    // Ingest Stripe keys
+    const stripeKeysDir = join(ASSETS_ROOT, 'stripe-keys');
+    if (existsSync(stripeKeysDir)) {
+      const { readdirSync, statSync } = await import('fs');
+      const stripeKeys = readdirSync(stripeKeysDir).filter(item => {
+        const itemPath = join(stripeKeysDir, item);
+        return statSync(itemPath).isDirectory();
+      });
+
+      for (const slug of stripeKeys) {
+        try {
+          const keyJsonPath = join(stripeKeysDir, slug, 'key.json');
+          if (!existsSync(keyJsonPath)) {
+            continue;
+          }
+
+          const keyData = JSON.parse(readFileSync(keyJsonPath, 'utf-8'));
+          const unified = await ingestStripeKey(slug, keyData);
+          
+          const { error } = await supabase
+            .from('marketplace_keys')
+            .upsert(unified, { onConflict: 'slug' });
+
+          if (error) {
+            throw new Error(`Database error: ${error.message}`);
+          }
+
+          const keyId = (await supabase.from('marketplace_keys').select('id').eq('slug', slug).single()).data?.id;
+          if (keyId) {
+            await supabase.from('marketplace_key_versions').upsert({
+              key_id: keyId,
+              version: unified.version,
+              zip_path: unified.zip_path,
+              changelog_md_path: unified.changelog_md_path,
+            }, { onConflict: 'key_id,version' });
+          }
+
+          success++;
+        } catch (error: any) {
+          errors.push({ slug, error: error.message || 'Unknown error' });
+          logger.error(`Failed to ingest Stripe key ${slug}:`, error);
+        }
+      }
+    }
+
+    // Ingest GitHub keys
+    const githubKeysDir = join(ASSETS_ROOT, 'github-keys');
+    if (existsSync(githubKeysDir)) {
+      const { readdirSync, statSync } = await import('fs');
+      const githubKeys = readdirSync(githubKeysDir).filter(item => {
+        const itemPath = join(githubKeysDir, item);
+        return statSync(itemPath).isDirectory();
+      });
+
+      for (const slug of githubKeys) {
+        try {
+          const keyJsonPath = join(githubKeysDir, slug, 'key.json');
+          if (!existsSync(keyJsonPath)) {
+            continue;
+          }
+
+          const keyData = JSON.parse(readFileSync(keyJsonPath, 'utf-8'));
+          const unified = await ingestGitHubKey(slug, keyData);
+          
+          const { error } = await supabase
+            .from('marketplace_keys')
+            .upsert(unified, { onConflict: 'slug' });
+
+          if (error) {
+            throw new Error(`Database error: ${error.message}`);
+          }
+
+          const keyId = (await supabase.from('marketplace_keys').select('id').eq('slug', slug).single()).data?.id;
+          if (keyId) {
+            await supabase.from('marketplace_key_versions').upsert({
+              key_id: keyId,
+              version: unified.version,
+              zip_path: unified.zip_path,
+              changelog_md_path: unified.changelog_md_path,
+            }, { onConflict: 'key_id,version' });
+          }
+
+          success++;
+        } catch (error: any) {
+          errors.push({ slug, error: error.message || 'Unknown error' });
+          logger.error(`Failed to ingest GitHub key ${slug}:`, error);
+        }
+      }
+    }
+
+    // Ingest Supabase keys
+    const supabaseKeysDir = join(ASSETS_ROOT, 'supabase-keys');
+    if (existsSync(supabaseKeysDir)) {
+      const { readdirSync, statSync } = await import('fs');
+      const supabaseKeys = readdirSync(supabaseKeysDir).filter(item => {
+        const itemPath = join(supabaseKeysDir, item);
+        return statSync(itemPath).isDirectory();
+      });
+
+      for (const slug of supabaseKeys) {
+        try {
+          const keyJsonPath = join(supabaseKeysDir, slug, 'key.json');
+          if (!existsSync(keyJsonPath)) {
+            continue;
+          }
+
+          const keyData = JSON.parse(readFileSync(keyJsonPath, 'utf-8'));
+          const unified = await ingestSupabaseKey(slug, keyData);
+          
+          const { error } = await supabase
+            .from('marketplace_keys')
+            .upsert(unified, { onConflict: 'slug' });
+
+          if (error) {
+            throw new Error(`Database error: ${error.message}`);
+          }
+
+          const keyId = (await supabase.from('marketplace_keys').select('id').eq('slug', slug).single()).data?.id;
+          if (keyId) {
+            await supabase.from('marketplace_key_versions').upsert({
+              key_id: keyId,
+              version: unified.version,
+              zip_path: unified.zip_path,
+              changelog_md_path: unified.changelog_md_path,
+            }, { onConflict: 'key_id,version' });
+          }
+
+          success++;
+        } catch (error: any) {
+          errors.push({ slug, error: error.message || 'Unknown error' });
+          logger.error(`Failed to ingest Supabase key ${slug}:`, error);
+        }
+      }
+    }
+
+    // Ingest Cursor keys
+    const cursorKeysDir = join(ASSETS_ROOT, 'cursor-keys');
+    if (existsSync(cursorKeysDir)) {
+      const { readdirSync, statSync } = await import('fs');
+      const cursorKeys = readdirSync(cursorKeysDir).filter(item => {
+        const itemPath = join(cursorKeysDir, item);
+        return statSync(itemPath).isDirectory();
+      });
+
+      for (const slug of cursorKeys) {
+        try {
+          const keyJsonPath = join(cursorKeysDir, slug, 'key.json');
+          if (!existsSync(keyJsonPath)) {
+            continue;
+          }
+
+          const keyData = JSON.parse(readFileSync(keyJsonPath, 'utf-8'));
+          const unified = await ingestCursorKey(slug, keyData);
+          
+          const { error } = await supabase
+            .from('marketplace_keys')
+            .upsert(unified, { onConflict: 'slug' });
+
+          if (error) {
+            throw new Error(`Database error: ${error.message}`);
+          }
+
+          const keyId = (await supabase.from('marketplace_keys').select('id').eq('slug', slug).single()).data?.id;
+          if (keyId) {
+            await supabase.from('marketplace_key_versions').upsert({
+              key_id: keyId,
+              version: unified.version,
+              zip_path: unified.zip_path,
+              changelog_md_path: unified.changelog_md_path,
+            }, { onConflict: 'key_id,version' });
+          }
+
+          success++;
+        } catch (error: any) {
+          errors.push({ slug, error: error.message || 'Unknown error' });
+          logger.error(`Failed to ingest Cursor key ${slug}:`, error);
+        }
+      }
+    }
+
   } catch (error: any) {
     logger.error('Failed to ingest keys:', error);
     throw error;
@@ -457,6 +754,82 @@ export async function ingestFromAssetsIndex(assetsIndex: any): Promise<{
       success++;
     } catch (error: any) {
       errors.push({ slug: runbook.slug || 'unknown', error: error.message || 'Unknown error' });
+    }
+  }
+
+  // Ingest Stripe keys
+  for (const stripeKey of validated.stripe_keys || []) {
+    try {
+      const unified = await ingestStripeKey(stripeKey.slug!, stripeKey);
+      
+      const { error } = await supabase
+        .from('marketplace_keys')
+        .upsert(unified, { onConflict: 'slug' });
+
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      success++;
+    } catch (error: any) {
+      errors.push({ slug: stripeKey.slug || 'unknown', error: error.message || 'Unknown error' });
+    }
+  }
+
+  // Ingest GitHub keys
+  for (const githubKey of validated.github_keys || []) {
+    try {
+      const unified = await ingestGitHubKey(githubKey.slug!, githubKey);
+      
+      const { error } = await supabase
+        .from('marketplace_keys')
+        .upsert(unified, { onConflict: 'slug' });
+
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      success++;
+    } catch (error: any) {
+      errors.push({ slug: githubKey.slug || 'unknown', error: error.message || 'Unknown error' });
+    }
+  }
+
+  // Ingest Supabase keys
+  for (const supabaseKey of validated.supabase_keys || []) {
+    try {
+      const unified = await ingestSupabaseKey(supabaseKey.slug!, supabaseKey);
+      
+      const { error } = await supabase
+        .from('marketplace_keys')
+        .upsert(unified, { onConflict: 'slug' });
+
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      success++;
+    } catch (error: any) {
+      errors.push({ slug: supabaseKey.slug || 'unknown', error: error.message || 'Unknown error' });
+    }
+  }
+
+  // Ingest Cursor keys
+  for (const cursorKey of validated.cursor_keys || []) {
+    try {
+      const unified = await ingestCursorKey(cursorKey.slug!, cursorKey);
+      
+      const { error } = await supabase
+        .from('marketplace_keys')
+        .upsert(unified, { onConflict: 'slug' });
+
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      success++;
+    } catch (error: any) {
+      errors.push({ slug: cursorKey.slug || 'unknown', error: error.message || 'Unknown error' });
     }
   }
 

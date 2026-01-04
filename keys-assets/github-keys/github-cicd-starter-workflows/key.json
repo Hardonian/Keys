@@ -1,0 +1,22 @@
+{
+  "slug": "github-cicd-starter-workflows",
+  "title": "GitHub Keys: CI/CD Starter Workflows",
+  "description": "Pre-built GitHub Actions workflows for common stacks. Unlocks CI/CD automation for Node.js, Python, and other popular stacks with testing, linting, and deployment patterns.",
+  "tool": "github",
+  "key_type": ["workflow"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "automation",
+  "maturity": "starter",
+  "tags": ["github", "ci", "cd", "automation", "workflows", "github-actions"],
+  "github_workflow_type": "ci",
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

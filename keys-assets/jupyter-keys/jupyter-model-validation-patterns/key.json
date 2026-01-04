@@ -1,0 +1,28 @@
+{
+  "slug": "jupyter-model-validation-patterns",
+  "title": "Jupyter Keys: Model Validation Patterns",
+  "description": "Model validation workflows for Jupyter. Unlocks cross-validation patterns, performance metrics calculation, overfitting detection, and model comparison patterns.",
+  "tool": "jupyter",
+  "key_type": ["notebook"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "validation",
+  "maturity": "operator",
+  "tags": ["jupyter", "machine-learning", "validation", "cross-validation", "metrics"],
+  "category": "model-validation",
+  "difficulty": "intermediate",
+  "runtime_minutes": 30,
+  "preview_public": true,
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  },
+  "assets": {
+    "zip": "jupyter-model-validation-patterns/1.0.0/key.zip"
+  }
+}

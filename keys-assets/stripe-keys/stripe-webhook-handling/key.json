@@ -1,0 +1,39 @@
+{
+  "slug": "stripe-webhook-handling",
+  "title": "Stripe Keys: Webhook Handling",
+  "description": "Advanced webhook handling for Stripe. Unlocks webhook signature verification, event processing patterns, idempotency handling, retry logic, and error handling.",
+  "tool": "stripe",
+  "key_type": ["workflow"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "automation",
+  "maturity": "operator",
+  "tags": ["stripe", "webhooks", "events", "idempotency", "automation"],
+  "webhook_event_types": [
+    "payment_intent.succeeded",
+    "payment_intent.payment_failed",
+    "customer.subscription.created",
+    "customer.subscription.updated",
+    "customer.subscription.deleted",
+    "invoice.payment_succeeded",
+    "invoice.payment_failed"
+  ],
+  "stripe_integration_level": "advanced",
+  "required_env": ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"],
+  "dependencies": [
+    {
+      "name": "stripe",
+      "version": "^14.0.0",
+      "required": true
+    }
+  ],
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

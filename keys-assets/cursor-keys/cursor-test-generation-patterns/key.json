@@ -1,0 +1,22 @@
+{
+  "slug": "cursor-test-generation-patterns",
+  "title": "Cursor Keys: Test Generation Patterns",
+  "description": "Test generation patterns for Cursor. Unlocks unit test generation, integration test patterns, test data generation, mock patterns, and test coverage patterns.",
+  "tool": "cursor",
+  "key_type": ["prompt", "composer"],
+  "version": "1.0.0",
+  "license_spdx": "MIT",
+  "outcome": "validation",
+  "maturity": "operator",
+  "tags": ["cursor", "testing", "unit-tests", "integration-tests", "mocks"],
+  "cursor_prompt_type": "mega-prompt",
+  "author": {
+    "name": "KEYS Team",
+    "email": "keys@example.com"
+  },
+  "documentation": {
+    "readme": "README.md",
+    "quickstart": "quickstart.md",
+    "changelog": "CHANGELOG.md"
+  }
+}

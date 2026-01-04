@@ -41,12 +41,16 @@ const supabase = createClient(
 router.get(
   '/keys',
   asyncHandler(async (req, res) => {
-    const { key_type, category, difficulty, search, outcome, maturity } = req.query;
+    const { key_type, tool, category, difficulty, search, outcome, maturity } = req.query;
 
     let query = supabase
       .from('marketplace_keys')
-      .select('id, slug, title, description, key_type, category, difficulty, tags, version, license_spdx, outcome, maturity, created_at')
+      .select('id, slug, title, description, tool, key_type, category, difficulty, tags, version, license_spdx, outcome, maturity, created_at')
       .order('created_at', { ascending: false });
+
+    if (tool) {
+      query = query.eq('tool', tool as string);
+    }
 
     if (key_type) {
       query = query.eq('key_type', key_type as string);
