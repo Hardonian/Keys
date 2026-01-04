@@ -38,40 +38,32 @@ KEYS roadmap is organized around:
 
 ## Phase 2: New KEYS (Next 3 Months)
 
-### Cursor Keys Expansion
-- **More Prompt Packs**: Additional Cursor workflow patterns
-- **Composer Keys**: More scaffolding instructions
-- **Template Keys**: More starter repositories
+**📋 Detailed Roadmap**: See `/docs/roadmap/NEW_KEYS_ROADMAP.md` for comprehensive priority list and development context.
 
-**Outcome**: Users unlock more Cursor capability
+### P0: Critical Priority (Next 30 Days)
+- **Stripe Keys: Subscription Management** (Operator) - Highest revenue potential
+- **GitHub Keys: CI/CD Starter Workflows** (Starter) - Most common developer need
+- **Supabase Keys: RLS Policy Patterns** (Operator) - Security/compliance foundation
 
-### Jupyter Keys Expansion
-- **More Notebook Packs**: Additional data science workflows
-- **Validation Harnesses**: Testing and validation patterns
-- **Analysis Templates**: Common analysis patterns
+### P1: High Priority (Next 60 Days)
+- **Cursor Keys: API Route Generation** (Operator)
+- **Stripe Keys: Payment Flow Patterns** (Starter)
+- **Jupyter Keys: Model Validation Patterns** (Operator)
+- **GitHub Keys: Repository Templates** (Starter)
+- **Supabase Keys: Auth Flow Templates** (Starter)
 
-**Outcome**: Users unlock more Jupyter capability
+### P2: Medium Priority (Next 90 Days)
+- **Cursor Keys: Database Migration Patterns** (Operator)
+- **Stripe Keys: Webhook Handling** (Operator)
+- **Jupyter Keys: EDA Workflows** (Starter)
+- **GitHub Keys: Issue Management Patterns** (Operator)
+- **Supabase Keys: Real-time Subscription Patterns** (Operator)
 
-### GitHub Keys (New)
-- **CI/CD Workflows**: GitHub Actions patterns
-- **Repository Templates**: Starter repo structures
-- **Issue Management**: Workflow patterns
+### Strategic Bundles
+- **SaaS Starter Stack**: Stripe + Supabase + GitHub + Cursor (Starter tier)
+- **SaaS Operator Stack**: Stripe + Supabase + GitHub + Cursor (Operator tier)
 
-**Outcome**: Users unlock GitHub automation capability
-
-### Stripe Keys (New)
-- **Payment Flows**: Payment processing patterns
-- **Subscription Management**: Subscription workflows
-- **Webhook Handling**: Webhook processing patterns
-
-**Outcome**: Users unlock Stripe monetization capability
-
-### Supabase Keys (New)
-- **RLS Patterns**: Row-level security patterns
-- **Auth Flows**: Authentication workflow patterns
-- **Real-time Patterns**: Real-time subscription patterns
-
-**Outcome**: Users unlock Supabase backend capability
+**Outcome**: Complete tool ecosystems with progressive maturity paths
 
 ---
 
