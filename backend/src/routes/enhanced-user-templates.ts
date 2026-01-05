@@ -257,6 +257,35 @@ router.get(
 // ============================================================================
 
 /**
+ * POST /user-templates/:templateId/analytics
+ * Track template usage (Injection Event)
+ */
+router.post(
+  '/:templateId/analytics',
+  validateParams(z.object({ templateId: z.string() })),
+  validateBody(
+    z.object({
+      success: z.boolean().optional(),
+      tokens_used: z.number().optional(),
+      latency_ms: z.number().optional(),
+    })
+  ),
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
+    const userId = req.userId!;
+    const { templateId } = req.params;
+    const { success, tokens_used, latency_ms } = req.body;
+
+    await templateAnalyticsService.trackUsage(userId, templateId, {
+      success,
+      tokens_used,
+      latency_ms,
+    });
+
+    res.json({ success: true });
+  })
+);
+
+/**
  * GET /user-templates/:templateId/analytics
  * Get analytics for a template
  */

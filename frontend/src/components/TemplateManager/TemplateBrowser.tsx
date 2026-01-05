@@ -34,16 +34,12 @@ export function TemplateBrowser() {
 
   const milestones = [
     { id: '', name: 'All Milestones' },
-    { id: '01-initialization', name: 'Initialization' },
-    { id: '02-authentication', name: 'Authentication' },
-    { id: '03-database-schema', name: 'Database Schema' },
-    { id: '04-api-routes', name: 'API Routes' },
-    { id: '05-frontend-routes', name: 'Frontend Routes' },
-    { id: '06-security-hardening', name: 'Security Hardening' },
-    { id: '07-performance-optimization', name: 'Performance Optimization' },
-    { id: '08-testing', name: 'Testing' },
-    { id: '09-ci-cd', name: 'CI/CD' },
-    { id: '10-deployment', name: 'Deployment' },
+    { id: 'marketing', name: 'Marketing' },
+    { id: 'sales', name: 'Sales' },
+    { id: 'finance', name: 'Finance' },
+    { id: 'product', name: 'Product' },
+    { id: 'engineering', name: 'Engineering' },
+    { id: 'operations', name: 'Operations' },
   ];
 
   return (
@@ -51,7 +47,7 @@ export function TemplateBrowser() {
       <div className="filters-panel">
         <input
           type="text"
-          placeholder="Search templates..."
+          placeholder="Search keys..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
@@ -62,7 +58,7 @@ export function TemplateBrowser() {
           onChange={(e) => setSelectedMilestone(e.target.value)}
           className="milestone-select"
         >
-          <option value="">All Milestones</option>
+          <option value="">All Domains</option>
           {milestones.map((milestone) => (
             <option key={milestone.id} value={milestone.id}>
               {milestone.name}
@@ -72,10 +68,10 @@ export function TemplateBrowser() {
       </div>
 
       {loading ? (
-        <div className="loading">Loading templates...</div>
+        <div className="loading">Loading keys...</div>
       ) : templates.length === 0 ? (
         <div className="empty-state">
-          <p>No templates found. Try adjusting your filters.</p>
+          <p>No verified keys found. Try adjusting your filters.</p>
         </div>
       ) : (
         <div className="templates-grid">
@@ -94,15 +90,16 @@ function TemplateCard({ template }: { template: Template }) {
       <h3>{template.name}</h3>
       <p>{template.description}</p>
       <div className="template-meta">
-        <span className={`badge badge-${template.priority}`}>
+        {/* <span className={`badge badge-${template.priority}`}>
           {template.priority}
         </span>
         <span className={`badge security-${template.security_level}`}>
           {template.security_level}
-        </span>
+        </span> */}
         {template.hasCustomization && (
           <span className="badge customized">Customized</span>
         )}
+         <span className="badge verified">Verified</span>
       </div>
       <div className="template-tags">
         {template.tags.slice(0, 3).map((tag) => (

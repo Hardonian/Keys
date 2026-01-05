@@ -102,7 +102,7 @@ function renderTemplates(templateList) {
   list.innerHTML = '';
   
   if (templateList.length === 0) {
-    list.innerHTML = '<div class="empty-state">No templates found</div>';
+    list.innerHTML = '<div class="empty-state">No keys found</div>';
     return;
   }
   
@@ -120,7 +120,7 @@ function createTemplateItem(template) {
   item.innerHTML = `
     <div class="template-header">
       <h3>${template.name}</h3>
-      <span class="badge badge-${template.priority}">${template.priority}</span>
+      <span class="badge verified">Verified</span>
     </div>
     <p class="template-description">${template.description}</p>
     <div class="template-meta">
@@ -249,10 +249,10 @@ async function openTemplateModal(templateId) {
     
     body.innerHTML = `
       <div class="template-preview">
-        <h3>Base Template</h3>
+        <h3>Verified Logic Key</h3>
         <pre class="prompt-preview">${escapeHtml(response.basePrompt)}</pre>
         ${response.hasCustomization ? `
-          <h3>Your Customized Version</h3>
+          <h3>Your Version</h3>
           <pre class="prompt-preview customized">${escapeHtml(response.customizedPrompt)}</pre>
         ` : ''}
       </div>

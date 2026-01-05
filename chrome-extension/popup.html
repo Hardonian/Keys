@@ -9,32 +9,28 @@
 <body>
   <div class="popup-container">
     <header class="popup-header">
-      <h1>Template Manager</h1>
+      <h1>Keys</h1>
       <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
     </header>
 
     <div class="popup-tabs">
-      <button class="tab-btn active" data-tab="browse">Browse</button>
-      <button class="tab-btn" data-tab="customized">My Templates</button>
-      <button class="tab-btn" data-tab="quick">Quick Insert</button>
+      <button class="tab-btn active" data-tab="browse">Library</button>
+      <button class="tab-btn" data-tab="customized">My Keys</button>
+      <button class="tab-btn" data-tab="quick">Inject</button>
     </div>
 
     <!-- Browse Tab -->
     <div class="tab-content active" id="browse-tab">
       <div class="search-section">
-        <input type="text" id="search-input" placeholder="Search templates..." />
+        <input type="text" id="search-input" placeholder="Search keys..." />
         <select id="milestone-filter">
-          <option value="">All Milestones</option>
-          <option value="01-initialization">Initialization</option>
-          <option value="02-authentication">Authentication</option>
-          <option value="03-database-schema">Database Schema</option>
-          <option value="04-api-routes">API Routes</option>
-          <option value="05-frontend-routes">Frontend Routes</option>
-          <option value="06-security-hardening">Security</option>
-          <option value="07-performance-optimization">Performance</option>
-          <option value="08-testing">Testing</option>
-          <option value="09-ci-cd">CI/CD</option>
-          <option value="10-deployment">Deployment</option>
+          <option value="">All Domains</option>
+          <option value="marketing">Marketing</option>
+          <option value="sales">Sales</option>
+          <option value="finance">Finance</option>
+          <option value="product">Product</option>
+          <option value="engineering">Engineering</option>
+          <option value="operations">Operations</option>
         </select>
       </div>
       <div id="templates-list" class="templates-list"></div>
@@ -48,10 +44,10 @@
     <!-- Quick Insert Tab -->
     <div class="tab-content" id="quick-tab">
       <div class="quick-insert">
-        <input type="text" id="quick-search" placeholder="Search template..." />
+        <input type="text" id="quick-search" placeholder="Search key..." />
         <div id="quick-results" class="quick-results"></div>
         <div class="quick-actions">
-          <button id="insert-btn" class="primary-btn" disabled>Insert Prompt</button>
+          <button id="insert-btn" class="primary-btn" disabled>Inject Key</button>
           <button id="copy-btn" class="secondary-btn" disabled>Copy to Clipboard</button>
         </div>
       </div>
@@ -65,7 +61,7 @@
         <div id="modal-body"></div>
         <div class="modal-actions">
           <button id="customize-btn" class="primary-btn">Customize</button>
-          <button id="use-btn" class="secondary-btn">Use Template</button>
+          <button id="use-btn" class="secondary-btn">Inject Key</button>
           <button id="test-btn" class="secondary-btn">Test</button>
         </div>
       </div>

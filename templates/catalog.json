@@ -490,6 +490,23 @@
           "optimization_level": "optional"
         }
       ]
+    },
+    "finance": {
+      "name": "Finance & Board Metrics",
+      "description": "Verified logic keys for financial reporting and board decks",
+      "templates": [
+        {
+          "id": "gross-margin",
+          "name": "Gross Margin (Board Definition)",
+          "description": "Standardized SQL logic for calculating Gross Margin across all products",
+          "priority": "high",
+          "dependencies": [],
+          "tags": ["finance", "metrics", "board", "sql"],
+          "stack": ["sql", "snowflake", "postgres"],
+          "security_level": "required",
+          "optimization_level": "required"
+        }
+      ]
     }
   }
 }

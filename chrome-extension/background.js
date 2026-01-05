@@ -196,11 +196,40 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 async function getTemplates(filters = {}) {
-  const params = new URLSearchParams();
-  if (filters.milestone) params.append('milestone', filters.milestone);
-  if (filters.query) params.append('query', filters.query);
-  
-  return apiRequest(`/user-templates/search?${params}`);
+  try {
+    const params = new URLSearchParams();
+    if (filters.milestone) params.append('milestone', filters.milestone);
+    if (filters.query) params.append('query', filters.query);
+    
+    const response = await apiRequest(`/user-templates/search?${params}`);
+    
+    // Cache the results if it's a broad fetch (no filters or just milestone)
+    if (!filters.query) {
+       await chrome.storage.local.set({ 
+         cachedTemplates: response.results, 
+         lastCacheUpdate: Date.now() 
+       });
+    }
+    
+    return response;
+  } catch (error) {
+    console.warn('Network request failed, falling back to cache', error);
+    // Fallback to cache
+    const cache = await chrome.storage.local.get(['cachedTemplates']);
+    if (cache.cachedTemplates) {
+       // Apply basic local filtering if needed
+       let results = cache.cachedTemplates;
+       if (filters.milestone) {
+          results = results.filter(t => t.milestone === filters.milestone);
+       }
+       if (filters.query) {
+          const q = filters.query.toLowerCase();
+          results = results.filter(t => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+       }
+       return { results, count: results.length, fromCache: true };
+    }
+    throw error;
+  }
 }
 
 async function getTemplatePreview(templateId) {

@@ -17,35 +17,49 @@ export default function TemplatesLayout({
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/templates', label: 'Browse' },
-    { href: '/templates/shared', label: 'Shared' },
-    { href: '/templates/presets', label: 'Presets' },
-    { href: '/templates/analytics', label: 'Analytics' },
+    { href: '/templates', label: 'Library' },
+    { href: '/templates/analytics', label: 'Governance' },
   ];
 
   return (
-    <div className="templates-layout min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="keys-layout min-h-screen bg-gray-50 dark:bg-slate-900">
       <nav 
-        className="templates-nav bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 shadow-sm"
+        className="keys-nav bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm"
         role="navigation"
-        aria-label="Templates navigation"
+        aria-label="Keys navigation"
       >
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              pathname === item.href 
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
-            }`}
-            aria-current={pathname === item.href ? 'page' : undefined}
-          >
-            {item.label}
-          </Link>
-        ))}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <span className="text-xl font-bold text-gray-900 dark:text-white">Keys</span>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                      pathname === item.href 
+                        ? 'border-blue-500 text-gray-900 dark:text-white' 
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                    aria-current={pathname === item.href ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center">
+               <div className="flex-shrink-0">
+                  {/* Action buttons could go here */}
+               </div>
+            </div>
+          </div>
+        </div>
       </nav>
-      <main id="main-content" className="templates-content" role="main">
+      <main id="main-content" className="keys-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main">
         {children}
       </main>
     </div>

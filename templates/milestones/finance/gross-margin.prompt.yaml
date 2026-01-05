@@ -1,0 +1,58 @@
+id: gross-margin
+milestone: finance
+name: Gross Margin (Board Definition)
+description: Standardized SQL logic for calculating Gross Margin across all products.
+priority: high
+tags:
+  - finance
+  - metrics
+  - board
+  - sql
+stack:
+  - sql
+  - snowflake
+  - postgres
+security_level: required
+optimization_level: required
+mega_prompt: |
+  -- Gross Margin Calculation (Board Approved: 2024-Q1)
+  -- Owner: CFO
+  -- Logic: (Revenue - COGS) / Revenue
+  -- Notes: Excludes Support Costs from COGS per Board Decision Dec 2023.
+
+  WITH revenue AS (
+    SELECT 
+      date_trunc('month', transaction_date) as month,
+      SUM(amount_cents) / 100.0 as total_revenue
+    FROM fact_transactions
+    WHERE type = 'charge' 
+      AND status = 'succeeded'
+    GROUP BY 1
+  ),
+  cogs AS (
+    SELECT
+      date_trunc('month', cost_date) as month,
+      SUM(cost_amount_cents) / 100.0 as total_cogs
+    FROM fact_infrastructure_costs
+    -- Exclude Support Costs
+    WHERE category NOT IN ('support_personnel', 'support_software')
+    GROUP BY 1
+  )
+  SELECT
+    r.month,
+    r.total_revenue,
+    c.total_cogs,
+    (r.total_revenue - c.total_cogs) as gross_profit,
+    ROUND(
+      ((r.total_revenue - c.total_cogs) / NULLIF(r.total_revenue, 0)) * 100, 
+      2
+    ) as gross_margin_percent
+  FROM revenue r
+  LEFT JOIN cogs c ON r.month = c.month
+  ORDER BY 1 DESC;
+
+variables:
+  - name: table_prefix
+    description: Prefix for tables (optional)
+    required: false
+    default: ""
