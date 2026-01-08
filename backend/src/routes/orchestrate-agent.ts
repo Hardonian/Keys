@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { orchestrateAgent } from '../services/agentOrchestration.js';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptAssemblyResult } from '../types/index.js';
 import { telemetryService } from '../services/telemetryService.js';
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
@@ -15,17 +16,17 @@ import { safetyEnforcementService } from '../services/safetyEnforcementService.j
 
 const router = Router();
 
-let supabaseClient: ReturnType<typeof createClient> | null = null;
+let supabaseClient: SupabaseClient<any> | null = null;
 function getSupabaseAdminClient() {
   if (supabaseClient) return supabaseClient;
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     // In non-production environments/tests, allow mocking createClient() without requiring env.
-    supabaseClient = createClient(url || 'http://127.0.0.1:54321', key || 'test-service-role');
+    supabaseClient = createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
     return supabaseClient;
   }
-  supabaseClient = createClient(url, key);
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
   return supabaseClient;
 }
 

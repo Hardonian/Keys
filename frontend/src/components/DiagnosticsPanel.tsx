@@ -17,7 +17,7 @@ export function DiagnosticsPanel({ className = '' }: DiagnosticsPanelProps) {
 
   // Only show in development or for admins
   const isDev = process.env.NODE_ENV === 'development';
-  const isAdmin = user?.user_metadata?.role === 'admin';
+  const isAdmin = (user as any)?.app_metadata?.role === 'admin';
 
   if (!isDev && !isAdmin) {
     return null;

@@ -94,9 +94,15 @@ export async function middleware(request: NextRequest) {
         return new NextResponse('Not found', { status: 404 });
       }
 
-      const role = user?.user_metadata?.role;
+      const role = (user as any)?.app_metadata?.role;
       const isAdmin = role === 'admin' || role === 'superadmin';
+      const allowlist = (process.env.ADMIN_USER_IDS || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const isAllowlisted = user?.id ? allowlist.includes(user.id) : false;
       if (!user || !isAdmin) {
+        if (isAllowlisted) return supabaseResponse;
         return new NextResponse('Not found', { status: 404 });
       }
       return supabaseResponse;

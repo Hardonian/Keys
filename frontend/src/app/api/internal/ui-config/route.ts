@@ -24,9 +24,14 @@ async function requireAdminAccess() {
     return { ok: false as const, status: 401 as const, token: null, role: null };
   }
 
-  const role = (user.user_metadata as Record<string, unknown> | null | undefined)?.role;
+  const role = (user.app_metadata as Record<string, unknown> | null | undefined)?.role;
   const roleStr = typeof role === 'string' ? role : 'user';
-  const isAdmin = roleStr === 'admin' || roleStr === 'superadmin';
+  const allowlist = (process.env.ADMIN_USER_IDS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const isAllowlisted = allowlist.includes(user.id);
+  const isAdmin = isAllowlisted || roleStr === 'admin' || roleStr === 'superadmin';
 
   if (!isAdmin) {
     return { ok: false as const, status: 403 as const, token: null, role: roleStr };

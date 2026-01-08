@@ -19,7 +19,15 @@ export interface RetryOptions {
   retryable?: (error: any) => boolean;
 }
 
-const DEFAULT_OPTIONS: Required<RetryOptions> = {
+type NormalizedRetryOptions = {
+  maxAttempts: number;
+  initialDelayMs: number;
+  maxDelayMs: number;
+  backoffMultiplier: number;
+  retryable: (error: any) => boolean;
+};
+
+const DEFAULT_OPTIONS: NormalizedRetryOptions = {
   maxAttempts: 3,
   initialDelayMs: 1000,
   maxDelayMs: 10000,
@@ -49,11 +57,12 @@ export async function retry<T>(
       ? options.initialDelay
       : undefined;
 
-  const opts = {
-    ...DEFAULT_OPTIONS,
-    ...options,
-    ...(legacyMaxAttempts !== undefined ? { maxAttempts: legacyMaxAttempts } : {}),
-    ...(legacyInitialDelayMs !== undefined ? { initialDelayMs: legacyInitialDelayMs } : {}),
+  const opts: NormalizedRetryOptions = {
+    maxAttempts: legacyMaxAttempts ?? options.maxAttempts ?? DEFAULT_OPTIONS.maxAttempts,
+    initialDelayMs: legacyInitialDelayMs ?? options.initialDelayMs ?? DEFAULT_OPTIONS.initialDelayMs,
+    maxDelayMs: options.maxDelayMs ?? DEFAULT_OPTIONS.maxDelayMs,
+    backoffMultiplier: options.backoffMultiplier ?? DEFAULT_OPTIONS.backoffMultiplier,
+    retryable: options.retryable ?? DEFAULT_OPTIONS.retryable,
   };
   let lastError: any;
   let delay = opts.initialDelayMs;

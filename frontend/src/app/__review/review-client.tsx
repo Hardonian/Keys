@@ -20,7 +20,7 @@ function prettyJson(value: unknown) {
 export function ReviewClient() {
   const { user } = useAuth();
   const { config: currentConfig, updatedAt } = useRuntimeUiConfig();
-  const role = (user?.user_metadata as Record<string, unknown> | null | undefined)?.role;
+  const role = (user?.app_metadata as Record<string, unknown> | null | undefined)?.role;
   const isAdmin = role === 'admin' || role === 'superadmin';
 
   const [mode, setMode] = useState<UiStateMode>('normal');

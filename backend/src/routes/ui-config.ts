@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
@@ -126,15 +127,15 @@ function computeEtag(payload: unknown): string {
   return `W/"ui-config-${hash}"`;
 }
 
-let supabaseClient: ReturnType<typeof createClient> | null = null;
+let supabaseClient: SupabaseClient<any> | null = null;
 
-function getSupabaseAdminClient() {
+function getSupabaseAdminClient(): SupabaseClient<any> {
   if (supabaseClient) return supabaseClient;
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if ((!url || !key) && process.env.NODE_ENV === 'test') {
-    supabaseClient = createClient(url || 'http://127.0.0.1:54321', key || 'test-service-role');
+    supabaseClient = createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
     return supabaseClient;
   }
 
@@ -142,7 +143,7 @@ function getSupabaseAdminClient() {
     throw new Error('Supabase admin client is not configured');
   }
 
-  supabaseClient = createClient(url, key);
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
   return supabaseClient;
 }
 

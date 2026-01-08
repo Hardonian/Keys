@@ -1,5 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { AuthenticatedRequest } from './auth.js';
 import { logger } from '../utils/logger.js';
 
@@ -12,9 +13,9 @@ export interface RequestWithEntitlements extends AuthenticatedRequest {
   };
 }
 
-let supabaseClient: ReturnType<typeof createClient> | null = null;
+let supabaseClient: SupabaseClient<any> | null = null;
 
-function getSupabaseAdminClient() {
+function getSupabaseAdminClient(): SupabaseClient<any> {
   const isTestRuntime = process.env.NODE_ENV === 'test' || typeof (import.meta as any)?.vitest !== 'undefined';
   if (!isTestRuntime && supabaseClient) return supabaseClient;
 
@@ -24,12 +25,12 @@ function getSupabaseAdminClient() {
   // In tests we allow a safe local fallback so vitest can mock createClient()
   // without requiring real env vars. Also avoid caching across tests.
   if (isTestRuntime) {
-    return createClient(url || 'http://127.0.0.1:54321', key || 'test-service-role');
+    return createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
   }
 
   if (!url || !key) throw new Error('Supabase admin client is not configured');
 
-  supabaseClient = createClient(url, key);
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
   return supabaseClient;
 }
 

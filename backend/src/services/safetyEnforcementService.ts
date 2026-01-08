@@ -7,8 +7,9 @@
 
 import { logger } from '../utils/logger.js';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-let supabaseClient: ReturnType<typeof createClient> | null = null;
+let supabaseClient: SupabaseClient<any> | null = null;
 
 function getSupabaseAdminClient() {
   if (supabaseClient) return supabaseClient;
@@ -17,7 +18,7 @@ function getSupabaseAdminClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if ((!url || !key) && process.env.NODE_ENV === 'test') {
-    supabaseClient = createClient(url || 'http://127.0.0.1:54321', key || 'test-service-role');
+    supabaseClient = createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
     return supabaseClient;
   }
 
@@ -25,7 +26,7 @@ function getSupabaseAdminClient() {
     throw new Error('Supabase admin client is not configured');
   }
 
-  supabaseClient = createClient(url, key);
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
   return supabaseClient;
 }
 

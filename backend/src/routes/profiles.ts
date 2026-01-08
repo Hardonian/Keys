@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { validateBody, validateParams } from '../middleware/validation.js';
@@ -12,7 +13,7 @@ import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
 import { checkLimit } from '../services/usageMetering.js';
 
 const router = Router();
-let supabaseClient: ReturnType<typeof createClient> | null = null;
+let supabaseClient: SupabaseClient<any> | null = null;
 function getSupabaseAdminClient() {
   const isTestRuntime = process.env.NODE_ENV === 'test' || typeof (import.meta as any)?.vitest !== 'undefined';
   if (!isTestRuntime && supabaseClient) return supabaseClient;
@@ -21,11 +22,11 @@ function getSupabaseAdminClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (isTestRuntime) {
-    return createClient(url || 'http://127.0.0.1:54321', key || 'test-service-role');
+    return createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
   }
 
   if (!url || !key) throw new Error('Supabase admin client is not configured');
-  supabaseClient = createClient(url, key);
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
   return supabaseClient;
 }
 
