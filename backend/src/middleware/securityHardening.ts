@@ -59,22 +59,25 @@ export function requestSigningMiddleware() {
       const timestamp = req.headers['x-request-timestamp'] as string;
       const signingSecret = process.env.REQUEST_SIGNING_SECRET;
 
-      // Verify timestamp (prevent replay attacks)
-      if (timestamp) {
+      // In production with signing secret configured, require signature + timestamp
+      if (process.env.NODE_ENV === 'production' && signingSecret) {
+        if (!signature) {
+          res.status(401).json({ error: 'Request signature required' });
+          return;
+        }
+
+        if (!timestamp) {
+          res.status(401).json({ error: 'Request timestamp required' });
+          return;
+        }
+
+        // Verify timestamp (prevent replay attacks)
         const requestTime = parseInt(timestamp, 10);
         const now = Date.now();
         const maxAge = 5 * 60 * 1000; // 5 minutes
 
         if (isNaN(requestTime) || Math.abs(now - requestTime) > maxAge) {
           res.status(401).json({ error: 'Request timestamp expired or invalid' });
-          return;
-        }
-      }
-
-      // In production with signing secret configured, require signature
-      if (process.env.NODE_ENV === 'production' && signingSecret) {
-        if (!signature) {
-          res.status(401).json({ error: 'Request signature required' });
           return;
         }
 
