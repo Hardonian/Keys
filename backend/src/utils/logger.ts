@@ -7,15 +7,20 @@ interface LogContext {
 }
 
 class Logger {
-  private logLevel: LogLevel;
+  private defaultLogLevel: LogLevel;
 
   constructor() {
-    this.logLevel = (process.env.LOG_LEVEL as LogLevel) || 'info';
+    this.defaultLogLevel = 'info';
+  }
+
+  private currentLogLevel(): LogLevel {
+    const envLevel = process.env.LOG_LEVEL as LogLevel | undefined;
+    return envLevel || this.defaultLogLevel;
   }
 
   private shouldLog(level: LogLevel): boolean {
     const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
-    return levels.indexOf(level) >= levels.indexOf(this.logLevel);
+    return levels.indexOf(level) >= levels.indexOf(this.currentLogLevel());
   }
 
   private formatMessage(level: LogLevel, message: string, context?: LogContext): string {

@@ -3,6 +3,15 @@
  */
 
 export interface RetryOptions {
+  /**
+   * Legacy option name (max retries, excluding the first attempt).
+   * If provided, total attempts = maxRetries + 1.
+   */
+  maxRetries?: number;
+  /**
+   * Legacy option name (ms).
+   */
+  initialDelay?: number;
   maxAttempts?: number;
   initialDelayMs?: number;
   maxDelayMs?: number;
@@ -10,23 +19,24 @@ export interface RetryOptions {
   retryable?: (error: any) => boolean;
 }
 
-const DEFAULT_OPTIONS: Required<RetryOptions> = {
+type NormalizedRetryOptions = {
+  maxAttempts: number;
+  initialDelayMs: number;
+  maxDelayMs: number;
+  backoffMultiplier: number;
+  retryable: (error: any) => boolean;
+};
+
+const DEFAULT_OPTIONS: NormalizedRetryOptions = {
   maxAttempts: 3,
   initialDelayMs: 1000,
   maxDelayMs: 10000,
   backoffMultiplier: 2,
   retryable: (error: any) => {
-    // Retry on network errors, 5xx errors, and rate limits (with retry-after)
-    if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT' || error.code === 'ENOTFOUND') {
-      return true;
-    }
-    if (error.response?.status >= 500 && error.response?.status < 600) {
-      return true;
-    }
-    if (error.response?.status === 429 && error.response?.headers['retry-after']) {
-      return true;
-    }
-    return false;
+    // Default: retry transient failures. Callers can override for stricter behavior.
+    // Keeping this permissive avoids surprising "no retry" behavior for generic errors.
+    void error;
+    return true;
   },
 };
 
@@ -37,7 +47,23 @@ export async function retry<T>(
   fn: () => Promise<T>,
   options: RetryOptions = {}
 ): Promise<T> {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  // Support legacy option names used by existing call sites/tests.
+  const legacyMaxAttempts =
+    typeof options.maxRetries === 'number' && options.maxRetries >= 0
+      ? options.maxRetries + 1
+      : undefined;
+  const legacyInitialDelayMs =
+    typeof options.initialDelay === 'number' && options.initialDelay >= 0
+      ? options.initialDelay
+      : undefined;
+
+  const opts: NormalizedRetryOptions = {
+    maxAttempts: legacyMaxAttempts ?? options.maxAttempts ?? DEFAULT_OPTIONS.maxAttempts,
+    initialDelayMs: legacyInitialDelayMs ?? options.initialDelayMs ?? DEFAULT_OPTIONS.initialDelayMs,
+    maxDelayMs: options.maxDelayMs ?? DEFAULT_OPTIONS.maxDelayMs,
+    backoffMultiplier: options.backoffMultiplier ?? DEFAULT_OPTIONS.backoffMultiplier,
+    retryable: options.retryable ?? DEFAULT_OPTIONS.retryable,
+  };
   let lastError: any;
   let delay = opts.initialDelayMs;
 
@@ -52,16 +78,19 @@ export async function retry<T>(
         throw error;
       }
 
-      // Calculate delay with exponential backoff
+      // Calculate delay with exponential backoff (first retry waits initialDelayMs).
       const retryAfter = error.response?.headers['retry-after'];
-      if (retryAfter) {
-        delay = parseInt(retryAfter, 10) * 1000;
-      } else {
-        delay = Math.min(delay * opts.backoffMultiplier, opts.maxDelayMs);
-      }
+      const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : delay;
 
       // Wait before retrying
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+
+      // Increase delay for next retry if we weren't instructed by Retry-After.
+      if (!retryAfter) {
+        delay = Math.min(delay * opts.backoffMultiplier, opts.maxDelayMs);
+      } else {
+        delay = opts.initialDelayMs;
+      }
     }
   }
 

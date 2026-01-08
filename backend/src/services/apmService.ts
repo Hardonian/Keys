@@ -1,9 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabaseClient: SupabaseClient<any> | null = null;
+
+function getSupabaseAdminClient(): SupabaseClient<any> {
+  if (supabaseClient) return supabaseClient;
+
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if ((!url || !key) && process.env.NODE_ENV === 'test') {
+    supabaseClient = createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
+    return supabaseClient;
+  }
+
+  if (!url || !key) {
+    throw new Error('Supabase admin client is not configured');
+  }
+
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
+  return supabaseClient;
+}
 
 export interface PerformanceMetric {
   endpoint: string;
@@ -32,9 +49,11 @@ export class APMService {
   private readonly FLUSH_INTERVAL = 10000; // 10 seconds
 
   constructor() {
-    // Flush metrics periodically
-    setInterval(() => this.flushMetrics(), this.FLUSH_INTERVAL);
-    setInterval(() => this.flushErrors(), this.FLUSH_INTERVAL);
+    // Flush metrics periodically (skip in tests to avoid dangling intervals).
+    if (process.env.NODE_ENV !== 'test') {
+      setInterval(() => this.flushMetrics(), this.FLUSH_INTERVAL);
+      setInterval(() => this.flushErrors(), this.FLUSH_INTERVAL);
+    }
   }
 
   /**
@@ -81,7 +100,7 @@ export class APMService {
     try {
       // Query from agent_runs table (using trigger_data for metrics)
       // In production, you'd have a dedicated metrics table
-      const { data: runs } = await supabase
+      const { data: runs } = await getSupabaseAdminClient()
         .from('agent_runs')
         .select('created_at, trigger_data, cost_usd')
         .gte('created_at', startTime.toISOString())
@@ -178,7 +197,7 @@ export class APMService {
       
       // Could store in background_events table with event_type='apm.metric'
       for (const metric of toFlush) {
-        await supabase.from('background_events').insert({
+        await getSupabaseAdminClient().from('background_events').insert({
           event_type: 'apm.metric',
           source: 'apm',
           event_data: metric,
@@ -205,7 +224,7 @@ export class APMService {
       console.log(`[APM] Flushing ${toFlush.length} error metrics`);
       
       for (const error of toFlush) {
-        await supabase.from('background_events').insert({
+        await getSupabaseAdminClient().from('background_events').insert({
           event_type: 'apm.error',
           source: 'apm',
           event_data: error,

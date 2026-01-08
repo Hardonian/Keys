@@ -11,6 +11,7 @@ import ErrorBoundary from './ErrorBoundary';
 import { ToastContainer } from './Toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { DiagnosticsPanel } from './DiagnosticsPanel';
+import { RuntimeUiBanner } from './RuntimeUiBanner';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { KeyboardShortcutsHelp } from './KeyboardShortcuts';
 import { useKeyboardShortcuts, defaultShortcuts } from '@/hooks/useKeyboardShortcuts';
@@ -45,6 +46,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <AnalyticsProvider>
           <KeyboardShortcutsProvider>
+            <RuntimeUiBanner />
             {children}
             <ToastContainer />
             <DiagnosticsPanel />

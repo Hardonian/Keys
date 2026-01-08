@@ -47,7 +47,7 @@ export function useBackgroundEvents(userId: string | null) {
           table: 'background_events',
           filter: `user_id=eq.${userId}`,
         },
-        (payload) => {
+        (payload: any) => {
           if (payload.eventType === 'INSERT') {
             setEvents((prev) => [payload.new as BackgroundEvent, ...prev]);
           } else if (payload.eventType === 'UPDATE') {

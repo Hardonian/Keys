@@ -5,6 +5,7 @@ Allow: /
 # Disallow admin and API routes
 Disallow: /admin/
 Disallow: /api/
+Disallow: /__review/
 
 # Allow important pages
 Allow: /
@@ -14,4 +15,4 @@ Allow: /profile
 Allow: /templates
 
 # Sitemap location
-Sitemap: https://cursor-venture-companion.com/sitemap.xml
+Sitemap: https://keys.dev/sitemap.xml

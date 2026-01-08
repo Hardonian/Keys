@@ -7,11 +7,28 @@
 
 import { logger } from '../utils/logger.js';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabaseClient: SupabaseClient<any> | null = null;
+
+function getSupabaseAdminClient() {
+  if (supabaseClient) return supabaseClient;
+
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if ((!url || !key) && process.env.NODE_ENV === 'test') {
+    supabaseClient = createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
+    return supabaseClient;
+  }
+
+  if (!url || !key) {
+    throw new Error('Supabase admin client is not configured');
+  }
+
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
+  return supabaseClient;
+}
 
 export interface SafetyCheckResult {
   passed: boolean;
@@ -174,7 +191,7 @@ export class SafetyEnforcementService {
   ): Promise<void> {
     try {
       // Get user's tier and guarantee coverage
-      const { data: profile } = await supabase
+      const { data: profile } = await getSupabaseAdminClient()
         .from('user_profiles')
         .select('subscription_tier, guarantee_coverage, prevented_failures_count')
         .eq('user_id', userId)
@@ -192,7 +209,7 @@ export class SafetyEnforcementService {
       if (results.blocked) {
         const preventedCount = (profile.prevented_failures_count || 0) + 1;
         
-        await supabase
+        await getSupabaseAdminClient()
           .from('user_profiles')
           .update({ prevented_failures_count: preventedCount })
           .eq('user_id', userId);

@@ -1,10 +1,27 @@
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { apmService } from './apmService.js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabaseClient: SupabaseClient<any> | null = null;
+
+function getSupabaseAdminClient() {
+  if (supabaseClient) return supabaseClient;
+
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if ((!url || !key) && process.env.NODE_ENV === 'test') {
+    supabaseClient = createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
+    return supabaseClient;
+  }
+
+  if (!url || !key) {
+    throw new Error('Supabase admin client is not configured');
+  }
+
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
+  return supabaseClient;
+}
 
 export interface ErrorGroup {
   errorType: string;
@@ -63,7 +80,7 @@ export class ErrorTrackingService {
     const fingerprint = this.getErrorFingerprint(error);
     
     try {
-      await supabase.from('background_events').insert({
+      await getSupabaseAdminClient().from('background_events').insert({
         event_type: 'error.tracked',
         source: 'error_tracking',
         event_data: {
@@ -86,7 +103,7 @@ export class ErrorTrackingService {
     startTime.setHours(startTime.getHours() - hours);
 
     try {
-      const { data: events } = await supabase
+      const { data: events } = await getSupabaseAdminClient()
         .from('background_events')
         .select('*')
         .eq('event_type', 'error.tracked')

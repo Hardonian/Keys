@@ -6,13 +6,22 @@ export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Use placeholder values during build when env vars are missing
-  const supabaseUrl = url || 'https://placeholder.supabase.co';
-  const supabaseKey = key || 'placeholder-key';
+  if (!url || !key) {
+    // Server-safe disabled client: no network calls, preserves build behavior.
+    const disabledError = new Error('Supabase is not configured (missing NEXT_PUBLIC_SUPABASE_URL/NEXT_PUBLIC_SUPABASE_ANON_KEY)');
+    const noopSub = { unsubscribe: () => {} };
+    return {
+      auth: {
+        getUser: async () => ({ data: { user: null }, error: disabledError }),
+        getSession: async () => ({ data: { session: null }, error: disabledError }),
+        onAuthStateChange: () => ({ data: { subscription: noopSub } }),
+      },
+    } as any;
+  }
 
   return createServerClient(
-    supabaseUrl,
-    supabaseKey,
+    url,
+    key,
     {
       cookies: {
         get(name: string) {

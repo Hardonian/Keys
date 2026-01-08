@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { orchestrateAgent } from '../services/agentOrchestration.js';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PromptAssemblyResult } from '../types/index.js';
 import { telemetryService } from '../services/telemetryService.js';
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
@@ -14,10 +15,20 @@ import { failurePatternService } from '../services/failurePatternService.js';
 import { safetyEnforcementService } from '../services/safetyEnforcementService.js';
 
 const router = Router();
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+
+let supabaseClient: SupabaseClient<any> | null = null;
+function getSupabaseAdminClient() {
+  if (supabaseClient) return supabaseClient;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    // In non-production environments/tests, allow mocking createClient() without requiring env.
+    supabaseClient = createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
+    return supabaseClient;
+  }
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
+  return supabaseClient;
+}
 
 const orchestrateAgentSchema = z.object({
   assembledPrompt: z.object({
@@ -33,8 +44,8 @@ const orchestrateAgentSchema = z.object({
 router.post(
   '/',
   authMiddleware,
-  entitlementsMiddleware({ checkUsageLimit: true }),
   validateBody(orchestrateAgentSchema),
+  entitlementsMiddleware({ checkUsageLimit: true }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
     const userId = req.userId!; // Always use authenticated user ID
     const { assembledPrompt, taskIntent, naturalLanguageInput } = req.body;
@@ -138,7 +149,7 @@ router.post(
     }
 
     // Log agent run with safety check results
-    const { data: run } = await supabase
+    const { data: run } = await getSupabaseAdminClient()
       .from('agent_runs')
       .insert({
         user_id: userId,

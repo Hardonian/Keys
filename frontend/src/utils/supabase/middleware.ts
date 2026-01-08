@@ -9,13 +9,14 @@ export async function updateSession(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Use placeholder values during build when env vars are missing
-  const supabaseUrl = url || 'https://placeholder.supabase.co';
-  const supabaseKey = key || 'placeholder-key';
+  // If env vars are missing, do not create a client (avoid placeholder domains).
+  if (!url || !key) {
+    return supabaseResponse;
+  }
 
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseKey,
+    url,
+    key,
     {
       cookies: {
         get(name: string) {

@@ -1,5 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { AuthenticatedRequest } from './auth.js';
 import { logger } from '../utils/logger.js';
 
@@ -12,10 +13,26 @@ export interface RequestWithEntitlements extends AuthenticatedRequest {
   };
 }
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let supabaseClient: SupabaseClient<any> | null = null;
+
+function getSupabaseAdminClient(): SupabaseClient<any> {
+  const isTestRuntime = process.env.NODE_ENV === 'test' || typeof (import.meta as any)?.vitest !== 'undefined';
+  if (!isTestRuntime && supabaseClient) return supabaseClient;
+
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  // In tests we allow a safe local fallback so vitest can mock createClient()
+  // without requiring real env vars. Also avoid caching across tests.
+  if (isTestRuntime) {
+    return createClient<any>(url || 'http://127.0.0.1:54321', key || 'test-service-role') as SupabaseClient<any>;
+  }
+
+  if (!url || !key) throw new Error('Supabase admin client is not configured');
+
+  supabaseClient = createClient<any>(url, key) as SupabaseClient<any>;
+  return supabaseClient;
+}
 
 export interface EntitlementCheck {
   requirePremium?: boolean;
@@ -47,6 +64,18 @@ export function entitlementsMiddleware(options: EntitlementCheck = {}) {
     }
 
     try {
+      // Fast-path: if no subscription/premium requirements are requested, avoid a DB round-trip.
+      // (Usage limits are enforced separately via usage metering.)
+      if (!options.requireActiveSubscription && !options.requirePremium) {
+        (req as RequestWithEntitlements).entitlements = {
+          subscriptionStatus: 'unknown',
+          premiumEnabled: false,
+        };
+        next();
+        return;
+      }
+
+      const supabase = getSupabaseAdminClient();
       // Fetch user profile with subscription status
       const { data: profile, error } = await supabase
         .from('user_profiles')

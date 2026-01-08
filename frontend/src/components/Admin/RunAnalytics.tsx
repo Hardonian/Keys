@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/services/supabaseClient';
-// AgentRun type imported but not directly used - kept for future use
+import type { AgentRun } from '@/types';
 import { formatCurrency } from '@/utils/format';
 
 interface AnalyticsData {
@@ -38,26 +38,27 @@ export function RunAnalytics() {
         .gte('created_at', dateFilter);
 
       if (error) throw error;
+      const typedRuns = ((runs as AgentRun[] | null) || []) as AgentRun[];
 
       const analyticsData: AnalyticsData = {
-        totalRuns: runs?.length || 0,
-        approvedRuns: runs?.filter((r) => r.user_feedback === 'approved').length || 0,
-        rejectedRuns: runs?.filter((r) => r.user_feedback === 'rejected').length || 0,
-        revisedRuns: runs?.filter((r) => r.user_feedback === 'revised').length || 0,
-        totalCost: runs?.reduce((sum, r) => sum + (r.cost_usd || 0), 0) || 0,
-        totalTokens: runs?.reduce((sum, r) => sum + (r.tokens_used || 0), 0) || 0,
+        totalRuns: typedRuns.length,
+        approvedRuns: typedRuns.filter((r) => r.user_feedback === 'approved').length,
+        rejectedRuns: typedRuns.filter((r) => r.user_feedback === 'rejected').length,
+        revisedRuns: typedRuns.filter((r) => r.user_feedback === 'revised').length,
+        totalCost: typedRuns.reduce((sum, r) => sum + (r.cost_usd || 0), 0),
+        totalTokens: typedRuns.reduce((sum, r) => sum + (r.tokens_used || 0), 0),
         avgLatency:
-          runs && runs.length > 0
-            ? runs.reduce((sum, r) => sum + (r.latency_ms || 0), 0) / runs.length
+          typedRuns.length > 0
+            ? typedRuns.reduce((sum, r) => sum + (r.latency_ms || 0), 0) / typedRuns.length
             : 0,
         runsByType: {},
         runsByModel: {},
       };
 
       // Count runs by type
-      runs?.forEach((run) => {
-        analyticsData.runsByType[run.agent_type] =
-          (analyticsData.runsByType[run.agent_type] || 0) + 1;
+      typedRuns.forEach((run) => {
+        const agentType = run.agent_type || 'unknown';
+        analyticsData.runsByType[agentType] = (analyticsData.runsByType[agentType] || 0) + 1;
         if (run.model_used) {
           analyticsData.runsByModel[run.model_used] =
             (analyticsData.runsByModel[run.model_used] || 0) + 1;

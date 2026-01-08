@@ -24,11 +24,11 @@ describe('Retry Utils', () => {
       .mockResolvedValue('success');
 
     const promise = retry(fn, { maxRetries: 2, initialDelay: 100 });
-    
+    // Attach handlers before advancing timers (avoid unhandled rejection warnings).
+    const assertion = expect(promise).resolves.toBe('success');
     await vi.advanceTimersByTimeAsync(100);
-    const result = await promise;
+    await assertion;
 
-    expect(result).toBe('success');
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
@@ -37,10 +37,10 @@ describe('Retry Utils', () => {
     const fn = vi.fn().mockRejectedValue(error);
 
     const promise = retry(fn, { maxRetries: 2, initialDelay: 100 });
-    
+    // Attach handlers before advancing timers (avoid unhandled rejection warnings).
+    const assertion = expect(promise).rejects.toThrow('fail');
     await vi.advanceTimersByTimeAsync(500);
-    
-    await expect(promise).rejects.toThrow('fail');
+    await assertion;
     expect(fn).toHaveBeenCalledTimes(3);
   });
 

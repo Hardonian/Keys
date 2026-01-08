@@ -23,6 +23,7 @@ import { apmRouter } from './routes/apm.js';
 import { auditRouter } from './routes/audit.js';
 import { marketplaceRouter } from './routes/marketplace.js';
 import { marketplaceV2Router } from './routes/marketplace-v2.js';
+import { uiConfigPublicRouter, uiConfigAdminRouter } from './routes/ui-config.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { optionalAuthMiddleware, authMiddleware } from './middleware/auth.js';
 import { userRateLimiterMiddleware, apiRateLimiter } from './middleware/rateLimit.js';
@@ -97,6 +98,10 @@ app.get('/health', (_req, res) => {
 
 // Optional auth for public routes
 app.use(optionalAuthMiddleware);
+
+// Runtime UI config (public, cacheable; writable via /admin/ui-config)
+app.use('/ui-config', uiConfigPublicRouter);
+app.use('/admin/ui-config', uiConfigAdminRouter);
 
 // Rate limiting for API routes
 app.use('/api', apiRateLimiter);

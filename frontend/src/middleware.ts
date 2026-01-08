@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import type { User } from '@supabase/supabase-js';
 
 // Protected routes that require authentication
 const protectedRoutes = ['/dashboard', '/chat', '/profile', '/templates', '/admin', '/api/billing'];
@@ -9,6 +10,7 @@ const publicAuthRoutes = ['/signin', '/signup'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isReviewRoute = pathname.startsWith('/__review');
 
   let supabaseResponse = NextResponse.next({
     request,
@@ -23,56 +25,54 @@ export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Use placeholder values during build when env vars are missing
-  const supabaseUrl = url || 'https://placeholder.supabase.co';
-  const supabaseKey = key || 'placeholder-key';
+  const supabase = url && key
+    ? createServerClient(
+        url,
+        key,
+        {
+          cookies: {
+            get(name: string) {
+              return request.cookies.get(name)?.value;
+            },
+            set(name: string, value: string, options: CookieOptions) {
+              request.cookies.set({
+                name,
+                value,
+                ...options,
+              });
+              supabaseResponse = NextResponse.next({
+                request,
+              });
+              supabaseResponse.cookies.set({
+                name,
+                value,
+                ...options,
+              });
+            },
+            remove(name: string, options: CookieOptions) {
+              request.cookies.set({
+                name,
+                value: '',
+                ...options,
+              });
+              supabaseResponse = NextResponse.next({
+                request,
+              });
+              supabaseResponse.cookies.set({
+                name,
+                value: '',
+                ...options,
+              });
+            },
+          },
+        }
+      )
+    : null;
 
-  const supabase = createServerClient(
-    supabaseUrl,
-    supabaseKey,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          supabaseResponse.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          supabaseResponse.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-        },
-      },
-    }
-  );
-
-  let user = null;
+  let user: User | null = null;
   
   // Only check auth if we have valid env vars
-  if (url && key) {
+  if (url && key && supabase) {
     try {
       const {
         data: { user: authUser },
@@ -81,6 +81,46 @@ export async function middleware(request: NextRequest) {
     } catch {
       // Ignore auth errors during build or when env vars are invalid
     }
+  }
+
+  // Internal review route gating (non-public)
+  if (isReviewRoute) {
+    const isPreview = process.env.VERCEL_ENV === 'preview';
+    const isProd = process.env.NODE_ENV === 'production';
+
+    // In production, require explicit enable + admin role.
+    if (isProd && !isPreview) {
+      if (process.env.ENABLE_INTERNAL_REVIEW_ROUTE !== 'true') {
+        return new NextResponse('Not found', { status: 404 });
+      }
+
+      const role = (user as any)?.app_metadata?.role;
+      const isAdmin = role === 'admin' || role === 'superadmin';
+      const allowlist = (process.env.ADMIN_USER_IDS || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const isAllowlisted = user?.id ? allowlist.includes(user.id) : false;
+      if (!user || !isAdmin) {
+        if (isAllowlisted) return supabaseResponse;
+        return new NextResponse('Not found', { status: 404 });
+      }
+      return supabaseResponse;
+    }
+
+    // In preview/dev: require authentication (keeps preview URLs safer if shared).
+    if (!user && url && key) {
+      const signInUrl = new URL('/signin', request.url);
+      signInUrl.searchParams.set('returnUrl', pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    // If env vars are missing (build), don't hard-fail.
+    if (!url || !key) {
+      return supabaseResponse;
+    }
+
+    return supabaseResponse;
   }
 
   // Check if route is protected

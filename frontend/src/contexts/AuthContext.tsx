@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
+import type { SupabaseClient, User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
@@ -23,7 +23,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const supabase = createClient();
+  // `createClient()` can return a disabled client when env vars are missing.
+  // Cast to keep Supabase types across the app (noImplicitAny).
+  const supabase = createClient() as unknown as SupabaseClient;
 
   useEffect(() => {
     // Get initial session
