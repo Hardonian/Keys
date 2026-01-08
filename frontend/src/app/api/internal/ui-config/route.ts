@@ -10,6 +10,20 @@ const REQUEST_SIGNING_SECRET = process.env.REQUEST_SIGNING_SECRET || '';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
+function isCrossSiteRequest(req: Request): boolean {
+  // Basic CSRF mitigation: block cross-site browser requests for state-changing routes.
+  // - Same-origin requests typically include Origin matching the request URL origin.
+  // - Modern browsers include Sec-Fetch-Site which is "same-origin"/"same-site" for legitimate navigation.
+  const origin = req.headers.get('origin');
+  const expectedOrigin = new URL(req.url).origin;
+  if (origin && origin !== expectedOrigin) return true;
+
+  const fetchSite = req.headers.get('sec-fetch-site');
+  if (fetchSite && fetchSite !== 'same-origin' && fetchSite !== 'same-site') return true;
+
+  return false;
+}
+
 async function requireAdminAccess() {
   const supabase = createClient();
   const [{ data: userData }, { data: sessionData }] = await Promise.all([
@@ -73,6 +87,10 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  if (isCrossSiteRequest(req)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const auth = await requireAdminAccess();
   if (!auth.ok) {
     return NextResponse.json({ error: 'Admin access required' }, { status: auth.status });
