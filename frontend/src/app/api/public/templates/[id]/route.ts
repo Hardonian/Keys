@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
 import { loadTemplateCatalog } from '@/lib/templateCatalog';
 
-export async function GET(_req: Request, context: { params: { id: string } }) {
+export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
   const catalog = await loadTemplateCatalog();
 
   if (!catalog) {
     return NextResponse.json({ error: 'Template catalog unavailable.' }, { status: 200 });
   }
 
-  const templateId = context.params.id;
+  const params = await context.params;
+  const templateId = params.id;
 
   for (const [milestoneId, milestone] of Object.entries(catalog.milestones)) {
     const match = milestone.templates.find((template) => template.id === templateId);
