@@ -15,7 +15,6 @@ router.use(authMiddleware);
  * GET /scaffold-templates
  * List available scaffold templates with filtering
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const listTemplatesSchema = z.object({
   milestone: z.string().array().optional(),
   stack: z.string().array().optional(),
@@ -189,7 +188,6 @@ router.post(
  * GET /scaffold-templates/recommended
  * Get recommended templates for a task
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const recommendedSchema = z.object({
   taskDescription: z.string().min(1),
 });

@@ -242,6 +242,7 @@ def run_demo(args: argparse.Namespace) -> int:
     print("PHASE 1: DECAY DETECTION")
     print("-" * 40)
     
+    config = SystemHealthConfig()
     monitor = HealthMonitor(args.repo_root, config)
     health_metrics = monitor.check_all_health()
     

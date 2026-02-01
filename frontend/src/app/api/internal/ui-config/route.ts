@@ -25,7 +25,7 @@ function isCrossSiteRequest(req: Request): boolean {
 }
 
 async function requireAdminAccess() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const [{ data: userData }, { data: sessionData }] = await Promise.all([
     supabase.auth.getUser(),
     supabase.auth.getSession(),

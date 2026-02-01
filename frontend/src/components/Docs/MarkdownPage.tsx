@@ -28,7 +28,7 @@ async function readMarkdownFile(filePath: string) {
   return null;
 }
 
-export async function MarkdownPage({ title, description, filePath }: MarkdownPageProps): Promise<JSX.Element> {
+export async function MarkdownPage({ title, description, filePath }: MarkdownPageProps) {
   const raw = await readMarkdownFile(filePath);
 
   const markdown = raw
