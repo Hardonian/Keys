@@ -1,6 +1,8 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import LibraryIndexClient, { IndexArtifact } from '@/components/Library/LibraryIndexClient';
+import { EmptyState } from '@/components/EmptyState';
+import Link from 'next/link';
 
 export const runtime = 'nodejs';
 
@@ -70,11 +72,22 @@ export default async function LibraryPage() {
           </p>
         </header>
 
-        {artifacts.length === 0 ? (
+{artifacts.length === 0 ? (
           <div className="bg-white/80 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
-            <p className="text-gray-700 dark:text-gray-300">
-              No artifacts are available yet. Check back soon or contribute a new prompt, notebook, or runbook.
-            </p>
+            <EmptyState
+              title="Library is empty"
+              description="No artifacts are available yet. Check back soon or contribute a new prompt, notebook, or runbook."
+              showIllustration={true}
+              illustrationAlt="Empty library waiting for content"
+              action={{
+                label: 'Contribute on GitHub',
+                onClick: () => window.open('https://github.com/anomalyco/keys', '_blank'),
+              }}
+              secondaryAction={{
+                label: 'Browse Docs',
+                onClick: () => window.location.href = '/docs',
+              }}
+            />
           </div>
         ) : (
           <LibraryIndexClient artifacts={artifacts} indexMissing={indexMissing} />

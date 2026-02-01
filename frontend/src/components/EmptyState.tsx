@@ -1,11 +1,15 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import Image from 'next/image';
 
 interface EmptyStateProps {
   title: string;
   description: string;
   icon?: ReactNode;
+  showIllustration?: boolean;
+  illustrationSrc?: string;
+  illustrationAlt?: string;
   action?: {
     label: string;
     onClick: () => void;
@@ -16,14 +20,38 @@ interface EmptyStateProps {
   };
 }
 
-export function EmptyState({ title, description, icon, action, secondaryAction }: EmptyStateProps) {
+const visualsDisabled = process.env.NEXT_PUBLIC_DISABLE_VISUALS === '1';
+
+export function EmptyState({ 
+  title, 
+  description, 
+  icon, 
+  showIllustration = false,
+  illustrationSrc = '/assets/visuals/empty-library.webp',
+  illustrationAlt = '',
+  action, 
+  secondaryAction 
+}: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center">
-      {icon && (
+      {/* Priority: illustration > icon > default */}
+      {showIllustration && !visualsDisabled ? (
+        <div className="relative w-48 h-36 mb-6 opacity-80">
+          <Image
+            src={illustrationSrc}
+            alt={illustrationAlt}
+            fill
+            loading="lazy"
+            sizes="192px"
+            className="object-contain"
+          />
+        </div>
+      ) : icon ? (
         <div className="mb-6 text-6xl sm:text-7xl animate-bounce-subtle" aria-hidden="true">
           {icon}
         </div>
-      )}
+      ) : null}
+      
       <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">{title}</h3>
       <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md text-lg">{description}</p>
       {action && (

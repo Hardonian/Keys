@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { EmptyState } from '@/components/EmptyState';
 
 export interface IndexArtifact {
   id: string;
@@ -139,10 +140,17 @@ export default function LibraryIndexClient({ artifacts, indexMissing }: LibraryI
         </div>
       </div>
 
-      {filteredArtifacts.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white/80 p-6 text-sm text-gray-600 shadow-sm dark:border-slate-700 dark:bg-slate-900/50 dark:text-gray-300">
-          No artifacts match the current filters.
-        </div>
+{filteredArtifacts.length === 0 ? (
+        <EmptyState
+          title="No matches found"
+          description="No artifacts match the current filters. Try adjusting your search criteria or clearing the filters."
+          showIllustration={false}
+          icon="🔍"
+          action={{
+            label: 'Clear Filters',
+            onClick: resetFilters,
+          }}
+        />
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredArtifacts.map((artifact) => (

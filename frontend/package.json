@@ -26,7 +26,8 @@
     "analyze": "ANALYZE=true next build",
     "validate": "npm run lint && npm run type-check && npm run test",
     "verify:fonts": "node scripts/verify-fonts.js",
-    "verify": "npm run lint && npm run type-check && npm run build && npm run verify:fonts"
+    "verify": "npm run lint && npm run type-check && npm run build && npm run verify:fonts",
+    "validate-assets": "node scripts/assets/validate.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.0",

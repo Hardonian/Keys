@@ -1,11 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Github, Map, Code2, Users, CheckCircle } from 'lucide-react';
 
 interface HeroSectionProps {
   className?: string;
 }
+
+// Check if visuals are disabled via env (for rollback)
+const visualsDisabled = process.env.NEXT_PUBLIC_DISABLE_VISUALS === '1';
 
 export function HeroSection({ className = '' }: HeroSectionProps) {
   return (
@@ -55,6 +59,27 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
             </Link>
           </div>
         </div>
+
+        {/* Hero Visual - Network illustration */}
+        {!visualsDisabled && (
+          <div className="relative w-full max-w-4xl mx-auto mb-16">
+            <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50 dark:from-blue-950/20 dark:via-slate-900 dark:to-purple-950/20 border border-gray-200 dark:border-white/10 shadow-lg">
+              <Image
+                src="/assets/visuals/hero-visual.webp"
+                alt="Abstract illustration of interconnected knowledge nodes representing the Keys library"
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1024px"
+                className="object-contain p-4"
+                style={{ 
+                  filter: 'drop-shadow(0 4px 20px rgba(37, 99, 235, 0.15))' 
+                }}
+              />
+            </div>
+            {/* Decorative glow */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-3xl blur-2xl -z-10" />
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20 border-y border-gray-200 dark:border-white/10 py-10 bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-xl md:rounded-none">
