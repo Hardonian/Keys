@@ -8,9 +8,8 @@ import { useVibeConfig } from '@/hooks/useVibeConfig';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/contexts/AuthContext';
 
-const isStaticExport = process.env.NEXT_OUTPUT === 'export';
-// Force dynamic rendering since this page uses Supabase (unless exporting static assets)
-export const dynamic = isStaticExport ? 'force-static' : 'force-dynamic';
+// Force dynamic rendering since this page uses Supabase auth
+export const dynamic = 'force-dynamic';
 
 export default function ProfileSettingsPage() {
   const router = useRouter();

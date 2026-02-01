@@ -4,9 +4,8 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
-const isStaticExport = process.env.NEXT_OUTPUT === 'export';
-// Force dynamic rendering (unless exporting static assets)
-export const dynamic = isStaticExport ? 'force-static' : 'force-dynamic';
+// Force dynamic rendering since this page uses client-side auth
+export const dynamic = 'force-dynamic';
 
 function ExtensionAuthContent() {
   const searchParams = useSearchParams();
