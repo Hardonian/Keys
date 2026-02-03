@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 import { authMiddleware, requireRole } from '../middleware/auth.js';
 import type { AuthenticatedRequest } from '../middleware/auth.js';
 import { auditLogService } from '../services/auditLogService.js';
+import { jobForgeAdapter, JobForgeError } from '../integrations/jobforgeAdapter.js';
+import { logger } from '../utils/logger.js';
+import { z } from 'zod';
 
 const router = Router() as Router;
 const supabase = createClient(
@@ -411,6 +414,134 @@ router.get('/health', requireRole('admin', 'superadmin'), async (req, res) => {
       error: 'Health check failed',
       message: error instanceof Error ? error.message : 'Unknown error',
     });
+  }
+});
+
+const jobForgeEventSchema = z.object({
+  tenantId: z.string().min(1),
+  projectId: z.string().min(1),
+  eventType: z.string().min(1),
+  payload: z.record(z.unknown()).default({}),
+});
+
+const jobForgeModuleSchema = z.object({
+  tenantId: z.string().min(1),
+  projectId: z.string().min(1),
+  moduleId: z.string().min(1),
+  input: z.record(z.unknown()).default({}),
+});
+
+const jobForgeReportQuerySchema = z.object({
+  tenantId: z.string().min(1),
+  projectId: z.string().min(1),
+});
+
+const jobForgeBundleSchema = z.object({
+  tenantId: z.string().min(1),
+  projectId: z.string().min(1),
+  bundleId: z.string().min(1),
+  confirm: z.boolean().optional(),
+});
+
+const handleJobForgeError = (res: Response, error: unknown, context: Record<string, unknown>) => {
+  if (error instanceof JobForgeError) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+
+  logger.error('JobForge admin request failed.', error instanceof Error ? error : undefined, context);
+  return res.status(500).json({ error: 'JobForge request failed.' });
+};
+
+/**
+ * GET /admin/jobforge/status - Get JobForge integration status
+ */
+router.get('/jobforge/status', requireRole('admin', 'superadmin'), async (_req, res) => {
+  try {
+    const status = await jobForgeAdapter.getStatus();
+    res.json(status);
+  } catch (error) {
+    handleJobForgeError(res, error, { action: 'jobforge_status' });
+  }
+});
+
+/**
+ * POST /admin/jobforge/events - Submit JobForge event
+ */
+router.post('/jobforge/events', requireRole('admin', 'superadmin'), async (req: AuthenticatedRequest, res) => {
+  const parsed = jobForgeEventSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid request body.' });
+  }
+
+  try {
+    const result = await jobForgeAdapter.submitEvent(parsed.data);
+    res.json({ status: 'submitted', result });
+  } catch (error) {
+    handleJobForgeError(res, error, { action: 'jobforge_submit_event', userId: req.userId });
+  }
+});
+
+/**
+ * POST /admin/jobforge/modules/dry-run - Run JobForge module dry-run
+ */
+router.post('/jobforge/modules/dry-run', requireRole('admin', 'superadmin'), async (req: AuthenticatedRequest, res) => {
+  const parsed = jobForgeModuleSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid request body.' });
+  }
+
+  try {
+    const result = await jobForgeAdapter.runModuleDryRun(parsed.data);
+    res.json({ status: 'dry_run', result });
+  } catch (error) {
+    handleJobForgeError(res, error, { action: 'jobforge_module_dry_run', userId: req.userId });
+  }
+});
+
+/**
+ * GET /admin/jobforge/reports/:reportId - View JobForge report
+ */
+router.get('/jobforge/reports/:reportId', requireRole('admin', 'superadmin'), async (req, res) => {
+  const queryParsed = jobForgeReportQuerySchema.safeParse(req.query);
+  if (!queryParsed.success) {
+    return res.status(400).json({ error: 'Invalid query parameters.' });
+  }
+
+  try {
+    const result = await jobForgeAdapter.getReport({
+      tenantId: queryParsed.data.tenantId,
+      projectId: queryParsed.data.projectId,
+      reportId: req.params.reportId,
+    });
+    res.json({ status: 'ok', result });
+  } catch (error) {
+    handleJobForgeError(res, error, { action: 'jobforge_get_report' });
+  }
+});
+
+/**
+ * POST /admin/jobforge/reports/:reportId/bundle-execution - Request bundle execution
+ */
+router.post('/jobforge/reports/:reportId/bundle-execution', requireRole('admin', 'superadmin'), async (req, res) => {
+  const parsed = jobForgeBundleSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid request body.' });
+  }
+
+  if (!parsed.data.confirm) {
+    return res.status(400).json({ error: 'Bundle execution requires confirm=true.' });
+  }
+
+  try {
+    const result = await jobForgeAdapter.requestBundleExecution({
+      tenantId: parsed.data.tenantId,
+      projectId: parsed.data.projectId,
+      reportId: req.params.reportId,
+      bundleId: parsed.data.bundleId,
+    });
+    res.json({ status: 'queued', result });
+  } catch (error) {
+    handleJobForgeError(res, error, { action: 'jobforge_bundle_execution' });
   }
 });
 

@@ -19,6 +19,12 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   FRONTEND_URL: z.string().url().optional(),
+  JOBFORGE_INTEGRATION_ENABLED: z.string().optional(),
+  JOBFORGE_BUNDLE_EXECUTION_ENABLED: z.string().optional(),
+  JOBFORGE_API_KEY: z.string().optional(),
+  JOBFORGE_BASE_URL: z.string().url().optional(),
+  JOBFORGE_SDK_MODULE: z.string().optional(),
+  JOBFORGE_TENANT_PROJECT_MAP: z.string().optional(),
 });
 
 export function validateEnv(): void {

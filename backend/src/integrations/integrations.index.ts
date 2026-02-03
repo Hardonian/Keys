@@ -6,6 +6,7 @@ export { ciCdAdapter, CiCdAdapter } from './ciCdAdapter.js';
 export { supabaseAdapter, SupabaseAdapter } from './supabaseAdapter.js';
 export { mindstudioAdapter, MindStudioAdapter } from './mindstudioAdapter.js';
 export { contentAdapter, ContentAdapter } from './contentAdapter.js';
+export { jobForgeAdapter } from './jobforgeAdapter.js';
 
 export type { CodeRepoWebhook, PullRequest, BuildStatus } from './codeRepoAdapter.js';
 export type { Issue, IssueComment, IssueTrackerProvider } from './issueTrackerAdapter.js';
