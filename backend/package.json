@@ -15,7 +15,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "load-test": "tsx scripts/load-test.ts",
     "migrate": "tsx ../scripts/run-all-migrations.ts",
-    "verify-migrations": "tsx ../scripts/verify-migrations.ts"
+    "verify-migrations": "tsx ../scripts/verify-migrations.ts",
+    "jobforge:admin": "tsx scripts/jobforge-admin.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

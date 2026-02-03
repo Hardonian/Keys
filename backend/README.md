@@ -36,6 +36,16 @@ The background event loop service monitors external events (Shopify webhooks, Su
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
    ```
 
+2. **Optional JobForge Integration (Admin)**
+   ```env
+   JOBFORGE_INTEGRATION_ENABLED=1
+   JOBFORGE_BASE_URL=https://api.jobforge.example
+   JOBFORGE_API_KEY=your_jobforge_api_key
+   JOBFORGE_TENANT_PROJECT_MAP='[{"tenantId":"tenant-123","projectId":"project-abc","jobforgeTenantId":"jf-tenant-1","jobforgeProjectId":"jf-project-1"}]'
+   ```
+   - Bundle execution requests require `JOBFORGE_BUNDLE_EXECUTION_ENABLED=1`.
+   - See `docs/ops/JOBFORGE_INTEGRATION.md` for admin endpoints and CLI usage.
+
 2. **Shopify Webhook Configuration**
    - In Shopify Admin, go to Settings > Notifications > Webhooks
    - Create webhook: `POST https://your-domain.com/webhooks/shopify`
