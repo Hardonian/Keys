@@ -18,6 +18,16 @@ export type DiscoveryReason = {
   confidence: 'high' | 'medium' | 'low';
 };
 
+export type DiscoveryCursor = {
+  score: number;
+  keyId: string;
+};
+
+export type DiscoveryResult = {
+  results: DiscoveryReason[];
+  nextCursor?: DiscoveryCursor;
+};
+
 /**
  * Record a discovery signal for a user
  */
@@ -90,8 +100,9 @@ export async function discoverKeys(
     limit?: number;
     keyType?: 'jupyter' | 'node' | 'next' | 'runbook';
     excludeOwned?: boolean;
+    cursor?: DiscoveryCursor;
   }
-): Promise<DiscoveryReason[]> {
+): Promise<DiscoveryResult> {
   const limit = options?.limit || 10;
   const signals = await getUserSignals(userId);
   const ownedKeys = options?.excludeOwned ? await getUserOwnedKeys(userId) : [];
@@ -156,7 +167,7 @@ export async function discoverKeys(
 
   if (error || !keys) {
     logger.error('Failed to discover keys:', error);
-    return [];
+    return { results: [] };
   }
 
   // Score and rank recommendations
@@ -223,14 +234,34 @@ export async function discoverKeys(
     });
   }
 
-  // Sort by score and return top N
-  recommendations.sort((a, b) => b.score - a.score);
+  // Sort by score and keyId to keep pagination stable
+  recommendations.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    return b.keyId.localeCompare(a.keyId);
+  });
 
-  return recommendations.slice(0, limit).map(r => ({
-    keyId: r.keyId,
-    reason: r.reason,
-    confidence: r.score >= 10 ? 'high' : r.score >= 5 ? 'medium' : 'low',
-  }));
+  const cursor = options?.cursor;
+  const filtered = cursor
+    ? recommendations.filter(
+        (rec) => rec.score < cursor.score || (rec.score === cursor.score && rec.keyId < cursor.keyId)
+      )
+    : recommendations;
+
+  const page = filtered.slice(0, limit + 1);
+  const hasMore = page.length > limit;
+  const pageItems = hasMore ? page.slice(0, limit) : page;
+  const lastItem = pageItems[pageItems.length - 1];
+
+  return {
+    results: pageItems.map((r) => ({
+      keyId: r.keyId,
+      reason: r.reason,
+      confidence: r.score >= 10 ? 'high' : r.score >= 5 ? 'medium' : 'low',
+    })),
+    nextCursor: hasMore && lastItem ? { score: lastItem.score, keyId: lastItem.keyId } : undefined,
+  };
 }
 
 /**
