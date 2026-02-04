@@ -41,6 +41,10 @@ const TIER_LIMITS: Record<string, UsageLimit> = {
   },
 };
 
+export function getTierLimit(tier: string, metricType: MetricType): number {
+  return TIER_LIMITS[tier]?.[metricType] ?? 0;
+}
+
 /**
  * Track usage metric
  */

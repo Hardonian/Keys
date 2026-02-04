@@ -43,12 +43,15 @@ const supabase = createClient(
 router.get(
   '/keys',
   asyncHandler(async (req, res) => {
-    const { key_type, tool, category, difficulty, search, outcome, maturity } = req.query;
+    const { key_type, tool, category, difficulty, search, outcome, maturity, cursor, limit } = req.query;
+    const pageSize = Math.min(parseInt((limit as string) || '20', 10) || 20, 100);
 
     let query = supabase
       .from('marketplace_keys')
       .select('id, slug, title, description, tool, key_type, category, difficulty, tags, version, license_spdx, outcome, maturity, created_at')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(pageSize + 1);
 
     if (tool) {
       query = query.eq('tool', tool as string);
@@ -78,6 +81,13 @@ router.get(
       query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,tags.cs.{${search}}`);
     }
 
+    if (cursor) {
+      const [createdAt, id] = (cursor as string).split('|');
+      if (createdAt && id) {
+        query = query.or(`created_at.lt.${createdAt},and(created_at.eq.${createdAt},id.lt.${id})`);
+      }
+    }
+
     const { data, error } = await query;
 
     if (error) {
@@ -87,7 +97,15 @@ router.get(
       });
     }
 
-    res.json({ keys: data || [] });
+    const keys = data || [];
+    const hasMore = keys.length > pageSize;
+    const page = hasMore ? keys.slice(0, pageSize) : keys;
+    const lastKey = page[page.length - 1];
+
+    res.json({
+      keys: page,
+      nextCursor: hasMore && lastKey ? `${lastKey.created_at}|${lastKey.id}` : undefined,
+    });
   })
 );
 
@@ -100,33 +118,55 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
     const userId = req.userId!;
-    const { key_type, limit } = req.query;
+    const { key_type, limit, cursor } = req.query;
+    const pageSize = Math.min(parseInt((limit as string) || '10', 10) || 10, 50);
+    let parsedCursor: { score: number; keyId: string } | undefined;
+    if (typeof cursor === 'string' && cursor.includes('|')) {
+      const [scoreRaw, keyId] = cursor.split('|');
+      const score = Number(scoreRaw);
+      if (!Number.isNaN(score) && keyId) {
+        parsedCursor = { score, keyId };
+      }
+    }
 
     try {
       const recommendations = await discoverKeys(userId, {
-        limit: limit ? parseInt(limit as string) : 10,
+        limit: pageSize,
         keyType: key_type as any,
         excludeOwned: true,
+        cursor: parsedCursor,
       });
 
       // Get full key details
-      const keyIds = recommendations.map(r => r.keyId);
+      const keyIds = recommendations.results.map((r) => r.keyId);
       const { data: keys } = await supabase
         .from('marketplace_keys')
         .select('id, slug, title, description, key_type, version')
         .in('id', keyIds);
 
-      // Map recommendations to keys
-      const results = recommendations.map(rec => {
-        const key = keys?.find(k => k.id === rec.keyId);
-        return {
-          ...key,
-          reason: rec.reason,
-          confidence: rec.confidence,
-        };
-      }).filter(Boolean);
+      const keyMap = new Map((keys || []).map((key) => [key.id, key]));
 
-      res.json({ recommendations: results });
+      // Map recommendations to keys
+      const results = recommendations.results
+        .map((rec) => {
+          const key = keyMap.get(rec.keyId);
+          if (!key) {
+            return null;
+          }
+          return {
+            ...key,
+            reason: rec.reason,
+            confidence: rec.confidence,
+          };
+        })
+        .filter(Boolean);
+
+      res.json({
+        recommendations: results,
+        nextCursor: recommendations.nextCursor
+          ? `${recommendations.nextCursor.score}|${recommendations.nextCursor.keyId}`
+          : undefined,
+      });
     } catch (error: any) {
       logger.error('Failed to discover keys:', error);
       res.status(500).json({
