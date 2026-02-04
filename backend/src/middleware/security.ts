@@ -3,6 +3,16 @@ import helmet from 'helmet';
 import { logger } from '../utils/logger.js';
 import { securityHeadersMiddleware, requestSigningMiddleware } from './securityHardening.js';
 
+const requestLogSampleRate = (() => {
+  const raw = process.env.REQUEST_LOG_SAMPLE_RATE;
+  if (!raw) return 1;
+  const parsed = Number(raw);
+  if (Number.isNaN(parsed)) return 1;
+  return Math.min(1, Math.max(0, parsed));
+})();
+
+const requestLogIgnorePaths = new Set(['/metrics']);
+
 /**
  * Security headers middleware (uses enhanced hardening)
  */
@@ -65,23 +75,30 @@ export function requestLoggingMiddleware(
 ): void {
   const startTime = Date.now();
   const requestId = req.headers['x-request-id'] as string;
+  const shouldSkip = requestLogIgnorePaths.has(req.path);
+  const shouldSample = requestLogSampleRate >= 1 || Math.random() < requestLogSampleRate;
+  const shouldLog = !shouldSkip && shouldSample;
 
-  logger.info('Request started', {
-    requestId,
-    method: req.method,
-    url: req.url,
-    userId: (req as any).userId,
-  });
-
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    logger.info('Request completed', {
+  if (shouldLog) {
+    logger.info('Request started', {
       requestId,
       method: req.method,
       url: req.url,
-      statusCode: res.statusCode,
-      duration: `${duration}ms`,
+      userId: (req as any).userId,
     });
+  }
+
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    if (shouldLog || res.statusCode >= 400) {
+      logger.info('Request completed', {
+        requestId,
+        method: req.method,
+        url: req.url,
+        statusCode: res.statusCode,
+        duration: `${duration}ms`,
+      });
+    }
   });
 
   next();

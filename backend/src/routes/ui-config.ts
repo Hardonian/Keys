@@ -8,6 +8,8 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { validateBody } from '../middleware/validation.js';
 import { DatabaseError } from '../types/errors.js';
 import { authMiddleware, requireRole, type AuthenticatedRequest } from '../middleware/auth.js';
+import { ExpiringCache } from '../utils/expiringCache.js';
+import { logger } from '../utils/logger.js';
 
 type PublicUiConfig = {
   version: number;
@@ -163,6 +165,14 @@ async function readConfigRow(): Promise<{ config: PublicUiConfig; updatedAt: str
   return { config, updatedAt };
 }
 
+const uiConfigCache = new ExpiringCache(readConfigRow, {
+  maxAgeMs: 30_000,
+  staleWhileRevalidateMs: 300_000,
+  onError: (error) => {
+    logger.warn('UI config cache refresh failed', { error: error.message });
+  },
+});
+
 export const uiConfigPublicRouter = Router() as Router;
 export const uiConfigAdminRouter = Router() as Router;
 
@@ -179,7 +189,7 @@ uiConfigPublicRouter.use(
 uiConfigPublicRouter.get(
   '/',
   asyncHandler(async (req, res) => {
-    const { config, updatedAt } = await readConfigRow();
+    const { config, updatedAt } = await uiConfigCache.get();
     const etag = computeEtag({ config, updatedAt });
 
     if (req.headers['if-none-match'] === etag) {
@@ -224,10 +234,11 @@ uiConfigAdminRouter.patch(
     const updatedAt = data?.updated_at ?? null;
     const etag = computeEtag({ config, updatedAt });
 
+    uiConfigCache.set({ config, updatedAt });
+
     res.setHeader('ETag', etag);
     res.setHeader('Cache-Control', 'no-store');
     if (updatedAt) res.setHeader('X-UI-Config-Updated-At', updatedAt);
     res.json({ config, updatedAt });
   })
 );
-

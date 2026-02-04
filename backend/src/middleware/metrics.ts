@@ -9,6 +9,16 @@ interface RequestMetrics {
   error?: Error;
 }
 
+const metricsSampleRate = (() => {
+  const raw = process.env.METRICS_LOG_SAMPLE_RATE;
+  if (!raw) return 1;
+  const parsed = Number(raw);
+  if (Number.isNaN(parsed)) return 1;
+  return Math.min(1, Math.max(0, parsed));
+})();
+
+const metricsIgnorePaths = new Set(['/metrics']);
+
 /**
  * Middleware to track request metrics (latency, error rate, etc.)
  */
@@ -31,14 +41,19 @@ export function metricsMiddleware(
     metrics.statusCode = res.statusCode;
 
     // Log metrics
-    logger.info('Request metrics', {
-      requestId,
-      method: metrics.method,
-      path: metrics.path,
-      statusCode: metrics.statusCode,
-      latencyMs,
-      // Calculate p95 latency would require aggregation (use external metrics service)
-    });
+    if (!metricsIgnorePaths.has(metrics.path)) {
+      const shouldSample = metricsSampleRate >= 1 || Math.random() < metricsSampleRate;
+      if (shouldSample) {
+        logger.info('Request metrics', {
+          requestId,
+          method: metrics.method,
+          path: metrics.path,
+          statusCode: metrics.statusCode,
+          latencyMs,
+          // Calculate p95 latency would require aggregation (use external metrics service)
+        });
+      }
+    }
 
     // Track error rate
     if (metrics.statusCode && metrics.statusCode >= 400) {
