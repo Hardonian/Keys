@@ -22,6 +22,12 @@ import {
   truncateUserAgent,
   fileExists,
 } from '../lib/marketplace/storage.js';
+import {
+  getMarketplaceBudgetMsForUser,
+  getMarketplaceBudgetMs,
+  remainingBudgetMs,
+  withBudgetTimeout,
+} from '../lib/marketplace/latencyBudget.js';
 import { createHash } from 'crypto';
 
 const router = Router() as Router;
@@ -127,8 +133,10 @@ router.post(
   '/packs/:slug/download',
   authMiddleware,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
+    const requestStart = Date.now();
     const { slug } = req.params;
     const userId = req.userId!;
+    const budgetMs = await getMarketplaceBudgetMsForUser(userId);
 
     // Get pack
     const { data: pack, error: packError } = await supabase
@@ -160,17 +168,32 @@ router.post(
       });
     }
 
+    if (remainingBudgetMs(requestStart, budgetMs) === 0) {
+      return res.status(504).json({
+        error: 'Request timed out',
+        message: 'The request exceeded the latency budget. Please retry.',
+      });
+    }
+
     // Generate signed URL for ZIP
     const zipPath = pack.zip_path || getPackAssetPath(pack.slug, pack.version, 'zip');
     let signedUrl: string;
 
     try {
-      signedUrl = await getSignedUrl(zipPath, 3600); // 1 hour expiry
+      signedUrl = await withBudgetTimeout(
+        getSignedUrl(zipPath, 3600),
+        remainingBudgetMs(requestStart, budgetMs),
+        'Latency budget exceeded while generating download link'
+      );
     } catch (error: any) {
       console.error('Failed to generate signed URL:', error);
-      return res.status(500).json({
-        error: 'Failed to generate download link',
-        message: 'Storage service unavailable',
+      const status = error?.message?.includes('Latency budget exceeded') ? 504 : 500;
+      return res.status(status).json({
+        error: status === 504 ? 'Request timed out' : 'Failed to generate download link',
+        message:
+          status === 504
+            ? 'The request exceeded the latency budget. Please retry.'
+            : 'Storage service unavailable',
       });
     }
 
@@ -207,7 +230,25 @@ router.post(
 router.get(
   '/packs/:slug/preview',
   asyncHandler(async (req, res) => {
+    const requestStart = Date.now();
     const { slug } = req.params;
+    const budgetMs = req.headers.authorization
+      ? await (async () => {
+          try {
+            const {
+              data: { user },
+            } = await supabase.auth.getUser(
+              req.headers.authorization.replace('Bearer ', '')
+            );
+            if (user?.id) {
+              return await getMarketplaceBudgetMsForUser(user.id);
+            }
+          } catch {
+            // fall through to default
+          }
+          return getMarketplaceBudgetMs();
+        })()
+      : getMarketplaceBudgetMs();
 
     const { data: pack, error } = await supabase
       .from('marketplace_packs')
@@ -262,16 +303,32 @@ router.get(
       }
     }
 
+    if (remainingBudgetMs(requestStart, budgetMs) === 0) {
+      return res.status(504).json({
+        error: 'Request timed out',
+        message: 'The request exceeded the latency budget. Please retry.',
+      });
+    }
+
     // Generate signed URL for preview HTML
     const previewPath = pack.preview_html_path || getPackAssetPath(pack.slug, pack.version, 'preview_html');
     
     try {
-      const signedUrl = await getSignedUrl(previewPath, 3600);
+      const signedUrl = await withBudgetTimeout(
+        getSignedUrl(previewPath, 3600),
+        remainingBudgetMs(requestStart, budgetMs),
+        'Latency budget exceeded while generating preview link'
+      );
       res.json({ previewUrl: signedUrl });
     } catch (error: any) {
       console.error('Failed to generate preview URL:', error);
-      res.status(500).json({
-        error: 'Failed to generate preview link',
+      const status = error?.message?.includes('Latency budget exceeded') ? 504 : 500;
+      res.status(status).json({
+        error: status === 504 ? 'Request timed out' : 'Failed to generate preview link',
+        message:
+          status === 504
+            ? 'The request exceeded the latency budget. Please retry.'
+            : undefined,
       });
     }
   })

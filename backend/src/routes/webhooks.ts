@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { codeRepoAdapter } from '../integrations/codeRepoAdapter.js';
 import { logger } from '../utils/logger.js';
+import { getLatestVibeConfig } from '../services/vibeConfig.js';
 
 const router = Router() as Router;
 const supabase = createClient(
@@ -209,33 +210,16 @@ function extractUserIdFromRecord(record: any, table: string): string | null {
  */
 async function processWebhookEvent(userId: string, eventRecord: any) {
   try {
-    // Check if suggestion should be generated
-    const { data: vibeConfig } = await supabase
-      .from('vibe_configs')
-      .select('auto_suggest')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (!vibeConfig?.auto_suggest) {
-      return;
-    }
-
     // Import here to avoid circular dependencies
     const { assemblePrompt } = await import('../services/promptAssembly.js');
     const { orchestrateAgent } = await import('../services/agentOrchestration.js');
 
-    // Get full vibe config
-    const { data: fullVibeConfig } = await supabase
-      .from('vibe_configs')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
+    const fullVibeConfig = await getLatestVibeConfig(userId);
     if (!fullVibeConfig) {
+      return;
+    }
+
+    if (!fullVibeConfig.auto_suggest) {
       return;
     }
 

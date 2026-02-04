@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { codeRepoAdapter } from '../integrations/codeRepoAdapter.js';
-import { processBackgroundEvent } from './eventProcessor.js';
+import { isSuggestionWorthyEventType, processBackgroundEvent } from './eventProcessor.js';
 import { logger } from '../utils/logger.js';
 
 const supabase = createClient(
@@ -19,6 +19,22 @@ export class BackgroundEventLoop {
   private isRunning = false;
   private pollInterval = 60000; // 1 minute
   private activeLoops: Map<string, NodeJS.Timeout> = new Map();
+  private pollBackoff: Map<
+    string,
+    {
+      code_repo: { failures: number; nextAllowedAt: number };
+      supabase: { failures: number; nextAllowedAt: number };
+    }
+  > = new Map();
+  private readonly baseBackoffMs = 5000;
+  private readonly maxBackoffMs = 300000;
+  private readonly prConcurrency = (() => {
+    const raw = process.env.CODE_REPO_POLL_CONCURRENCY;
+    if (!raw) return 4;
+    const parsed = Number(raw);
+    if (Number.isNaN(parsed)) return 4;
+    return Math.max(1, Math.min(10, parsed));
+  })();
 
   /**
    * Start background event loop for a specific user
@@ -113,10 +129,7 @@ export class BackgroundEventLoop {
         continue;
       }
 
-      // Determine if suggestion warranted
-      const shouldSuggest = await this.shouldGenerateSuggestion(event, userId);
-
-      if (shouldSuggest && eventRecord) {
+      if (eventRecord && isSuggestionWorthyEventType(event.type)) {
         // Process event asynchronously (don't block the loop)
         processBackgroundEvent(userId, eventRecord).catch((error) => {
           console.error('Error processing background event:', error);
@@ -127,19 +140,29 @@ export class BackgroundEventLoop {
 
   private async pollExternalEvents(userId: string): Promise<ExternalEvent[]> {
     const events: ExternalEvent[] = [];
+    const now = Date.now();
+    const tasks: Array<Promise<ExternalEvent[]>> = [];
 
     // Poll code repo events (fallback polling if webhooks aren't configured)
-    const codeRepoEvents = await this.pollCodeRepoEvents(userId);
-    events.push(...codeRepoEvents);
+    if (this.canPoll(userId, 'code_repo', now)) {
+      tasks.push(this.runPollWithBackoff(userId, 'code_repo', () => this.pollCodeRepoEvents(userId)));
+    } else {
+      logger.debug('Code repo polling skipped due to backoff', { userId });
+    }
 
-      // Poll Supabase schema changes (if supabase adapter is configured)
-      try {
-        const supabaseEvents = await this.pollSupabaseEvents(userId);
-        events.push(...supabaseEvents);
-      } catch (error) {
-        // Supabase adapter may not be configured, skip
-        logger.debug('Supabase events polling skipped', { userId });
+    // Poll Supabase schema changes (if supabase adapter is configured)
+    if (this.canPoll(userId, 'supabase', now)) {
+      tasks.push(this.runPollWithBackoff(userId, 'supabase', () => this.pollSupabaseEvents(userId)));
+    } else {
+      logger.debug('Supabase events polling skipped due to backoff', { userId });
+    }
+
+    const results = await Promise.allSettled(tasks);
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        events.push(...result.value);
       }
+    }
 
     return events;
   }
@@ -168,70 +191,84 @@ export class BackgroundEventLoop {
       // Get recent pull requests
       const recentPRs = await codeRepoAdapter.getRecentPullRequests(20, 'open');
 
-      for (const pr of recentPRs) {
-        const prCreated = new Date(pr.created_at);
-        const prUpdated = new Date(pr.updated_at);
+      const prEvents = await this.mapWithConcurrency(
+        recentPRs,
+        this.prConcurrency,
+        async (pr) => {
+          const eventsForPr: ExternalEvent[] = [];
+          const prCreated = new Date(pr.created_at);
+          const prUpdated = new Date(pr.updated_at);
 
-        // Check if PR was created recently
-        if (prCreated > lastChecked) {
-          events.push({
-            type: 'repo.pr.opened',
-            source: 'code_repo',
-            data: {
-              id: pr.id,
-              number: pr.number,
-              title: pr.title,
-              author: pr.author,
-              branch: pr.branch,
-            },
-            timestamp: prCreated,
-          });
-        }
+          // Check if PR was created recently
+          if (prCreated > lastChecked) {
+            eventsForPr.push({
+              type: 'repo.pr.opened',
+              source: 'code_repo',
+              data: {
+                id: pr.id,
+                number: pr.number,
+                title: pr.title,
+                author: pr.author,
+                branch: pr.branch,
+              },
+              timestamp: prCreated,
+            });
+          }
 
-        // Check if PR was updated recently (and not just created)
-        if (prUpdated > lastChecked && prUpdated.getTime() !== prCreated.getTime()) {
-          events.push({
-            type: 'repo.pr.updated',
-            source: 'code_repo',
-            data: {
-              id: pr.id,
-              number: pr.number,
-              title: pr.title,
-            },
-            timestamp: prUpdated,
-          });
-        }
+          // Check if PR was updated recently (and not just created)
+          if (prUpdated > lastChecked && prUpdated.getTime() !== prCreated.getTime()) {
+            eventsForPr.push({
+              type: 'repo.pr.updated',
+              source: 'code_repo',
+              data: {
+                id: pr.id,
+                number: pr.number,
+                title: pr.title,
+              },
+              timestamp: prUpdated,
+            });
+          }
 
-        // Check if PR is stale
-        const isStale = await codeRepoAdapter.isPRStale(pr.number, 7);
-        if (isStale) {
-          events.push({
-            type: 'repo.pr.stale',
-            source: 'code_repo',
-            data: {
-              id: pr.id,
-              number: pr.number,
-              title: pr.title,
-            },
-            timestamp: new Date(),
-          });
-        }
+          const [isStale, buildStatus] = await Promise.all([
+            codeRepoAdapter.isPRStale(pr.number, 7),
+            codeRepoAdapter.checkBuildStatus(pr.branch),
+          ]);
 
-        // Check build status
-        const buildStatus = await codeRepoAdapter.checkBuildStatus(pr.branch);
-        if (buildStatus && buildStatus.status === 'failure') {
-          events.push({
-            type: 'repo.build.failed',
-            source: 'ci_cd',
-            data: {
-              branch: pr.branch,
-              commit: buildStatus.commit,
-              workflow: buildStatus.workflow,
-              logs_url: buildStatus.logs_url,
-            },
-            timestamp: buildStatus.completed_at ? new Date(buildStatus.completed_at) : new Date(),
-          });
+          // Check if PR is stale
+          if (isStale) {
+            eventsForPr.push({
+              type: 'repo.pr.stale',
+              source: 'code_repo',
+              data: {
+                id: pr.id,
+                number: pr.number,
+                title: pr.title,
+              },
+              timestamp: new Date(),
+            });
+          }
+
+          // Check build status
+          if (buildStatus && buildStatus.status === 'failure') {
+            eventsForPr.push({
+              type: 'repo.build.failed',
+              source: 'ci_cd',
+              data: {
+                branch: pr.branch,
+                commit: buildStatus.commit,
+                workflow: buildStatus.workflow,
+                logs_url: buildStatus.logs_url,
+              },
+              timestamp: buildStatus.completed_at ? new Date(buildStatus.completed_at) : new Date(),
+            });
+          }
+
+          return eventsForPr;
         }
+      );
+
+      for (const batch of prEvents) {
+        events.push(...batch);
       }
     } catch (error) {
       console.error('Error polling code repo events:', error);
@@ -279,47 +316,95 @@ export class BackgroundEventLoop {
           timestamp: new Date(),
         });
       }
-    } catch (error) {
-      logger.debug('Supabase events polling skipped', { userId });
+    } catch (error: any) {
+      const message = error?.message || '';
+      if (message.includes('Cannot find module') || message.includes('supabaseAdapter')) {
+        logger.debug('Supabase events polling skipped', { userId });
+        return events;
+      }
+      throw error;
     }
 
     return events;
   }
 
-  private async shouldGenerateSuggestion(
-    event: ExternalEvent,
-    userId: string
-  ): Promise<boolean> {
-    // Determine if this event warrants a suggestion
-    // Example: pr.opened -> suggest review checklist, build.failed -> suggest fixes
-    const suggestionWorthyEvents = [
-      'repo.pr.opened',
-      'repo.pr.stale',
-      'repo.build.failed',
-      'issue.created',
-      'issue.stale',
-      'metric.regression',
-      'incident.opened',
-      'supabase.schema.changed',
-    ];
-
-    if (suggestionWorthyEvents.includes(event.type)) {
-      return true;
-    }
-
-    // Check user preferences
-    const { data: vibeConfig } = await supabase
-      .from('vibe_configs')
-      .select('auto_suggest')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    return vibeConfig?.auto_suggest ?? true;
+  private canPoll(
+    userId: string,
+    source: 'code_repo' | 'supabase',
+    now: number
+  ): boolean {
+    const state = this.getBackoffState(userId);
+    return now >= state[source].nextAllowedAt;
   }
 
+  private async runPollWithBackoff(
+    userId: string,
+    source: 'code_repo' | 'supabase',
+    poller: () => Promise<ExternalEvent[]>
+  ): Promise<ExternalEvent[]> {
+    try {
+      const events = await poller();
+      this.resetBackoff(userId, source);
+      return events;
+    } catch (error) {
+      this.applyBackoff(userId, source);
+      logger.warn('Polling failed; applying backoff', {
+        userId,
+        source,
+        nextAllowedAt: this.getBackoffState(userId)[source].nextAllowedAt,
+      });
+      return [];
+    }
+  }
 
+  private getBackoffState(userId: string) {
+    const existing = this.pollBackoff.get(userId);
+    if (existing) {
+      return existing;
+    }
+
+    const initial = {
+      code_repo: { failures: 0, nextAllowedAt: 0 },
+      supabase: { failures: 0, nextAllowedAt: 0 },
+    };
+    this.pollBackoff.set(userId, initial);
+    return initial;
+  }
+
+  private resetBackoff(userId: string, source: 'code_repo' | 'supabase') {
+    const state = this.getBackoffState(userId);
+    state[source] = { failures: 0, nextAllowedAt: 0 };
+  }
+
+  private applyBackoff(userId: string, source: 'code_repo' | 'supabase') {
+    const state = this.getBackoffState(userId);
+    const failures = state[source].failures + 1;
+    const backoffMs = Math.min(
+      this.maxBackoffMs,
+      this.baseBackoffMs * Math.pow(2, failures - 1)
+    );
+    state[source] = { failures, nextAllowedAt: Date.now() + backoffMs };
+  }
+
+  private async mapWithConcurrency<T, R>(
+    items: T[],
+    limit: number,
+    mapper: (item: T) => Promise<R>
+  ): Promise<R[]> {
+    const results: R[] = [];
+    let index = 0;
+
+    const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (index < items.length) {
+        const current = index;
+        index += 1;
+        results[current] = await mapper(items[current]);
+      }
+    });
+
+    await Promise.all(workers);
+    return results;
+  }
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
