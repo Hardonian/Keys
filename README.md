@@ -1,245 +1,92 @@
 # KEYS
+A marketplace and distribution system for structured “keys” (prompts, notebooks, workflows, runbooks) that unlock repeatable capability in existing tools.
 
-**The keyring to modern tools.**
+## Landing Strip
+- Curates structured assets (“keys”) that make tools like Cursor, Jupyter, and Stripe usable in repeatable, team-safe ways.
+- Ships a web app + API for discovery, entitlement, and delivery of keys.
+- Enforces metadata contracts so keys can be validated, indexed, and surfaced consistently.
+- Supports multi-tenant organizations with authenticated access controls.
 
-You already have the tools. Here are the keys to unlock them.
+**Who this is for:** teams and developers who want reusable, validated workflows for modern developer and data tools.
 
----
+**Quick start:** install dependencies with `pnpm install`, then run `pnpm dev` to start the frontend and backend locally.
 
-## What Is KEYS?
+## Why This Exists
+- Teams collect prompts, notebooks, and playbooks, but they decay without metadata, validation, and distribution.
+- Tool power is fragmented across vendors; practical leverage comes from repeatable, documented assets.
+- Without a contract-driven system, sharing and monetizing these assets is inconsistent and fragile.
 
-KEYS is a marketplace of structured assets (notebooks, prompts, workflows, playbooks) that unlock practical, repeatable, commercial capability from external tools without competing with them.
+## What This Project Is
+- A marketplace web application and API for publishing, validating, and delivering “keys.”
+- A contract-driven indexing pipeline that turns structured assets into searchable, entitlement-aware catalog entries.
+- A developer workflow for adding new keys with schema validation and indexing scripts.
 
-**KEYS is not an AI tool.**  
-**KEYS is the keyring to modern tools.**
+## What This Project Is NOT
+- An AI assistant or model host.
+- A replacement for tools like Cursor, Jupyter, GitHub, or Stripe.
+- A generic marketplace for unstructured content.
 
-### The Toolshed Metaphor
+## Where This Fits (If Part of a Larger System)
+- **Frontend (Next.js)** consumes the API and Supabase auth for discovery and delivery.
+- **Backend (Express)** exposes APIs, enforces ownership/entitlements, and integrates billing.
+- **Supabase** provides auth, Postgres, and RLS enforcement.
+- **Stripe** handles commercial entitlements and billing workflows.
 
-Imagine a modern toolshed filled with powerful tools: Cursor, Jupyter, GitHub, Stripe, Supabase, AI Studio, and countless others. Each tool provides raw capability—but capability alone isn't enough. You need to know how to use them effectively.
-
-**KEYS is the keyring.**
-
-Just as a physical keyring holds keys that unlock doors, KEYS holds structured assets that unlock capability in digital tools. A "key" might be:
-- A prompt pack that unlocks advanced Cursor workflows
-- A notebook that unlocks data science outcomes in Jupyter
-- A starter repo that unlocks SaaS patterns using GitHub + Stripe
-- A validation harness that unlocks testing patterns
-- A playbook that unlocks operational processes
-
-The tool provides the power. The key provides the leverage.
-
----
+## Core Capabilities
+- Metadata-driven validation and indexing of keys.
+- Multi-tenant organization support with authenticated access control.
+- API + UI for discovery and retrieval of keys.
+- Integration scaffolding for billing (Stripe) and auth (Supabase).
 
 ## Quick Start
 
-### For Developers
-
 ```bash
-# Install dependencies
-npm install
-cd frontend && npm install
-cd ../backend && npm install
-
-# Run development servers
-npm run dev
+pnpm install
+pnpm dev
 ```
 
-### For Deployment
+Success looks like:
+- Frontend running on `http://localhost:3000`
+- Backend running on `http://localhost:3001`
 
-See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete deployment instructions.
+Environment configuration:
+- Copy values from `.env.example` into your local environment.
+- Supabase credentials are required for authenticated flows.
+- Stripe keys are required for billing and entitlement flows.
 
-**Quick deployment:**
-1. Run database migrations (see `MIGRATION_STATUS.md`)
-2. Set environment variables (see `.env.example`)
-3. Deploy frontend (Vercel) and backend (your hosting)
+## Architecture Overview
+- `frontend/`: Next.js App Router UI.
+- `backend/`: Express API with Supabase + Stripe integration.
+- `contracts/`: Schemas for metadata and validation.
+- `docs/library/`: Structured assets and metadata for keys.
+- `scripts/`: Validation, indexing, and verification tooling.
 
----
+High-level flow:
+1. Contributors add assets + metadata to `docs/library/`.
+2. `pnpm keys:validate` enforces the metadata contract.
+3. `pnpm keys:index` builds searchable indexes consumed by the UI.
 
-## What KEYS Provides
+## Extending the Project
+- Add new keys in `docs/library/` with matching `*.metadata.json` files.
+- Validate against `contracts/artifact_metadata.schema.json` before indexing.
+- Keep metadata fields authoritative; do not add frontmatter to markdown assets.
+- Prefer adding new scripts to `scripts/` and wiring them into `package.json`.
 
-### Cursor Keys
-Prompt packs and Composer instructions that unlock advanced workflows in Cursor.
+## Failure & Degradation Model
+- API failures return structured JSON errors; clients should surface them to users.
+- Indexing/validation failures fail fast and stop CI from publishing invalid assets.
+- Authentication failures should not expose protected assets or tenant data.
 
-**Example**: "Cursor Keys: Authentication Scaffolding" unlocks consistent JWT auth patterns.
+## Security & Safety Considerations
+- Supabase RLS policies enforce tenant isolation at the database layer.
+- Secrets and API keys must be supplied via environment variables (see `.env.example`).
+- Report security issues privately (see `SECURITY.md`).
 
-### Jupyter Keys
-Notebook packs that unlock data science workflows and analysis patterns in Jupyter.
+## Contributing
+- Documentation, new keys, and validation improvements are welcome.
+- Run `pnpm verify` before opening a PR to match CI expectations.
+- Use GitHub Discussions for questions and design feedback (see `CONTRIBUTING.md`).
 
-**Example**: "Jupyter Keys: Data Analysis Basics" unlocks fundamental analysis workflows.
-
-### GitHub Keys (Coming Soon)
-Workflow templates and repository structures that unlock automation patterns in GitHub.
-
-**Example**: "GitHub Keys: CI/CD Starter Workflows" unlocks consistent CI/CD patterns.
-
-### Stripe Keys (Coming Soon)
-Payment flows and subscription management patterns that unlock monetization in Stripe.
-
-**Example**: "Stripe Keys: Subscription Management" unlocks consistent billing patterns.
-
-### Supabase Keys (Coming Soon)
-Database patterns and auth flows that unlock backend capability in Supabase.
-
-**Example**: "Supabase Keys: RLS Policy Patterns" unlocks consistent security patterns.
-
----
-
-## 📚 Documentation
-
-### North Star (Start Here)
-- **[KEYS_POSITIONING.md](./docs/north-star/KEYS_POSITIONING.md)** - Canonical positioning statement
-- **[KEY_TAXONOMY.md](./docs/north-star/KEY_TAXONOMY.md)** - How keys are organized
-- **[PRODUCT_PRINCIPLES.md](./docs/north-star/PRODUCT_PRINCIPLES.md)** - Non-negotiable guardrails
-- **[ROADMAP.md](./docs/north-star/ROADMAP.md)** - Future work aligned with positioning
-
-### Technical
-- **[LAUNCH_READINESS_REALITY_CHECK.md](./LAUNCH_READINESS_REALITY_CHECK.md)** - Launch readiness audit
-- **[SECURITY_AND_TRUST_MODEL.md](./SECURITY_AND_TRUST_MODEL.md)** - Security, data handling, and trust model
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide
-- **[MIGRATION_STATUS.md](./MIGRATION_STATUS.md)** - Database migration guide
-
-### Marketplace
-- **[Marketplace Contract](./docs/marketplace-notebooks/CONTRACT.md)** - Notebook pack integration contract
-- **[Marketplace Security](./docs/marketplace-notebooks/SECURITY.md)** - Security model for marketplace
-
----
-
-## ✅ What's Complete
-
-### Marketplace Infrastructure
-- ✅ Cursor Keys (prompt packs, Composer instructions)
-- ✅ Jupyter Keys (notebook marketplace)
-- ✅ Stripe integration for entitlements
-- ✅ Multi-tenant support (organizations)
-- ✅ Key discovery and search
-
-### Authentication & Security
-- ✅ Real Supabase authentication (no placeholders)
-- ✅ Route protection middleware
-- ✅ Backend ownership enforcement
-- ✅ Row-level security (RLS) policies
-- ✅ JWT-based authentication
-
-### Quality
-- ✅ Type-safe (TypeScript)
-- ✅ Fully tested (unit, integration, E2E)
-- ✅ CI/CD pipeline
-- ✅ Error handling
-- ✅ Toast notifications
-- ✅ Loading states
-
----
-
-## 🏗️ Architecture
-
-- **Frontend**: Next.js 14 (App Router), React, TypeScript
-- **Backend**: Express.js, TypeScript, Supabase
-- **Database**: PostgreSQL (via Supabase)
-- **Auth**: Supabase Auth
-- **Billing**: Stripe
-- **Testing**: Vitest, Playwright
-- **CI/CD**: GitHub Actions
-
----
-
-## 🔒 Security
-
-- ✅ No hardcoded credentials
-- ✅ RLS policies on all user-owned tables
-- ✅ Ownership enforcement on all endpoints
-- ✅ Input validation (Zod)
-- ✅ Rate limiting
-- ✅ CORS configuration
-
----
-
-## 📦 Project Structure
-
-```
-├── frontend/          # Next.js frontend
-├── backend/           # Express.js backend
-├── chrome-extension/  # Chrome extension
-├── templates/         # Cursor Keys (prompt templates)
-├── scripts/           # Deployment scripts
-└── docs/              # Documentation
-    └── north-star/    # North-star positioning documents
-```
-
----
-
-## 🧪 Testing
-
-```bash
-# Unit tests
-cd backend && npm test
-cd frontend && npm test
-
-# E2E tests
-cd frontend && npm run test:e2e
-
-# Type checking
-npm run type-check
-
-# Linting
-npm run lint
-```
-
----
-
-## 🚀 Deployment
-
-See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for detailed instructions.
-
-**Required before deployment:**
-1. Run database migrations (`012_add_rls_core_tables.sql`, `013_add_billing_and_orgs.sql`)
-2. Set environment variables (see `.env.example`)
-3. Deploy frontend and backend
-
----
-
-## What KEYS Is NOT
-
-- ❌ **An AI Tool** - KEYS doesn't generate code or answer questions
-- ❌ **A Tool Replacement** - KEYS doesn't replace Cursor, Jupyter, or any other tool
-- ❌ **A Platform Lock-In** - KEYS works with tools you already own
-- ❌ **A Generic Solution** - Every key unlocks a specific, practical outcome
-
----
-
-## Who KEYS Is For
-
-- ✅ **Business Operators** - People who need to unlock practical capability in tools
-- ✅ **Developers** - Developers who want to leverage tools effectively
-- ✅ **Founders** - Founders building SaaS products who need keys to unlock tools
-- ✅ **Data Practitioners** - Data scientists who need keys to unlock Jupyter workflows
-- ✅ **Teams** - Teams that want to standardize on proven patterns
-
----
-
-## Principles
-
-KEYS follows these non-negotiable principles:
-
-1. **Keys never compete with tools** - KEYS unlocks tools; it doesn't replace them
-2. **Keys never hide execution paths** - Users see how tools are used
-3. **Keys always produce tangible outputs** - Real notebooks, prompts, workflows
-4. **Keys assets must be reusable** - Not one-off solutions
-5. **Keys optimize for usefulness, not novelty** - Practical leverage over hype
-
-See **[PRODUCT_PRINCIPLES.md](./docs/north-star/PRODUCT_PRINCIPLES.md)** for complete principles.
-
----
-
-## 📝 License
-
-Private - All rights reserved
-
----
-
-## 🎯 Production Readiness: 100%
-
-The system is fully production-ready. All code is implemented, tested, and documented. Ready to ship! 🚀
-
----
-
-**Remember**: KEYS is not an AI tool. KEYS is the keyring to modern tools.
+## License & Governance
+- Licensed under the MIT License with a commercial licensing note for marketplace assets. See `LICENSE`.
+- Project decisions and governance details are documented in `GOVERNANCE.md`.

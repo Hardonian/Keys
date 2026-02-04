@@ -18,6 +18,7 @@ interface VerificationStep {
 }
 
 const steps: VerificationStep[] = [
+  { name: 'Verify Docs', command: 'npm run verify:docs', required: true },
   { name: 'Lint Frontend', command: 'npm run lint:frontend', required: true },
   { name: 'Lint Backend', command: 'npm run lint:backend', required: true },
   { name: 'Type Check Frontend', command: 'npm run type-check:frontend', required: true },

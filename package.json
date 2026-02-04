@@ -43,7 +43,8 @@
     "keys:validate": "node scripts/keys-validate.mjs",
     "keys:smoke": "python scripts/run_notebooks_smoke.py --timeout 300",
     "keys:audit": "detect-secrets scan --baseline .secrets.baseline && npm --workspace backend audit --audit-level=high && npm --workspace frontend audit --audit-level=high",
-    "postinstall": "echo 'Run pnpm verify:fast before committing'"
+    "postinstall": "echo 'Run pnpm verify:fast before committing'",
+    "verify:docs": "tsx scripts/verify-docs.ts"
   },
   "dependencies": {
     "react": "18.3.1",
