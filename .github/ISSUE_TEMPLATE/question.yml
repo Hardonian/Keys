@@ -1,0 +1,21 @@
+name: Question or clarification
+description: Ask a question about usage or behavior.
+title: "question: "
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For how-to questions, GitHub Discussions is preferred.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What do you want to know?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context or links.
