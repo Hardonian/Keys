@@ -42,13 +42,70 @@ export interface ErrorMetric {
   metadata?: Record<string, any>;
 }
 
+export interface BackgroundEventRecord {
+  event_type: string;
+  source: string;
+  event_data: Record<string, any>;
+  event_timestamp: string;
+  user_id: string;
+}
+
+export interface APMWriters {
+  writeMetrics: (metrics: PerformanceMetric[]) => Promise<void>;
+  writeErrors: (errors: ErrorMetric[]) => Promise<void>;
+}
+
+export async function insertBackgroundEvents(
+  client: SupabaseClient<any>,
+  records: BackgroundEventRecord[],
+  chunkSize: number = 200
+): Promise<void> {
+  for (let i = 0; i < records.length; i += chunkSize) {
+    const chunk = records.slice(i, i + chunkSize);
+    await client.from('background_events').insert(chunk);
+  }
+}
+
+function buildMetricRecords(metrics: PerformanceMetric[]): BackgroundEventRecord[] {
+  return metrics.map((metric) => ({
+    event_type: 'apm.metric',
+    source: 'apm',
+    event_data: metric,
+    event_timestamp: metric.timestamp.toISOString(),
+    user_id: metric.userId || 'system',
+  }));
+}
+
+function buildErrorRecords(errors: ErrorMetric[]): BackgroundEventRecord[] {
+  return errors.map((error) => ({
+    event_type: 'apm.error',
+    source: 'apm',
+    event_data: error,
+    event_timestamp: error.timestamp.toISOString(),
+    user_id: error.userId || 'system',
+  }));
+}
+
+const defaultWriters: APMWriters = {
+  writeMetrics: async (metrics) => {
+    if (metrics.length === 0) return;
+    const client = getSupabaseAdminClient();
+    await insertBackgroundEvents(client, buildMetricRecords(metrics));
+  },
+  writeErrors: async (errors) => {
+    if (errors.length === 0) return;
+    const client = getSupabaseAdminClient();
+    await insertBackgroundEvents(client, buildErrorRecords(errors));
+  },
+};
+
 export class APMService {
   private metricsBuffer: PerformanceMetric[] = [];
   private errorsBuffer: ErrorMetric[] = [];
   private readonly BATCH_SIZE = 50;
   private readonly FLUSH_INTERVAL = 10000; // 10 seconds
 
-  constructor() {
+  constructor(private readonly writers: APMWriters = defaultWriters) {
     // Flush metrics periodically (skip in tests to avoid dangling intervals).
     if (process.env.NODE_ENV !== 'test') {
       setInterval(() => this.flushMetrics(), this.FLUSH_INTERVAL);
@@ -194,17 +251,7 @@ export class APMService {
       // In production, insert into metrics table
       // For now, we'll log or store in a way that doesn't break the app
       console.log(`[APM] Flushing ${toFlush.length} performance metrics`);
-      
-      // Could store in background_events table with event_type='apm.metric'
-      for (const metric of toFlush) {
-        await getSupabaseAdminClient().from('background_events').insert({
-          event_type: 'apm.metric',
-          source: 'apm',
-          event_data: metric,
-          event_timestamp: metric.timestamp.toISOString(),
-          user_id: metric.userId || 'system',
-        });
-      }
+      await this.writers.writeMetrics(toFlush);
     } catch (error) {
       console.error('Error flushing metrics:', error);
       // Don't throw - APM failures shouldn't break the app
@@ -222,16 +269,7 @@ export class APMService {
 
     try {
       console.log(`[APM] Flushing ${toFlush.length} error metrics`);
-      
-      for (const error of toFlush) {
-        await getSupabaseAdminClient().from('background_events').insert({
-          event_type: 'apm.error',
-          source: 'apm',
-          event_data: error,
-          event_timestamp: error.timestamp.toISOString(),
-          user_id: error.userId || 'system',
-        });
-      }
+      await this.writers.writeErrors(toFlush);
     } catch (error) {
       console.error('Error flushing errors:', error);
     }
