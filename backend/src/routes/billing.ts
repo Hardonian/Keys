@@ -195,6 +195,7 @@ router.get(
 router.post(
   '/webhook',
   asyncHandler(async (req, res) => {
+    const webhookStart = Date.now();
     if (!stripe) {
       return res.status(503).json({ error: 'Billing is not configured' });
     }
@@ -207,11 +208,19 @@ router.post(
     }
 
     let event: Stripe.Event;
+    let webhookEventId: string | undefined;
+    let webhookEventType: string | undefined;
+    let webhookRequestId: string | null | undefined;
+    let webhookIdempotencyKey: string | null | undefined;
 
     try {
       // req.body is a Buffer when using express.raw() middleware
       const rawBody = req.body instanceof Buffer ? req.body : Buffer.from(JSON.stringify(req.body));
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+      webhookEventId = event.id;
+      webhookEventType = event.type;
+      webhookRequestId = event.request?.id;
+      webhookIdempotencyKey = event.request?.idempotency_key;
     } catch (err) {
       logger.error('Webhook signature verification failed', err as Error, {
         requestId: req.headers['x-request-id'] as string,
@@ -234,6 +243,15 @@ router.post(
       .single();
 
     if (existingEvent) {
+      logger.info('Stripe webhook duplicate', {
+        requestId: req.headers['x-request-id'] as string,
+        eventId: webhookEventId,
+        eventType: webhookEventType,
+        status: existingEvent.status,
+        stripeRequestId: webhookRequestId,
+        stripeIdempotencyKey: webhookIdempotencyKey,
+        latencyMs: Date.now() - webhookStart,
+      });
       // Event already processed
       return res.json({ received: true, duplicate: true });
     }
@@ -250,9 +268,19 @@ router.post(
         requestId: req.headers['x-request-id'] as string,
         eventId: event.id,
         eventType: event.type,
+        stripeRequestId: webhookRequestId,
+        stripeIdempotencyKey: webhookIdempotencyKey,
       });
       // Continue processing even if recording fails
     }
+
+    logger.info('Stripe webhook received', {
+      requestId: req.headers['x-request-id'] as string,
+      eventId: webhookEventId,
+      eventType: webhookEventType,
+      stripeRequestId: webhookRequestId,
+      stripeIdempotencyKey: webhookIdempotencyKey,
+    });
 
     // Handle different event types
     switch (event.type) {
@@ -702,6 +730,15 @@ router.post(
         error: updateError,
       });
     }
+
+    logger.info('Stripe webhook processed', {
+      requestId: req.headers['x-request-id'] as string,
+      eventId: webhookEventId,
+      eventType: webhookEventType,
+      stripeRequestId: webhookRequestId,
+      stripeIdempotencyKey: webhookIdempotencyKey,
+      latencyMs: Date.now() - webhookStart,
+    });
 
     res.json({ received: true });
   })

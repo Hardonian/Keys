@@ -420,6 +420,11 @@ git push
    - Monitoring dashboard: `stripe_webhook_error_rate`
    - **Success**: Error rate < 1%
 
+4. **Check Duplicate & Latency Dashboards**
+   - Monitoring dashboard: `stripe_webhook_duplicates_rate` (based on `Stripe webhook duplicate` log events)
+   - Monitoring dashboard: `stripe_webhook_latency_p95` (based on `Stripe webhook processed` latencyMs)
+   - **Success**: Duplicate rate < 2%, p95 latency < 2s
+
 ### Final Verification (After 24 Hours)
 
 1. **Review Webhook Delivery Report**
@@ -432,6 +437,11 @@ git push
 
 3. **Check Alert Status**
    - **Success**: No webhook-related alerts firing
+
+4. **Confirm Alerts for New Metrics**
+   - Alert: `stripe_webhook_duplicate_rate > 5% for 10m`
+   - Alert: `stripe_webhook_latency_p95 > 3000ms for 10m`
+   - **Success**: Alerts configured and not firing
 
 ---
 

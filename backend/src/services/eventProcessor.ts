@@ -1,7 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
 import { assemblePrompt } from './promptAssembly.js';
 import { orchestrateAgent } from './agentOrchestration.js';
 import { notificationService } from './notificationService.js';
+import { getLatestVibeConfig } from './vibeConfig.js';
+
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -16,24 +18,18 @@ export async function processBackgroundEvent(
   eventRecord: any
 ): Promise<void> {
   try {
-    // Check if suggestion should be generated
-    const shouldSuggest = await shouldGenerateSuggestion(eventRecord, userId);
-
-    if (!shouldSuggest) {
+    // Get user's vibe config once
+    const vibeConfig = await getLatestVibeConfig(userId);
+    if (!vibeConfig) {
+      console.log(`No vibe config found for user ${userId}`);
       return;
     }
 
-    // Get user's vibe config
-    const { data: vibeConfig } = await supabase
-      .from('vibe_configs')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    if (!vibeConfig.auto_suggest) {
+      return;
+    }
 
-    if (!vibeConfig) {
-      console.log(`No vibe config found for user ${userId}`);
+    if (!isSuggestionWorthyEventType(eventRecord.event_type)) {
       return;
     }
 
@@ -87,23 +83,7 @@ export async function processBackgroundEvent(
   }
 }
 
-async function shouldGenerateSuggestion(eventRecord: any, userId: string): Promise<boolean> {
-  // Check user preferences
-  const { data: vibeConfig } = await supabase
-    .from('vibe_configs')
-    .select('auto_suggest')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  if (!vibeConfig?.auto_suggest) {
-    return false;
-  }
-
-  // Check if event type warrants a suggestion
-  const eventType = eventRecord.event_type;
-
+export function isSuggestionWorthyEventType(eventType: string): boolean {
   const suggestionWorthyEvents = [
     'repo.pr.opened',
     'repo.pr.merged',
