@@ -26,17 +26,17 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
           </div>
           
           {/* Heading */}
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-gray-900 dark:text-white">
-            Transparency is our{' '}
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-gray-900 dark:text-white">
+            Structured assets for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-              key feature.
+              tools you own.
             </span>
           </h1>
           
           {/* Description */}
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
-            KEYS is built in public. We believe that critical developer tools should be open, 
-            auditable, and community-driven. You own your keys; we just help you turn them.
+            An open source library of prompts, notebooks, and runbooks designed for adaptation and review. 
+            Every artifact is a starting point—your team applies judgment before use.
           </p>
           
           {/* CTA Buttons */}
@@ -81,23 +81,23 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
           </div>
         )}
 
-        {/* Stats */}
+        {/* Open Source Credentials */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20 border-y border-gray-200 dark:border-white/10 py-10 bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-xl md:rounded-none">
           <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">12k+</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">GitHub Stars</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Open Source</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">MIT Licensed</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">450+</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">Contributors</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Self-Hosted</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">Docker Available</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">2.5M+</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">Docker Pulls</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Transparent</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">Public Repository</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">99.9%</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">Uptime (Managed)</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Community</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">Governed Review</div>
           </div>
         </div>
 
@@ -114,21 +114,20 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
               </div>
               <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">Contribute to Core</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Help us build the standard for tool orchestration. We have issues tagged for 
-                beginners and detailed contribution guidelines.
+                Help extend the open source library. Issues are tagged by complexity and contribution guidelines document the review process.
               </p>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  Detailed setup documentation
+                  Contribution guidelines documented
                 </li>
                 <li className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  Weekly office hours for contributors
+                  Community review process
                 </li>
                 <li className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  Swag for first-time mergers
+                  Public governance model
                 </li>
               </ul>
             </div>
@@ -145,21 +144,20 @@ export function HeroSection({ className = '' }: HeroSectionProps) {
               </div>
               <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">Join the Community</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Connect with thousands of developers using KEYS. Share workflows, ask questions, 
-                and get help from the core team.
+                Connect with other teams using open source patterns. Share adaptations, ask questions, and contribute back to the library.
               </p>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  Active Discord community
+                  Discussion forums
                 </li>
                 <li className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  Monthly community calls
+                  Contribution pathways
                 </li>
                 <li className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  Regional meetups
+                  Artifact sharing
                 </li>
               </ul>
             </div>

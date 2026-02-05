@@ -34,16 +34,16 @@ const managedFeatures = [
 
 const faqs = [
   {
-    question: 'Can I really host this myself for free?',
-    answer: 'Yes! The Community Edition is 100% open source under the MIT license. You can spin it up on your own servers using our Docker image.',
+    question: 'Can I self-host the Community Edition?',
+    answer: 'Yes. The Community Edition is open source under the MIT license. You can deploy using our Docker image on infrastructure you control.',
   },
   {
-    question: 'What happens if I downgrade from Cloud to Community?',
-    answer: 'Since both versions use the same underlying engine, you can export your data from the Cloud version and import it into your self-hosted instance at any time.',
+    question: 'What happens if I migrate from Managed Cloud to self-hosted?',
+    answer: 'Both versions use the same underlying artifacts. You can export your configuration and deploy a self-hosted instance using standard processes.',
   },
   {
-    question: 'Do you offer discounts for open source maintainers?',
-    answer: 'Absolutely. If you maintain a popular open source project, we offer a free tier of our Managed Cloud. Contact us for details.',
+    question: 'Do you offer discounts for organizations?',
+    answer: 'We offer consideration for qualified organizations. Contact us to discuss specific requirements.',
   },
 ];
 
@@ -65,10 +65,10 @@ export function PricingSection() {
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
-            Pricing that scales with you
+            Distribution options
           </h2>
           <p className="text-gray-600 dark:text-gray-400 text-lg">
-            Start for free with our powerful open source edition, or upgrade to our managed cloud for peace of mind and enterprise features.
+            Use the open source edition directly, or choose managed cloud for infrastructure management and support. All options use the same artifacts.
           </p>
           
           {/* Billing Toggle */}
@@ -131,7 +131,7 @@ export function PricingSection() {
                   </span>
                 </div>
                 <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm h-10">
-                  Perfect for hackers, hobbyists, and teams who want full control over their infrastructure.
+                  For teams that want full control over their infrastructure and prefer self-hosted deployment.
                 </p>
               </div>
               
@@ -174,7 +174,7 @@ export function PricingSection() {
             className="bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 border-blue-600 dark:border-blue-500 shadow-lg shadow-blue-500/10 dark:shadow-blue-500/20 transition-all duration-300 flex flex-col relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 bg-blue-600 dark:bg-blue-500 text-white dark:text-slate-900 text-xs font-bold px-3 py-1 rounded-bl-lg z-20">
-              MOST POPULAR
+              MANAGED
             </div>
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-500/10 rounded-bl-full -mr-8 -mt-8 z-0" />
             <div className="relative z-10">
@@ -195,7 +195,7 @@ export function PricingSection() {
                   </span>
                 </div>
                 <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm h-10">
-                  For teams that need reliability, security, and priority support without the maintenance overhead.
+                  For teams that need managed infrastructure, access controls, and support for their deployment.
                 </p>
               </div>
               
@@ -232,10 +232,10 @@ export function PricingSection() {
                 href="/signup"
                 className="w-full block text-center py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 text-white dark:text-slate-900 font-bold shadow-lg hover:shadow-blue-500/30 dark:shadow-blue-500/20 transition-all"
               >
-                Start 14-Day Free Trial
+                Start Evaluation
               </Link>
               <p className="text-xs text-center text-gray-400 dark:text-gray-500 mt-4">
-                No credit card required for trial.
+                Trial requires authentication. No credit card required.
               </p>
             </div>
           </motion.div>
@@ -252,10 +252,10 @@ export function PricingSection() {
             <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center flex-shrink-0">
               <Building2 className="w-6 h-6 text-gray-600 dark:text-gray-300" />
             </div>
-            <div>
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white">Need custom deployment?</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">For VPC peering, custom SLAs, and dedicated instances.</p>
-            </div>
+          <div>
+            <h4 className="text-lg font-bold text-gray-900 dark:text-white">Enterprise requirements?</h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400">For custom deployments, VPC options, and organizational access controls.</p>
+          </div>
           </div>
           <Link
             href="/enterprise"
