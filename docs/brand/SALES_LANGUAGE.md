@@ -1,9 +1,9 @@
 # Sales Language Guide
 
-**Version**: 1.0.0  
-**Last Updated**: 2025-01-XX  
+**Version**: 2.0.0  
+**Last Updated**: 2025-02-04  
 **Status**: Active — Governs all sales and positioning materials  
-**Purpose**: Standardized language for sales conversations, proposals, and positioning
+**Purpose**: Standardized language for sales conversations and positioning
 
 ---
 
@@ -11,81 +11,102 @@
 
 **Standard Pitch:**
 ```
-KEYS is the keyring to modern tools. We provide proven patterns—runbooks, components, 
-and analysis notebooks—that unlock practical capability in Cursor, Jupyter, Node.js, 
-and more. Instead of spending 8-16 hours researching and building patterns yourself, 
-you can purchase a Key for $79-299 and integrate it in 2-4 hours. We're not replacing 
-tools—we're unlocking them.
+KEYS provides structured assets—prompts, notebooks, runbooks—that complement tools you already use.
+Each asset is reviewed, documented, and designed for adaptation to your context.
+We don't replace tools or judgment—we provide starting points under your control.
 ```
 
 **Key Points:**
-- KEYS = patterns, not tools
-- Saves 8-16 hours per pattern
-- Costs $79-299 vs. $1,200-2,400 for consultants
-- Unlocks capability, doesn't replace it
+- KEYS = structured assets, not tools
+- Designed for adaptation and review
+- Human oversight required
+- Works with tools you own
 
 ---
 
-## What KEYS Replaces
+## What KEYS Provides
 
-KEYS replaces:
-- **Tribal knowledge** → Structured, reusable patterns
-- **Glue code** → Proven integration patterns
-- **Ad-hoc consulting** → Validated workflows
-- **Trial and error** → Production-tested approaches
-- **Documentation deep-dives** → Ready-to-use assets
+KEYS provides:
+- Reviewed and documented patterns for common workflows
+- Clear assumptions and limitations for each asset
+- Starting points that require organizational judgment
+- Structure that complements existing tools
+- Auditability for compliance requirements
 
-KEYS does NOT replace:
-- Tools (Cursor, Jupyter, GitHub, etc.)
-- Teams (users still need developers, operators)
-- Judgment (users decide when and how to use keys)
-- Custom development (keys are patterns, not custom solutions)
+KEYS does not provide:
+- Autonomous decision-making
+- Guaranteed outcomes
+- Replacement for organizational judgment
+- Black-box processing
 
 ---
 
 ## What KEYS Does NOT Replace
 
-**Explicitly Prohibit Claims About:**
-- ❌ "KEYS replaces [Tool]" (keys unlock tools, don't replace them)
-- ❌ "KEYS replaces your team" (keys are assets, not teams)
-- ❌ "KEYS replaces consultants" (keys are patterns, consultants provide custom solutions)
-- ❌ "KEYS replaces development" (keys accelerate development, don't eliminate it)
+**Explicitly Avoid Claims About:**
+- ❌ "KEYS replaces [Tool]" (assets complement tools)
+- ❌ "KEYS replaces your team" (assets require human judgment)
+- ❌ "KEYS guarantees results" (starting points, not outcomes)
+- ❌ "KEYS automates decisions" (human oversight required)
 
-**Correct Language:**
-- ✅ "KEYS unlocks capability in [Tool]"
-- ✅ "KEYS provides patterns your team can use"
-- ✅ "KEYS complements consultants by providing proven patterns"
-- ✅ "KEYS accelerates development with reusable patterns"
+**Correct Framing:**
+- ✅ "KEYS provides starting points your team evaluates"
+- ✅ "KEYS accelerates pattern evaluation"
+- ✅ "KEYS complements your existing tools"
+- ✅ "KEYS provides structure that requires your judgment"
 
 ---
 
 ## Comparison Framing
 
-### KEYS vs. Consultants
+### KEYS vs. Building From Scratch
 
 **KEYS:**
-- Provides proven patterns
-- Costs $79-299 per pattern
-- Available immediately
-- Reusable across projects
-- No ongoing relationship
+- Provides reviewed starting points
+- Includes documented assumptions
+- Accelerates evaluation phase
+- Requires adaptation to your context
 
-**Consultants:**
-- Provide custom solutions
-- Cost $1,200-2,400 per pattern
-- Require scheduling
-- One-time solutions
-- Ongoing relationship
+**Building From Scratch:**
+- Requires full development effort
+- Needs internal documentation
+- Takes more time to validate
+- Maintains full control
 
 **When to Use Each:**
-- **KEYS**: When you need proven patterns for common problems
-- **Consultants**: When you need custom architecture or domain expertise
+- **KEYS**: When starting points accelerate your evaluation
+- **Build**: When you need complete customization from day one
 
 **Language:**
 ```
-KEYS provides proven patterns for $79-299. Consultants provide custom solutions 
-for $1,200-2,400. If you need 10 patterns, that's $790-2,990 with KEYS vs. 
-$12,000-24,000 with consultants. Use KEYS for patterns, consultants for custom work.
+KEYS may accelerate your evaluation by providing reviewed patterns with documentation.
+Whether it makes sense depends on your specific context and requirements.
+```
+
+---
+
+### KEYS vs. Consultants
+
+**KEYS:**
+- Provides reviewed starting points
+- Designed for adaptation
+- Self-service evaluation
+- Fixed pricing per asset
+
+**Consultants:**
+- Provide custom solutions
+- Tailored to specific requirements
+- Engagement-based delivery
+- Variable cost
+
+**When to Use Each:**
+- **KEYS**: For common patterns with standard requirements
+- **Consultants**: For custom architecture or domain expertise
+
+**Language:**
+```
+KEYS provides starting points for common patterns. Consultants provide custom solutions.
+Use KEYS for structure—consultants for customization.
 ```
 
 ---
@@ -93,64 +114,32 @@ $12,000-24,000 with consultants. Use KEYS for patterns, consultants for custom w
 ### KEYS vs. AI Tools
 
 **KEYS:**
-- Provides production-tested patterns
-- Security-reviewed implementations
-- Compliance-ready workflows
-- Structured, reusable assets
-- Proven in real environments
+- Provides reviewed, documented patterns
+- Requires human oversight
+- Designed for adaptation
+- No autonomous operation
 
-**AI Tools (ChatGPT, Cursor, etc.):**
-- Generate code on demand
-- Provide assistance and answers
+**AI Tools:**
+- Generate outputs on demand
 - Require prompt engineering
-- Produce one-off solutions
-- Not production-tested
+- Produce one-off results
+- May operate autonomously
 
 **When to Use Each:**
-- **KEYS**: When you need proven, production-ready patterns
-- **AI Tools**: When you need code generation or assistance
+- **KEYS**: When you need structure with documented assumptions
+- **AI Tools**: When you need generation or exploration
 
 **Language:**
 ```
-ChatGPT and Cursor are great for generating code, but they don't provide 
-production-tested patterns. KEYS gives you security-reviewed implementations, 
-compliance-ready workflows, and proven runbooks that AI tools can't provide.
+AI tools generate outputs. KEYS provides reviewed starting points with documentation.
+Use AI for generation—KEYS for structure that requires your judgment.
 ```
 
 ---
 
-### KEYS vs. Frameworks
+## Prohibited Language
 
-**KEYS:**
-- Works with tools you already own
-- Requires no migration
-- Provides patterns, not structure
-- Integrates into existing workflows
-- Tool-agnostic
-
-**Frameworks:**
-- Impose structure and conventions
-- Require migration
-- Provide architecture, not patterns
-- Replace existing approaches
-- Framework-specific
-
-**When to Use Each:**
-- **KEYS**: When you want patterns without migration
-- **Frameworks**: When you want architectural structure
-
-**Language:**
-```
-Frameworks require migration and impose structure. KEYS provides patterns that 
-work with tools you already own. No migration, no lock-in—just proven patterns 
-that unlock capability in your existing tools.
-```
-
----
-
-## Prohibited Sales Language
-
-### ❌ AI Hype
+### AI Hype
 
 **Forbidden:**
 - "AI-powered"
@@ -161,42 +150,44 @@ that unlock capability in your existing tools.
 **Replace with:**
 - "Pattern-based"
 - "Structured workflows"
-- "Proven approaches"
-- "Validated patterns"
+- "Documented approaches"
+- "Reviewed starting points"
 
 ---
 
-### ❌ Automation Hype
+### Automation Hype
 
 **Forbidden:**
 - "Auto-pilot"
 - "Self-healing"
-- "Automatic"
+- "Automatic operation"
 - "Zero-touch"
 
 **Replace with:**
-- "Automated workflows"
-- "Structured processes"
-- "Streamlined"
-- "Reduced manual work"
+- "Streamlined workflows"
+- "Structured approaches"
+- "Documented starting points"
+- "Human-oversight required"
 
 ---
 
-### ❌ Replacement Claims
+### Outcome Guarantees
 
 **Forbidden:**
-- "KEYS replaces [Tool]"
-- "Eliminates the need for [X]"
-- "No more [X]"
+- "Guaranteed time savings"
+- "Proven ROI"
+- "Eliminate work"
+- "Faster results"
 
 **Replace with:**
-- "KEYS unlocks capability in [Tool]"
-- "Reduces the need for [X]"
-- "Less [X] required"
+- "Starting points for evaluation"
+- "Structure for your workflow"
+- "Documentation for assessment"
+- "Patterns to adapt"
 
 ---
 
-### ❌ Superlatives
+### Superlatives
 
 **Forbidden:**
 - "Revolutionary"
@@ -205,127 +196,80 @@ that unlock capability in your existing tools.
 - "Perfect"
 
 **Replace with:**
-- "Proven"
-- "Practical"
-- "Effective"
-- "Validated"
+- "Reviewed"
+- "Documented"
+- "Structured"
+- "Adaptable"
 
 ---
 
-## Objection Handling Language
+## Objection Handling
 
 ### "Why Not Build It Ourselves?"
 
 **Response:**
 ```
-You absolutely can! KEYS saves you 8-16 hours per pattern. If your team's time 
-is worth $100/hour, that's $800-1,600 saved per pattern. Plus, KEYS patterns 
-are production-tested and security-reviewed—you get proven patterns, not 
-trial-and-error.
+You absolutely can. KEYS provides starting points that may accelerate your evaluation.
+Whether it makes sense depends on your timeline, requirements, and existing patterns.
+We provide structure—you decide if it adds value.
 ```
 
 **Language:**
-- ✅ Acknowledge they can build it
-- ✅ Quantify time savings
-- ✅ Emphasize proven patterns
+- ✅ Acknowledge building is possible
+- ✅ Position as potential acceleration
+- ✅ Emphasize organizational judgment
 - ❌ Don't dismiss their capability
 
 ---
 
-### "Why Not Use ChatGPT/Cursor?"
+### "Why Not Use AI Tools?"
 
 **Response:**
 ```
-ChatGPT and Cursor are great for generating code, but they don't provide 
-production-tested patterns. KEYS gives you:
-- Security-reviewed implementations
-- Compliance-ready patterns
-- Proven runbooks (not just code)
-- Analysis notebooks (not just prompts)
-
-ChatGPT generates code. KEYS provides patterns.
+AI tools generate outputs. KEYS provides reviewed starting points with assumptions and limitations.
+Use AI for generation—KEYS for structure that requires your team's judgment.
+Both have their place in a workflow.
 ```
 
 **Language:**
-- ✅ Acknowledge AI tools are useful
-- ✅ Differentiate patterns from code generation
-- ✅ Emphasize production-readiness
+- ✅ Acknowledge AI utility
+- ✅ Differentiate structure from generation
+- ✅ Emphasize documentation
 - ❌ Don't dismiss AI tools
 
 ---
 
-### "We Already Have Patterns"
+### "How Do You Differentiate?"
 
 **Response:**
 ```
-Great! KEYS can complement your existing patterns. You might find:
-- Patterns you haven't built yet (runbooks, analysis notebooks)
-- Patterns that are better than yours (security-reviewed, compliance-ready)
-- Patterns that save you maintenance time (we maintain them)
-
-Plus, KEYS patterns are portable—if you switch tools, you keep the patterns.
+KEYS provides reviewed, documented patterns with clear assumptions. 
+Every asset requires human oversight. We don't make autonomous claims.
+Structure + documentation + oversight—that's our differentiation.
 ```
 
 **Language:**
-- ✅ Acknowledge their existing patterns
-- ✅ Position as complement, not replacement
-- ✅ Emphasize value-add
-- ❌ Don't dismiss their patterns
+- ✅ Lead with structure
+- ✅ Emphasize documentation
+- ✅ Highlight oversight requirements
+- ❌ Avoid outcome guarantees
 
 ---
 
-### "We Don't Use Those Tools"
+### "What About Security?"
 
 **Response:**
 ```
-KEYS works with tools you already own. We don't replace tools—we unlock them. 
-If you use Cursor, Jupyter, Node.js, GitHub, or Stripe, we have keys that 
-unlock capability in those tools. KEYS is tool-agnostic—we provide patterns, 
-not tool replacements.
+All assets include documented assumptions and limitations. 
+Your organization reviews and validates before use.
+No autonomous operation, no black-box processing.
 ```
 
 **Language:**
-- ✅ Clarify tool-agnostic approach
-- ✅ List supported tools
-- ✅ Emphasize "tools you own"
-- ❌ Don't push unsupported tools
-
----
-
-## Value Proposition Language
-
-### Time Savings
-
-**Language:**
-```
-KEYS saves 8-16 hours per pattern. Instead of researching, building, and testing 
-patterns yourself, you get production-tested patterns that integrate in 2-4 hours.
-```
-
-### Cost Savings
-
-**Language:**
-```
-KEYS costs $79-299 per pattern. Consultants cost $1,200-2,400 per pattern. 
-If you need 10 patterns, that's $790-2,990 with KEYS vs. $12,000-24,000 
-with consultants.
-```
-
-### Risk Reduction
-
-**Language:**
-```
-KEYS patterns are production-tested and security-reviewed. You get proven patterns 
-that reduce risk compared to building from scratch.
-```
-
-### Consistency
-
-**Language:**
-```
-KEYS provides standardized patterns across your team. Instead of everyone building 
-their own approach, you get consistent, proven patterns.
-```
+- ✅ Emphasize documentation
+- ✅ Highlight human review
+- ✅ Clarify no autonomy
+- ❌ Don't claim security certification
 
 ---
 
@@ -334,28 +278,69 @@ their own approach, you get consistent, proven patterns.
 ### For Enterprise Buyers
 
 **Focus:**
-- Compliance and security
-- Risk mitigation
-- Audit readiness
-- Team consistency
+- Documentation and assumptions
+- Human oversight requirements
+- Auditability
+- Organizational control
+- No lock-in
 
 **Language:**
 ```
-KEYS provides compliance-ready patterns, security-reviewed implementations, and 
-audit trail generation. Enterprise teams get proven patterns that reduce risk 
-and ensure consistency.
+KEYS provides reviewed assets with documented assumptions. 
+Every asset requires your team's judgment before use.
+We support governance requirements—human oversight, auditability, organizational control.
+No lock-in, no autonomous operation.
 ```
 
 ### Trust Boundaries
 
 **Language:**
 ```
-KEYS knows its boundaries. We provide patterns that unlock capability—we don't 
-replace tools, teams, or judgment. Enterprise buyers get leverage without risk.
+KEYS provides starting points—nothing more. 
+Your team evaluates, adapts, and decides.
+No autonomy, no guarantees, no replacement of your judgment.
+```
+
+---
+
+## Value Proposition Language
+
+### Time
+
+**Language:**
+```
+KEYS may accelerate pattern evaluation by providing reviewed starting points.
+Time savings depend on your context and requirements.
+```
+
+### Cost
+
+**Language:**
+```
+KEYS offers fixed pricing per asset. Compare to consultant engagement costs for similar patterns.
+Whether it's cost-effective depends on your specific situation.
+```
+
+### Risk
+
+**Language:**
+```
+KEYS assets are reviewed with documented limitations. 
+This provides structure for your risk assessment.
+Final validation remains your responsibility.
+```
+
+### Consistency
+
+**Language:**
+```
+KEYS provides standardized starting points that teams can adapt.
+This may support consistency in how patterns are evaluated and documented.
 ```
 
 ---
 
 ## Version History
 
+- **2.0.0** (2025-02-04): Updated for enterprise procurement alignment. Removed outcome guarantees. Added explicit oversight language.
 - **1.0.0** (2025-01-XX): Initial sales language guide

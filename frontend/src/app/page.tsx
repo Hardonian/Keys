@@ -113,18 +113,18 @@ export default function Home() {
         <div className="bg-white/80 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Open source by default</h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4">
-            Keys is open source with a transparent contribution and review process. See how licensing, governance,
-            and community review work.
+            Keys is open source under the MIT license. All artifacts are reviewed through a governance process before publication. 
+            Your organization retains full ownership of any adapted versions.
           </p>
           <Link href="/open-source" className="text-blue-700 dark:text-blue-200 font-semibold hover:underline">
-            Read the open source model →
+            Review the open source model →
           </Link>
         </div>
         <div className="bg-white/80 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Enterprise is optional</h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4">
-            Teams can use the library directly or choose a managed distribution for procurement, access control,
-            and support.
+            Teams can use the library directly or choose a managed distribution for centralized access, 
+            access controls, and support. No lock-in—artifacts remain portable.
           </p>
          <Link href="/enterprise" className="text-blue-700 dark:text-blue-200 font-semibold hover:underline">
             Explore managed distribution →
