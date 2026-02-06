@@ -232,13 +232,14 @@ router.get(
   asyncHandler(async (req, res) => {
     const requestStart = Date.now();
     const { slug } = req.params;
-    const budgetMs = req.headers.authorization
+    const authHeader = req.headers.authorization;
+    const budgetMs = authHeader
       ? await (async () => {
           try {
             const {
               data: { user },
             } = await supabase.auth.getUser(
-              req.headers.authorization.replace('Bearer ', '')
+              authHeader.replace('Bearer ', '')
             );
             if (user?.id) {
               return await getMarketplaceBudgetMsForUser(user.id);

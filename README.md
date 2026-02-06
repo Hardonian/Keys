@@ -34,6 +34,24 @@ Then visit:
 - **`/contrast`** - See why Control Plane beats rule-based automation
 - **`/simulate`** - Replay decisions and test "what if" scenarios
 
+## Local Development (Reality Pass)
+
+```bash
+npm install
+npm run dev
+```
+
+Common verification commands:
+
+```bash
+npm run lint
+npm run type-check
+npm run test:all
+npm run build
+```
+
+See `docs/DEPLOYMENT.md` for production deployment and `docs/SECURITY.md` for the security posture.
+
 ## What This Is
 
 **Control Plane** is an opinionated system for running AI agents with:

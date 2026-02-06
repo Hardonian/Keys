@@ -29,7 +29,7 @@ import apiKeysRouter from './routes/api-keys.js';
 import personasRouter from './routes/personas.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { optionalAuthMiddleware, authMiddleware } from './middleware/auth.js';
-import { userRateLimiterMiddleware, apiRateLimiter } from './middleware/rateLimit.js';
+import { userRateLimiterMiddleware, apiRateLimiter, webhookRateLimiter } from './middleware/rateLimit.js';
 import {
   securityMiddleware,
   requestIdMiddleware,
@@ -86,8 +86,13 @@ app.use(apmMiddleware);
 
 // Stripe webhook needs raw body for signature verification
 // Mount it BEFORE JSON body parser
-import { billingRouter } from './routes/billing.js';
-app.use('/billing/webhook', express.raw({ type: 'application/json' }), billingRouter);
+import { billingRouter, billingWebhookRouter } from './routes/billing.js';
+app.use(
+  '/billing/webhook',
+  webhookRateLimiter,
+  express.raw({ type: 'application/json' }),
+  billingWebhookRouter
+);
 
 // Body parsing (for all other routes)
 app.use(express.json({ limit: '10mb' }));
@@ -142,7 +147,7 @@ app.use('/admin', authMiddleware, adminRouter);
 
 // Webhooks with raw body middleware
 const webhookMiddleware = express.raw({ type: 'application/json' });
-app.use('/webhooks', webhookMiddleware, webhooksRouter);
+app.use('/webhooks', webhookRateLimiter, webhookMiddleware, webhooksRouter);
 
 // Other billing routes (checkout, portal) use JSON body parser
 app.use('/billing', billingRouter);

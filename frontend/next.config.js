@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
+const path = require('node:path');
+
 const nextConfig = {
   reactStrictMode: true,
-  // ESLint configuration
-  eslint: {
-    // Don't fail build on lint warnings (only errors)
-    ignoreDuringBuilds: false,
-  },
   typescript: {
     // Don't ignore TypeScript errors
     ignoreBuildErrors: false,
@@ -91,6 +88,9 @@ const nextConfig = {
   },
   // Enable static exports for desktop app
   output: process.env.NEXT_OUTPUT || undefined,
+  turbopack: {
+    root: path.join(__dirname, '..'),
+  },
   // Experimental features for performance
   experimental: {
     optimizeCss: false, // Disabled due to potential build issues

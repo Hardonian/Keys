@@ -360,8 +360,8 @@ export function checkBlastRadius(
       };
     }
     
-    const operation = action.scope as string;
-    if (!table.operations.includes(operation as any)) {
+    const operation = action.scope;
+    if (!operation || !table.operations.includes(operation as typeof table.operations[number])) {
       return {
         allowed: false,
         reason: `Operation '${operation}' is not allowed on table '${action.target}'`,

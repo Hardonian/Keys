@@ -14,6 +14,7 @@ import {
 } from '../utils/redirects.js';
 
 const router = Router() as Router;
+const billingWebhookRouter = Router() as Router;
 
 // Initialize Stripe (will be null if key not provided)
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -192,9 +193,7 @@ router.get(
  * Webhook handler for Stripe events
  * POST /billing/webhook
  */
-router.post(
-  '/webhook',
-  asyncHandler(async (req, res) => {
+const webhookHandler = asyncHandler(async (req, res) => {
     const webhookStart = Date.now();
     if (!stripe) {
       return res.status(503).json({ error: 'Billing is not configured' });
@@ -741,7 +740,8 @@ router.post(
     });
 
     res.json({ received: true });
-  })
-);
+});
 
-export { router as billingRouter };
+billingWebhookRouter.post('/', webhookHandler);
+
+export { router as billingRouter, billingWebhookRouter };

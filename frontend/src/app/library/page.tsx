@@ -2,7 +2,6 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import LibraryIndexClient, { IndexArtifact } from '@/components/Library/LibraryIndexClient';
 import { EmptyState } from '@/components/EmptyState';
-import Link from 'next/link';
 
 export const runtime = 'nodejs';
 

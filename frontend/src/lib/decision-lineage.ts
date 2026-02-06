@@ -16,7 +16,7 @@
  */
 
 import { EvidenceBundle } from './evidence-bundle';
-import { SystemMemory, MemoryEvent } from './system-memory';
+import { SystemMemory } from './system-memory';
 
 // Decision Node in the lineage graph
 export interface DecisionNode {
@@ -592,7 +592,7 @@ export function createLineageFromMemory(
 
   // Note: This is a simplified integration
   // In practice, you'd iterate through memory events and convert them
-  console.log(`Created lineage timeline ${timeline.id} linked to memory`);
+  console.warn(`Created lineage timeline ${timeline.id} linked to memory`);
 
   return lineage;
 }

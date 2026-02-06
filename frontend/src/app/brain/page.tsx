@@ -12,7 +12,7 @@
 
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Network,
@@ -24,15 +24,11 @@ import {
   ChevronRight,
   X,
   Code,
-  ScrollText,
-  History,
   AlertTriangle,
   CheckCircle2,
   Eye,
   Terminal,
-  Zap,
   Lock,
-  Unlock,
   Filter,
   Search,
   Maximize2,

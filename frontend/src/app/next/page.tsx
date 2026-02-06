@@ -7,7 +7,7 @@
  * "Based on what just happened, here's what you should do next"
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,8 +21,7 @@ import {
   Clock,
   Zap,
   Shield,
-  BookOpen,
-  ChevronRight
+  BookOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Suggestion, SuggestionType, SuggestionPriority } from '@/lib/second-win';
