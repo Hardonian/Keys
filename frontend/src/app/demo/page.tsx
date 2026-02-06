@@ -105,7 +105,7 @@ export default function InstantWinDemo() {
       ));
 
       // Simulate agent execution
-      await simulateAgentExecution(demoSteps[i], scenarioId);
+      await simulateAgentExecution(demoSteps[i]);
 
       setSteps(prev => prev.map((step, idx) => 
         idx === i ? { ...step, status: 'completed', duration: Math.floor(Math.random() * 5000) + 2000 } : step
@@ -559,7 +559,7 @@ function generateDemoSteps(scenarioId: string): DemoStep[] {
 }
 
 // Simulate agent execution
-async function simulateAgentExecution(step: DemoStep, scenarioId: string): Promise<void> {
+async function simulateAgentExecution(step: DemoStep): Promise<void> {
   // Simulate realistic execution time
   const duration = Math.floor(Math.random() * 2000) + 1000;
   await new Promise(resolve => setTimeout(resolve, duration));

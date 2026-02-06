@@ -2,6 +2,19 @@
 
 All notable changes to the Keys project will be documented in this file.
 
+## [Unreleased] - 2026-02-06
+
+### Changed
+- Enforced CI gates for audits and E2E verification.
+- Replaced Next.js lint command with direct ESLint for Next 16 CLI compatibility.
+
+### Fixed
+- Prevented undefined authorization header access in marketplace preview routing.
+
+### Added
+- Stripe webhook replay-protection integration tests.
+- Updated deployment, security, and reality map documentation.
+
 ## [RC1] - 2024-12-XX
 
 ### 🎉 Production Readiness Overhaul

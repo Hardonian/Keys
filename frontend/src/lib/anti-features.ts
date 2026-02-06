@@ -7,7 +7,7 @@
  * @phase Phase 5 - Opinionated Defaults + Anti-Features
  */
 
-import { Shield, AlertTriangle, Lock, Eye, Clock, Database, Globe, FileWarning } from 'lucide-react';
+import { Shield, AlertTriangle, Lock, Eye, Clock, Database, FileWarning } from 'lucide-react';
 
 export interface AntiFeature {
   id: string;

@@ -15,7 +15,6 @@ import {
   GitBranch, 
   Clock, 
   CheckCircle, 
-  XCircle, 
   User, 
   Bot, 
   ArrowRight,

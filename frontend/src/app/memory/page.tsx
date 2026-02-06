@@ -20,7 +20,6 @@ import {
   ThumbsDown, 
   MessageSquare,
   Shield,
-  AlertTriangle,
   CheckCircle,
   XCircle
 } from 'lucide-react';
@@ -123,7 +122,7 @@ export default function SystemMemoryPage() {
   };
 
   const handleAnnotate = (beliefId: string, type: 'agreement' | 'disagreement') => {
-    console.log(`Annotated belief ${beliefId} with ${type}`);
+    console.warn(`Annotated belief ${beliefId} with ${type}`);
   };
 
   const filteredBeliefs = beliefs.filter(belief => {

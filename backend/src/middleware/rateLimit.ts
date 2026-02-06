@@ -30,6 +30,22 @@ export const authRateLimiter = rateLimit({
 });
 
 /**
+ * Webhook rate limiter (higher ceiling for external providers)
+ */
+export const webhookRateLimiter = rateLimit({
+  windowMs: parseInt(process.env.WEBHOOK_RATE_LIMIT_WINDOW_MS || '900000', 10),
+  max: parseInt(process.env.WEBHOOK_RATE_LIMIT_MAX_REQUESTS || '300', 10),
+  message: 'Too many webhook requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req: Request, res: Response) => {
+    const resetTime = (req as any).rateLimit?.resetTime || Date.now() + 900000;
+    const retryAfter = Math.ceil((resetTime - Date.now()) / 1000);
+    throw new RateLimitError('Webhook rate limit exceeded', retryAfter);
+  },
+});
+
+/**
  * User-specific rate limiter
  */
 export function userRateLimiterMiddleware(

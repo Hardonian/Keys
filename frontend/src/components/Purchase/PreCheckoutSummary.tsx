@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 
 interface PreCheckoutSummaryProps {
-  keyTitle?: string; // eslint-disable-line @typescript-eslint/no-unused-vars
-  priceCents?: number; // eslint-disable-line @typescript-eslint/no-unused-vars
+  keyTitle?: string;
+  priceCents?: number;
   whatUnlocks: string;
 }
 

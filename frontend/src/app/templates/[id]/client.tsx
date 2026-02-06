@@ -28,10 +28,8 @@ export default function TemplateDetailClient({ id }: { id?: string }) {
   const templateId = (id ?? (params.id as string)) as string;
 
   const { preview, publicTemplate, loading: previewLoading } = useTemplatePreview(templateId);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { saveCustomization, updateCustomization, deleteCustomization } = useTemplateCustomization(templateId);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { validation, availableVariables, validate } = useTemplateValidation(templateId);
+  useTemplateCustomization(templateId);
+  useTemplateValidation(templateId);
   const { testResult, test } = useTemplateTesting(templateId);
   const { user, loading: authLoading } = useAuth();
   const isAuthenticated = !!user;
@@ -43,8 +41,6 @@ export default function TemplateDetailClient({ id }: { id?: string }) {
     changed?: Array<{ line: string; old: string; new: string }>;
     similarity?: number;
   } | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loadingComparison, setLoadingComparison] = useState(false);
 
   if (previewLoading || authLoading) {
     return <div className="loading">Loading template...</div>;
@@ -141,7 +137,6 @@ export default function TemplateDetailClient({ id }: { id?: string }) {
             preview={preview}
             comparison={comparison}
             setComparison={setComparison}
-            setLoadingComparison={setLoadingComparison}
           />
         </div>
       )}
@@ -182,8 +177,6 @@ function TestTemplateView({
   testResult,
   onTest,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  templateId?: string;
   testResult: {
     success: boolean;
     renderedPrompt?: string;
@@ -292,7 +285,6 @@ function CompareView({
   preview,
   comparison,
   setComparison,
-  setLoadingComparison,
 }: {
   templateId: string;
   preview: TemplatePreview | null;
@@ -308,7 +300,6 @@ function CompareView({
     changed?: Array<{ line: string; old: string; new: string }>;
     similarity?: number;
   } | null) => void;
-  setLoadingComparison: (loading: boolean) => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -320,7 +311,6 @@ function CompareView({
 
     try {
       setIsLoading(true);
-      setLoadingComparison(true);
       const result = await templateService.comparePrompts(
         templateId,
         preview.customVariables || {},
@@ -331,9 +321,8 @@ function CompareView({
       toast.error('Failed to load comparison');
     } finally {
       setIsLoading(false);
-      setLoadingComparison(false);
     }
-  }, [templateId, preview, setComparison, setLoadingComparison]);
+  }, [templateId, preview, setComparison]);
 
   useEffect(() => {
     if (preview?.hasCustomization && !comparison) {

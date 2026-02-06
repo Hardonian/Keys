@@ -1,6 +1,6 @@
 # Security Posture
 
-**Last Updated:** 2024-12-30  
+**Last Updated:** 2026-02-06  
 **Status:** Production-ready with documented limitations
 
 ## What We Have
@@ -10,7 +10,8 @@
 - ✅ **Row-Level Security (RLS)** policies on all user-owned tables
 - ✅ **Tenant isolation** enforced at database level
 - ✅ **Role-based access control** middleware for admin routes
-- ✅ **Webhook signature verification** (Stripe, GitHub, GitLab)
+- ✅ **Webhook signature verification + replay protection** (Stripe; event IDs tracked)
+- ✅ **Request signing for sensitive operations** (shared secret)
 
 ### Data Protection
 - ✅ **No hardcoded secrets** — all credentials via environment variables
@@ -18,7 +19,7 @@
 - ✅ **SQL injection protection** via Supabase client (parameterized queries)
 - ✅ **XSS protection** via React's built-in escaping
 - ✅ **CORS configuration** restricts cross-origin requests
-- ✅ **Rate limiting** on API routes
+- ✅ **Rate limiting** on public/auth/webhook endpoints with upgrade path to Redis
 
 ### Infrastructure
 - ✅ **HTTPS only** (enforced by Vercel/hosting provider)
@@ -92,6 +93,7 @@
 - Monitor error logs for suspicious activity
 - Keep dependencies updated
 - Review RLS policies when adding new tables
+- Store Stripe webhook secrets and request signing secrets in a secure vault
 
 ## Incident Response
 
@@ -112,6 +114,10 @@
 - ✅ Fixed Stripe webhook signature verification (was using parsed JSON, now uses raw body)
 - ✅ Verified all RLS policies are correctly implemented
 - ✅ Removed fake metrics that could mislead users
+
+### 2026-02-06
+- ✅ Added replay protection verification tests for Stripe webhooks
+- ✅ Enforced CI security gates (`npm audit --audit-level=high`)
 
 ---
 

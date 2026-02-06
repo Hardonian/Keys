@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -51,7 +51,7 @@ export default function AdminJobForgePage() {
     []
   );
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     try {
       const { createClient } = await import('@/utils/supabase/client');
       const supabase = createClient();
@@ -74,7 +74,7 @@ export default function AdminJobForgePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_BASE_URL]);
 
   useEffect(() => {
     if (!user) {
@@ -83,12 +83,12 @@ export default function AdminJobForgePage() {
     }
 
     fetchStatus();
-  }, [user, router]);
+  }, [user, router, fetchStatus]);
 
   const parseJson = (value: string, label: string) => {
     try {
       return JSON.parse(value) as Record<string, unknown>;
-    } catch (err) {
+    } catch {
       throw new Error(`${label} must be valid JSON.`);
     }
   };

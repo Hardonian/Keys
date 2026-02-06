@@ -52,14 +52,12 @@ class UXEventLogger {
 
     // Log to console in dev
     if (this.isDev) {
-      // eslint-disable-next-line no-console
-      console.log('[UX Event]', fullEvent);
+      console.warn('[UX Event]', fullEvent);
     }
 
     // Stub for backend integration
     // In production, this would send to analytics backend
     this.sendToBackend().catch((error) => {
-      // eslint-disable-next-line no-console
       console.error('Failed to send UX event to backend:', error);
     });
   }

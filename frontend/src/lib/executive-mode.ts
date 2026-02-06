@@ -14,9 +14,7 @@
  * - Audit-safe explanations
  */
 
-import { EvidenceBundle } from './evidence-bundle';
-import { DecisionLineage, DecisionTimeline } from './decision-lineage';
-import { SystemBelief } from './system-memory';
+import { DecisionLineage } from './decision-lineage';
 
 // Executive Summary Card
 export interface ExecutiveCard {
@@ -214,7 +212,7 @@ export class ExecutiveMode {
         totalDecisions += stats.totalDecisions;
         automatedDecisions += Math.floor(stats.totalDecisions * stats.automatedRate);
         totalRiskAvoided += stats.totalValue.risksAvoided;
-      } catch (e) {
+      } catch {
         // Timeline not found, skip
       }
     }

@@ -66,17 +66,17 @@ jobs:
         run: pnpm --filter backend type-check
       
       - name: Verify database contract
+        if: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
         run: |
           cd backend
           npm install -g tsx
           cd ..
-          pnpm run db:verify || echo "Database verification failed - check logs"
+          pnpm run db:verify
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        continue-on-error: true
       
       - name: Run tests
         run: pnpm --filter backend test -- --coverage --reporter=verbose
@@ -159,7 +159,6 @@ jobs:
           NODE_ENV: test
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        continue-on-error: true
       
       - name: Production Build (Resilient Mode)
         run: pnpm --filter frontend build
@@ -240,14 +239,12 @@ jobs:
       - name: Run npm audit (Backend)
         run: |
           cd backend
-          npm audit --audit-level=high || true
-        continue-on-error: true
+          npm audit --audit-level=high
       
       - name: Run npm audit (Frontend)
         run: |
           cd frontend
-          npm audit --audit-level=high || true
-        continue-on-error: true
+          npm audit --audit-level=high
 
   ci-summary:
     name: CI Summary

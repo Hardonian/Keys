@@ -8,7 +8,6 @@ interface ValueReminderProps {
   version?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function ValueReminder({ keyTitle: _keyTitle, lastUsed: _lastUsed, version }: ValueReminderProps) {
   return (
     <motion.div
