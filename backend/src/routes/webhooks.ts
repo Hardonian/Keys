@@ -145,8 +145,9 @@ router.post('/code-repo', async (req: Request, res: Response) => {
     }
 
     if (!success) {
-      logger.error('Failed to record webhook processing', {
+      logger.warn('Failed to record webhook processing', {
         deliveryId,
+        eventType: event,
       });
       return res.status(500).json({ error: 'Failed to process webhook' });
     }
