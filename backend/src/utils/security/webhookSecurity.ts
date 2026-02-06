@@ -25,7 +25,14 @@ export class WebhookSecurityManager {
   private replayWindowMs: number;
 
   constructor(config: WebhookSecurityConfig) {
-    this.supabase = createClient(config.supabaseUrl, config.supabaseServiceKey);
+    if (config.supabaseUrl && config.supabaseServiceKey) {
+      this.supabase = createClient(config.supabaseUrl, config.supabaseServiceKey);
+    } else {
+      this.supabase = createClient(
+        process.env.SUPABASE_URL || 'https://test.supabase.co',
+        process.env.SUPABASE_SERVICE_ROLE_KEY || 'test-key'
+      );
+    }
     this.replayWindowMs = config.replayWindowMinutes * 60 * 1000;
   }
 
@@ -356,7 +363,7 @@ export class WebhookSecurityManager {
                body?.uid ||
                crypto.randomUUID();
       default:
-        return null;
+        return crypto.randomUUID();
     }
   }
 }

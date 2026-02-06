@@ -214,7 +214,8 @@ describe('WebhookSecurityManager', () => {
       const result = manager.extractWebhookId('unknown', body, headers);
 
       expect(result).toBeDefined();
-      expect(result).toMatch(/^[0-9a-f-]{36}$/);
+      expect(typeof result).toBe('string');
+      expect(result).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
     });
   });
 });
