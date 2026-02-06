@@ -175,7 +175,7 @@ router.post('/code-repo', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     };
 
-    const userId = await getUserIdFromRepo(webhookData.repository);
+    const userId = await getUserIdFromRepo(webhookData.repository || undefined);
 
     if (!userId) {
       logger.warn('No user found for repository', {
@@ -212,12 +212,10 @@ router.post('/code-repo', async (req: Request, res: Response) => {
       .single();
 
     if (saveError) {
-      logger.error('Error saving code repo webhook event', {
-        userId,
+      logger.error('Error saving code repo webhook event', undefined, {
         eventType,
         repository: webhookData.repository,
         deliveryId,
-        error: saveError instanceof Error ? saveError.message : String(saveError),
       });
 
       await webhookSecurityManager.markFailed(deliveryId, saveError.message);
@@ -328,7 +326,7 @@ router.post('/supabase', async (req: Request, res: Response) => {
     }
 
     if (!success) {
-      logger.error('Failed to record Supabase webhook', { webhookId });
+      logger.warn('Failed to record Supabase webhook', { webhookId });
       return res.status(500).json({ error: 'Failed to process webhook' });
     }
 
@@ -413,7 +411,7 @@ router.post('/supabase', async (req: Request, res: Response) => {
   }
 });
 
-async function getUserIdFromRepo(repository: string): Promise<string | null> {
+async function getUserIdFromRepo(repository: string | null | undefined): Promise<string | null> {
   if (!repository) return null;
 
   try {
@@ -527,7 +525,7 @@ function eventToTaskDescription(eventRecord: any): string {
   }
 
   if (eventType.startsWith('repo.pr.stale')) {
-    return `Pull request #${EventData?.pullRequest?.number || 'N/A'} "${eventData.pullRequest?.title || 'PR'}" has been stale. Suggest either closing it, splitting it into smaller PRs, or refreshing the specification.`;
+    return `Pull request #${eventData.pullRequest?.number || 'N/A'} "${eventData.pullRequest?.title || 'PR'}" has been stale. Suggest either closing it, splitting it into smaller PRs, or refreshing the specification.`;
   }
 
   if (eventType.startsWith('repo.build.failed')) {
