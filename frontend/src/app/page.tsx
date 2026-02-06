@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { HeroSection } from '@/components/HeroSection';
-import { FileText, BookOpen, ClipboardList } from 'lucide-react';
+import { FileText, BookOpen, ClipboardList, Play, Network, Shield } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Keys - Open Source Knowledge & Artifact Library',
@@ -16,6 +16,113 @@ export default function Home() {
   return (
     <main id="main-content" className="min-h-screen flex flex-col bg-white dark:bg-slate-950">
       <HeroSection />
+
+      {/* Control Plane Feature Section */}
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-14 bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center space-y-4 mb-10">
+            <p className="text-sm uppercase tracking-[0.2em] text-purple-700 dark:text-purple-300">
+              New: Control Plane
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">
+              Mission Control for AI Agents
+            </h2>
+            <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+              Deterministic, explainable, and safe multi-agent orchestration. See exactly what happens, why it happens, and what agents can (and cannot) touch.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-3 mb-10">
+            <Link href="/demo" className="group">
+              <div className="h-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:border-purple-500/30 transition-all">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Play className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Run a Live Demo
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  See agents in action with zero setup. Watch real-time execution, policy enforcement, and evidence generation.
+                </p>
+                <span className="text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1">
+                  Try it now <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </span>
+              </div>
+            </Link>
+
+            <Link href="/brain" className="group">
+              <div className="h-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:border-blue-500/30 transition-all">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Network className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Explore System Brain
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Visualize the entire agent ecosystem. Click any node to inspect code, prompts, policies, and decision logs.
+                </p>
+                <span className="text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
+                  View visualization <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </span>
+              </div>
+            </Link>
+
+            <div className="group">
+              <div className="h-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-500/20 flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Enterprise Safety
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Blast radius constraints, policy enforcement, and complete audit trails. Every action is explainable and reproducible.
+                </p>
+                <span className="text-green-600 dark:text-green-400 font-medium">
+                  Built-in guardrails
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 rounded-2xl p-6 sm:p-8 text-white">
+            <div className="grid sm:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl font-bold mb-4">What This System Refuses To Do</h3>
+                <ul className="space-y-3 text-slate-300">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-400">✗</span>
+                    <span>No silent failures — every error is logged and explained</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-400">✗</span>
+                    <span>No unbounded operations — strict limits on everything</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-400">✗</span>
+                    <span>No black box decisions — full reasoning traces</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-400">✗</span>
+                    <span>No data exfiltration — your data stays local</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="bg-slate-800 rounded-xl p-4 font-mono text-sm">
+                <div className="text-slate-500 mb-2">// Example: Blast Radius</div>
+                <div className="text-green-400">canTouch:</div>
+                <div className="text-slate-300 ml-4">- Database (Read-Only)</div>
+                <div className="text-slate-300 ml-4">- Tables: users, projects</div>
+                <div className="text-slate-300 ml-4">- Max 100 rows per query</div>
+                <div className="text-red-400 mt-3">cannotTouch:</div>
+                <div className="text-slate-300 ml-4">- Production writes</div>
+                <div className="text-slate-300 ml-4">- User credentials</div>
+                <div className="text-slate-300 ml-4">- External APIs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       
       {/* Original content sections below hero */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
