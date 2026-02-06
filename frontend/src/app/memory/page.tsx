@@ -4,7 +4,7 @@
  * System Memory Page (/memory)
  * 
  * Shows system beliefs, confidence levels, and evidence
- * "What the system has learned and how confident it is"
+ * "What the system believes, why it believes it, and how confident it is"
  */
 
 import React, { useState } from 'react';
@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SystemBelief } from '@/lib/system-memory';
+
+type FilterType = 'all' | 'high' | 'contested';
 
 // Mock beliefs for demo
 const MOCK_BELIEFS: SystemBelief[] = [
@@ -111,8 +113,8 @@ const CONFIDENCE_COLORS = {
 };
 
 export default function SystemMemoryPage() {
-  const [beliefs, setBeliefs] = useState<SystemBelief[]>(MOCK_BELIEFS);
-  const [selectedBelief, setSelectedBelief] = useState<SystemBelief | null>(null);
+  const [beliefs] = useState<SystemBelief[]>(MOCK_BELIEFS);
+  const [filter, setFilter] = useState<FilterType>('all');
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return CONFIDENCE_COLORS.high;
@@ -120,10 +122,15 @@ export default function SystemMemoryPage() {
     return CONFIDENCE_COLORS.low;
   };
 
-  const handleAnnotate = (beliefId: string, type: HumanAnnotation['type']) => {
-    // In real implementation, this would call the API
+  const handleAnnotate = (beliefId: string, type: 'agreement' | 'disagreement') => {
     console.log(`Annotated belief ${beliefId} with ${type}`);
   };
+
+  const filteredBeliefs = beliefs.filter(belief => {
+    if (filter === 'high') return belief.confidence >= 0.8;
+    if (filter === 'contested') return belief.timesOverridden > 0;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -173,157 +180,125 @@ export default function SystemMemoryPage() {
           </Card>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="all">
-          <TabsList>
-            <TabsTrigger value="all">All Beliefs</TabsTrigger>
-            <TabsTrigger value="high">High Confidence</TabsTrigger>
-            <TabsTrigger value="contested">Contested</TabsTrigger>
-          </TabsList>
+        {/* Filter Buttons */}
+        <div className="flex gap-2">
+          <Button 
+            variant={filter === 'all' ? 'default' : 'outline'}
+            onClick={() => setFilter('all')}
+          >
+            All Beliefs
+          </Button>
+          <Button 
+            variant={filter === 'high' ? 'default' : 'outline'}
+            onClick={() => setFilter('high')}
+          >
+            High Confidence
+          </Button>
+          <Button 
+            variant={filter === 'contested' ? 'default' : 'outline'}
+            onClick={() => setFilter('contested')}
+          >
+            Contested
+          </Button>
+        </div>
 
-          <TabsContent value="all" className="space-y-4">
-            {beliefs.map((belief) => (
-              <motion.div
-                key={belief.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <Card 
-                  className="cursor-pointer hover:border-primary transition-colors"
-                  onClick={() => setSelectedBelief(belief)}
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="text-lg">{belief.statement}</CardTitle>
-                          {TREND_ICONS[belief.confidenceTrend]}
-                        </div>
-                        <CardDescription className="capitalize">
-                          {belief.category.replace('_', ' ')}
-                        </CardDescription>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold">
-                          {Math.round(belief.confidence * 100)}%
-                        </div>
-                        <p className="text-xs text-muted-foreground">confidence</p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Confidence bar */}
-                      <div className="space-y-1">
-                        <div className="h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${getConfidenceColor(belief.confidence)} transition-all`}
-                            style={{ width: `${belief.confidence * 100}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Supported by {belief.supportingEvidence.length} evidence</span>
-                          <span>Validated {belief.timesValidated} times</span>
-                        </div>
-                      </div>
-
-                      {/* Evidence pills */}
-                      <div className="flex flex-wrap gap-2">
-                        {belief.supportingEvidence.slice(0, 3).map((ev) => (
-                          <Badge key={ev.id} variant="outline" className="text-xs">
-                            <CheckCircle className="w-3 h-3 mr-1 text-green-500" />
-                            {ev.source}
-                          </Badge>
-                        ))}
-                        {belief.contradictingEvidence.length > 0 && (
-                          <Badge variant="outline" className="text-xs">
-                            <XCircle className="w-3 h-3 mr-1 text-red-500" />
-                            {belief.contradictingEvidence.length} contradicting
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-2 pt-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAnnotate(belief.id, 'agreement');
-                          }}
-                        >
-                          <ThumbsUp className="w-4 h-4 mr-1" />
-                          Agree
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAnnotate(belief.id, 'disagreement');
-                          }}
-                        >
-                          <ThumbsDown className="w-4 h-4 mr-1" />
-                          Disagree
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <MessageSquare className="w-4 h-4 mr-1" />
-                          Comment
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </TabsContent>
-
-          <TabsContent value="high" className="space-y-4">
-            {beliefs.filter(b => b.confidence >= 0.8).map((belief) => (
-              <Card key={belief.id}>
+        {/* Beliefs List */}
+        <div className="space-y-4">
+          {filteredBeliefs.map((belief) => (
+            <motion.div
+              key={belief.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <Card className="hover:border-primary transition-colors">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-green-500" />
-                    <CardTitle className="text-lg">{belief.statement}</CardTitle>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">{belief.statement}</CardTitle>
+                        {TREND_ICONS[belief.confidenceTrend]}
+                      </div>
+                      <CardDescription className="capitalize">
+                        {belief.category.replace('_', ' ')}
+                      </CardDescription>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">
+                        {Math.round(belief.confidence * 100)}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">confidence</p>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
-                    {Math.round(belief.confidence * 100)}% confidence
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Validated {belief.timesValidated} times with {belief.supportingEvidence.length} supporting evidence
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </TabsContent>
+                  <div className="space-y-4">
+                    {/* Confidence bar */}
+                    <div className="space-y-1">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${getConfidenceColor(belief.confidence)} transition-all`}
+                          style={{ width: `${belief.confidence * 100}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Supported by {belief.supportingEvidence.length} evidence</span>
+                        <span>Validated {belief.timesValidated} times</span>
+                      </div>
+                    </div>
 
-          <TabsContent value="contested" className="space-y-4">
-            {beliefs.filter(b => b.timesOverridden > 0).map((belief) => (
-              <Card key={belief.id}>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-orange-500" />
-                    <CardTitle className="text-lg">{belief.statement}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4">
-                    <div className="text-2xl font-bold">{belief.timesOverridden}</div>
-                    <div>
-                      <p className="font-medium">Overridden {belief.timesOverridden} times</p>
-                      <p className="text-sm text-muted-foreground">
-                        Despite {belief.timesValidated} successful validations
-                      </p>
+                    {/* Evidence pills */}
+                    <div className="flex flex-wrap gap-2">
+                      {belief.supportingEvidence.slice(0, 3).map((ev) => (
+                        <Badge key={ev.id} variant="outline" className="text-xs">
+                          <CheckCircle className="w-3 h-3 mr-1 text-green-500" />
+                          {ev.source}
+                        </Badge>
+                      ))}
+                      {belief.contradictingEvidence.length > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          <XCircle className="w-3 h-3 mr-1 text-red-500" />
+                          {belief.contradictingEvidence.length} contradicting
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 pt-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleAnnotate(belief.id, 'agreement')}
+                      >
+                        <ThumbsUp className="w-4 h-4 mr-1" />
+                        Agree
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleAnnotate(belief.id, 'disagreement')}
+                      >
+                        <ThumbsDown className="w-4 h-4 mr-1" />
+                        Disagree
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <MessageSquare className="w-4 h-4 mr-1" />
+                        Comment
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </TabsContent>
-        </Tabs>
+            </motion.div>
+          ))}
+
+          {filteredBeliefs.length === 0 && (
+            <Card className="p-8 text-center">
+              <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold">No beliefs match this filter</h3>
+              <p className="text-muted-foreground">Try a different filter to see results</p>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
