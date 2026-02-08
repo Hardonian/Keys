@@ -1,6 +1,6 @@
-# Control Plane
+# Keys
 
-> **The Mission Control for AI-Assisted Development**
+> **The Keyholder to your for AI-Toolkits*
 
 A deterministic, explainable, and trustworthy system for orchestrating AI agents to perform complex tasks safely. Think of it as **mission control for your codebase** — where every agent has a role, every action is auditable, and nothing happens without explicit constraints.
 
