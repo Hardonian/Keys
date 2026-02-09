@@ -1,0 +1,59 @@
+{
+    "name": "@keys/cli",
+    "version": "1.0.0",
+    "description": "Backendless local-first pack management CLI for Keys + ZEO + ControlPlane",
+    "type": "module",
+    "main": "./dist/core/index.js",
+    "types": "./dist/core/index.d.ts",
+    "bin": {
+        "keys": "./dist/cli/keys.js"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/core/index.d.ts",
+            "import": "./dist/core/index.js"
+        },
+        "./cli": {
+            "types": "./dist/cli/keys.d.ts",
+            "import": "./dist/cli/keys.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "dev": "tsx cli/keys.ts",
+        "lint": "eslint . --ext .ts",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage",
+        "keys": "tsx cli/keys.ts"
+    },
+    "dependencies": {
+        "zod": "^3.23.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "eslint": "^8.57.0",
+        "tsx": "^4.0.0",
+        "typescript": "^5.4.0",
+        "vitest": "^1.6.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "keywords": [
+        "keys",
+        "cli",
+        "pack",
+        "zeo",
+        "controlplane",
+        "local-first",
+        "offline"
+    ],
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Hardonian/Keys.git",
+        "directory": "src"
+    }
+}

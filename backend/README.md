@@ -1,120 +1,37 @@
-# KEYS Backend
+# Backend (Optional)
 
-**The backend infrastructure for KEYS—the keyring to modern tools.**
+> **⚠️ The backend is NOT required for core Keys functionality.**
 
-This backend serves the KEYS marketplace, managing keys (notebooks, prompts, workflows) that unlock capability in external tools like Cursor, Jupyter, GitHub, Stripe, and more.
+Keys is designed as a **local-first, backendless** CLI. The `backend/` directory contains optional server components for advanced use cases like:
 
-## Background Event Loop Service
+- Multi-user sync
+- Hosted pack registry
+- Enterprise features
 
-The background event loop service monitors external events (Shopify webhooks, Supabase schema changes) and generates proactive suggestions for users.
+## Core Functionality (No Backend)
 
-### Architecture
+The core Keys CLI works entirely offline:
 
-1. **Webhook Endpoints** (`/webhooks/shopify`, `/webhooks/supabase`)
-   - Receive real-time webhooks from external services
-   - Verify signatures and store events
-   - Trigger async processing
-
-2. **Polling Service** (`backgroundEventLoop.ts`)
-   - Polls external services as fallback if webhooks aren't configured
-   - Runs on configurable intervals (default: 1 minute)
-   - Supports multiple users with separate loops
-
-3. **Event Processing** (`eventProcessor.ts`)
-   - Determines if events warrant suggestions
-   - Generates proactive suggestions using prompt assembly
-   - Logs agent runs and updates events
-
-### Setup
-
-1. **Environment Variables**
-   ```env
-   SHOPIFY_API_KEY=your_shopify_api_key
-   SHOPIFY_API_SECRET=your_shopify_api_secret
-   SHOPIFY_STORE_URL=your-store.myshopify.com
-   SUPABASE_URL=your_supabase_url
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   ```
-
-2. **Optional JobForge Integration (Admin)**
-   ```env
-   JOBFORGE_INTEGRATION_ENABLED=1
-   JOBFORGE_BASE_URL=https://api.jobforge.example
-   JOBFORGE_API_KEY=your_jobforge_api_key
-   JOBFORGE_TENANT_PROJECT_MAP='[{"tenantId":"tenant-123","projectId":"project-abc","jobforgeTenantId":"jf-tenant-1","jobforgeProjectId":"jf-project-1"}]'
-   ```
-   - Bundle execution requests require `JOBFORGE_BUNDLE_EXECUTION_ENABLED=1`.
-   - See `docs/ops/JOBFORGE_INTEGRATION.md` for admin endpoints and CLI usage.
-
-2. **Shopify Webhook Configuration**
-   - In Shopify Admin, go to Settings > Notifications > Webhooks
-   - Create webhook: `POST https://your-domain.com/webhooks/shopify`
-   - Subscribe to events:
-     - `products/create`
-     - `products/update`
-     - `collections/create`
-     - `orders/create`
-     - `inventory_levels/update`
-
-3. **Supabase Webhook Configuration**
-   - Configure Supabase webhooks to POST to `/webhooks/supabase`
-   - Or rely on polling for schema changes
-
-4. **Start Background Loops**
-   ```typescript
-   import { backgroundEventLoop } from './services/backgroundEventLoop';
-   
-   // Start for specific user
-   await backgroundEventLoop.start('user-id');
-   
-   // Or start for all users
-   await backgroundEventLoop.startForAllUsers();
-   ```
-
-### API Endpoints
-
-#### POST /webhooks/shopify
-Receives Shopify webhooks. Verifies HMAC signature and processes events.
-
-**Headers:**
-- `X-Shopify-Hmac-Sha256`: Webhook signature
-- `X-Shopify-Topic`: Event topic (e.g., `products/create`)
-- `X-Shopify-Shop-Domain`: Shop domain
-
-#### POST /webhooks/supabase
-Receives Supabase database webhooks.
-
-**Body:**
-```json
-{
-  "event_type": "INSERT",
-  "table": "products",
-  "record": { ... },
-  "old_record": null
-}
+```bash
+cd src
+npm install
+npx tsx cli/keys.ts init
+npx tsx cli/keys.ts add ./my-pack
+npx tsx cli/keys.ts list
+npx tsx cli/keys.ts run my-pack hello
 ```
 
-### Event Types
+See the main [README](../README.md) for full CLI documentation.
 
-**Shopify Events:**
-- `shopify.product.created`
-- `shopify.product.updated`
-- `shopify.collection.created`
-- `shopify.inventory.low`
-- `shopify.order.created`
+## When You Might Need Backend
 
-**Supabase Events:**
-- `supabase.schema.changed`
-- `supabase.table.created`
-- `supabase.column.added`
-- `supabase.column.updated`
+- **Team collaboration** — Sharing packs across a team
+- **Hosted registry** — Publishing packs to a central server
+- **Access control** — Role-based permissions
+- **Audit logging** — Centralized action tracking
 
-### Monitoring
+## Status
 
-Events are stored in the `background_events` table with:
-- `event_type`: Type of event
-- `source`: Source system (shopify, supabase, etc.)
-- `event_data`: Full event payload
-- `suggestion_generated`: Whether a suggestion was created
-- `suggestion_id`: Reference to agent_run if suggestion was generated
-- `user_actioned`: Whether user acted on the suggestion
+The backend is currently in maintenance mode. For most use cases, the local-first CLI is recommended.
+
+If you need backend features, please open a [discussion](https://github.com/Hardonian/Keys/discussions).

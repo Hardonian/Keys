@@ -1,0 +1,155 @@
+name: Keys CLI
+
+on:
+    push:
+        branches: [main, develop]
+        paths:
+            - "src/**"
+            - ".github/workflows/keys-cli.yml"
+    pull_request:
+        branches: [main, develop]
+        paths:
+            - "src/**"
+    workflow_dispatch:
+
+env:
+    NODE_VERSION: "20"
+
+jobs:
+    keys-cli:
+        name: Keys CLI CI
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "pnpm"
+                  cache-dependency-path: pnpm-lock.yaml
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10.13.1
+
+            - name: Install dependencies
+              run: |
+                  cd src
+                  pnpm install
+
+            - name: Type check
+              run: |
+                  cd src
+                  pnpm run typecheck
+
+            - name: Run tests
+              run: |
+                  cd src
+                  pnpm run test
+
+            - name: Build
+              run: |
+                  cd src
+                  pnpm run build
+
+            - name: Smoke test - Help
+              run: |
+                  cd src
+                  npx tsx cli/keys.ts help
+
+            - name: Smoke test - Doctor
+              run: |
+                  cd src
+                  npx tsx cli/keys.ts init
+                  npx tsx cli/keys.ts doctor --json
+
+            - name: Upload coverage
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: keys-cli-coverage
+                  path: src/coverage/
+                  retention-days: 7
+
+    keys-cli-windows:
+        name: Keys CLI (Windows)
+        runs-on: windows-latest
+        timeout-minutes: 10
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10.13.1
+
+            - name: Install dependencies
+              run: |
+                  cd src
+                  pnpm install
+
+            - name: Type check
+              run: |
+                  cd src
+                  pnpm run typecheck
+
+            - name: Run tests
+              run: |
+                  cd src
+                  pnpm run test
+
+            - name: Smoke test
+              run: |
+                  cd src
+                  npx tsx cli/keys.ts help
+
+    keys-cli-macos:
+        name: Keys CLI (macOS)
+        runs-on: macos-latest
+        timeout-minutes: 10
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10.13.1
+
+            - name: Install dependencies
+              run: |
+                  cd src
+                  pnpm install
+
+            - name: Type check
+              run: |
+                  cd src
+                  pnpm run typecheck
+
+            - name: Run tests
+              run: |
+                  cd src
+                  pnpm run test
+
+            - name: Smoke test
+              run: |
+                  cd src
+                  npx tsx cli/keys.ts help
