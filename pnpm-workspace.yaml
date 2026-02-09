@@ -1,10 +1,8 @@
 # Keys Workspace Configuration
 #
 # src/      - Primary CLI (local-first, no backend required)
-# frontend/ - Optional web UI (deprecated, maintenance mode)
-# backend/  - Optional server (deprecated, maintenance mode)
-#
-# For most use cases, only 'src/' is needed.
+# frontend/ - Web UI (deployable to Vercel, Supabase optional)
+# backend/  - Server API (optional, requires Supabase)
 
 packages:
   - "src"

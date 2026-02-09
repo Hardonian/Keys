@@ -1,32 +1,55 @@
-# Frontend (Optional)
+# Keys Frontend
 
-> **⚠️ The frontend is NOT required for core Keys functionality.**
+> Web UI for browsing and managing Keys packs
 
-Keys is designed as a **local-first, backendless** CLI. The `frontend/` directory contains an optional web UI for visualization and browsing.
+## Deployment Modes
 
-## Core Functionality (No Frontend)
+### Standalone Mode (No Backend)
 
-The core Keys CLI works entirely from the command line:
+The frontend runs **without Supabase** when environment variables are not set. It gracefully degrades to local/mock functionality.
 
 ```bash
-cd src
-npm install
-npx tsx cli/keys.ts init
-npx tsx cli/keys.ts list
-npx tsx cli/keys.ts search "api"
-npx tsx cli/keys.ts show my-pack
+# Install and run
+pnpm install
+pnpm dev
 ```
 
-See the main [README](../README.md) for full CLI documentation.
+Visit `http://localhost:3000`
 
-## When You Might Need Frontend
+### With Backend (Optional)
 
-- **Visual pack browsing** — GUI for exploring packs
-- **Action execution UI** — Web-based action runner
-- **Dashboard** — Metrics and status visualization
+To enable Supabase integration:
 
-## Status
+1. Copy `.env.example` to `.env.local`
+2. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Run `pnpm dev`
 
-The frontend is currently in maintenance mode. For most use cases, the CLI is recommended.
+## Vercel Deployment
 
-If you need frontend features, please open a [discussion](https://github.com/Hardonian/Keys/discussions).
+Deploy to Vercel without any environment variables for standalone mode:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Hardonian/Keys&root-directory=frontend)
+
+Or set Supabase environment variables in Vercel dashboard for full backend integration.
+
+## Development
+
+```bash
+pnpm install
+pnpm dev         # Start dev server
+pnpm build       # Production build
+pnpm lint        # Run linter
+pnpm test        # Run tests
+```
+
+## Architecture
+
+- **Next.js 14** with App Router
+- **Tailwind CSS** for styling
+- **Supabase** (optional) for auth and data
+- **TypeScript** throughout
+
+## See Also
+
+- [Main README](../README.md) — CLI documentation
+- [CLI (`src/`)](../src/) — Local-first CLI
