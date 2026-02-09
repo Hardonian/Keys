@@ -1,3 +1,11 @@
+# Keys Workspace Configuration
+#
+# src/      - Primary CLI (local-first, no backend required)
+# frontend/ - Optional web UI (deprecated, maintenance mode)
+# backend/  - Optional server (deprecated, maintenance mode)
+#
+# For most use cases, only 'src/' is needed.
+
 packages:
   - "src"
   - "frontend"
