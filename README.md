@@ -2,6 +2,8 @@
 
 > **The Keyring for AI Toolkits** — Local-first pack management for AI agents
 
+[![Keys CLI](https://github.com/Hardonian/Keys/actions/workflows/keys-cli.yml/badge.svg)](https://github.com/Hardonian/Keys/actions/workflows/keys-cli.yml)
+[![CI](https://github.com/Hardonian/Keys/actions/workflows/ci.yml/badge.svg)](https://github.com/Hardonian/Keys/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org)
 
