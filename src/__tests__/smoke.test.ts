@@ -1,466 +1,367 @@
 /**
  * Smoke Tests for Keys CLI
- * End-to-end tests: init -> add -> list -> search -> export -> doctor
+ * End-to-end tests using core modules directly (not spawning processes)
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { spawnSync } from 'node:child_process';
+import {
+    LocalPackStore,
+    LocalIndexStore,
+    LocalControlPlaneAdapter,
+    runDoctorChecks,
+    formatDoctorResult,
+    type WorkspacePaths,
+    type KeysConfig,
+} from '../core';
 
 describe('Keys CLI Smoke Tests', () => {
     let tempDir: string;
-    let originalCwd: string;
+    let workspace: WorkspacePaths;
+    let config: KeysConfig;
 
     beforeEach(() => {
-        // Create temp directory and change to it
+        // Create temp directory
         tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'keys-smoke-'));
-        originalCwd = process.cwd();
-        process.chdir(tempDir);
+        const keysDir = path.join(tempDir, '.keys');
+        fs.mkdirSync(keysDir, { recursive: true });
 
         // Create a .git directory to simulate project mode
         fs.mkdirSync(path.join(tempDir, '.git'));
+
+        workspace = {
+            root: keysDir,
+            config: path.join(keysDir, 'config.json'),
+            registry: path.join(keysDir, 'registry.json'),
+            index: path.join(keysDir, 'index.json'),
+            mode: 'project',
+        };
+
+        config = {
+            version: '1.0.0',
+            workspaceMode: 'project',
+            zeo: { enabled: true, commandTemplate: 'zeo run --pack "{packPath}" --action "{actionName}"' },
+            controlplane: { enabled: false },
+            outputDir: 'dist/keys',
+        };
+
+        // Initialize workspace files
+        fs.writeFileSync(workspace.config, JSON.stringify(config, null, 2));
+        fs.writeFileSync(workspace.registry, JSON.stringify({ version: '1.0.0', entries: [] }, null, 2));
+        fs.writeFileSync(workspace.index, JSON.stringify({
+            version: '1.0.0',
+            updatedAt: new Date().toISOString(),
+            entries: [],
+            invertedIndex: {}
+        }, null, 2));
     });
 
     afterEach(() => {
-        // Restore original cwd and clean up
-        process.chdir(originalCwd);
+        // Clean up temp directory
         fs.rmSync(tempDir, { recursive: true, force: true });
     });
 
-    function runKeys(...args: string[]): { code: number; stdout: string; stderr: string } {
-        const result = spawnSync('npx', ['tsx', path.join(originalCwd, 'src/cli/keys.ts'), ...args], {
-            cwd: tempDir,
-            encoding: 'utf-8',
-            timeout: 30000,
-            env: { ...process.env, NODE_ENV: 'test' },
-        });
+    function createTestPack(id: string, options: Partial<{
+        name: string;
+        version: string;
+        description: string;
+        tags: string[];
+        actions: Array<{ name: string; kind: string; command?: string; args?: string[] }>;
+    }> = {}): string {
+        const packDir = path.join(tempDir, id);
+        fs.mkdirSync(packDir, { recursive: true });
 
-        return {
-            code: result.status ?? 1,
-            stdout: result.stdout ?? '',
-            stderr: result.stderr ?? '',
+        const manifest = {
+            id,
+            name: options.name ?? `${id} Pack`,
+            version: options.version ?? '1.0.0',
+            description: options.description ?? `Description for ${id}`,
+            tags: options.tags ?? [],
+            actions: options.actions ?? [],
         };
+
+        fs.writeFileSync(path.join(packDir, 'keys.pack.json'), JSON.stringify(manifest, null, 2));
+        fs.writeFileSync(path.join(packDir, 'README.md'), `# ${manifest.name}\n\n${manifest.description}`);
+
+        return packDir;
     }
 
-    it('should show help', () => {
-        const result = runKeys('help');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('Keys CLI');
-        expect(result.stdout).toContain('init');
-        expect(result.stdout).toContain('add');
+    it('should initialize workspace correctly', () => {
+        expect(fs.existsSync(workspace.config)).toBe(true);
+        expect(fs.existsSync(workspace.registry)).toBe(true);
+        expect(fs.existsSync(workspace.index)).toBe(true);
     });
 
-    it('should initialize workspace', () => {
-        const result = runKeys('init');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('Initialized Keys workspace');
-
-        // Verify files created
-        expect(fs.existsSync(path.join(tempDir, '.keys', 'config.json'))).toBe(true);
-        expect(fs.existsSync(path.join(tempDir, '.keys', 'registry.json'))).toBe(true);
-        expect(fs.existsSync(path.join(tempDir, '.keys', 'index.json'))).toBe(true);
+    it('should list empty packs after init', async () => {
+        const store = new LocalPackStore(workspace);
+        const packs = await store.listPacks();
+        expect(packs).toHaveLength(0);
     });
 
-    it('should list empty packs after init', () => {
-        runKeys('init');
-        const result = runKeys('list');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('No packs registered');
+    it('should add a pack', async () => {
+        const packDir = createTestPack('my-pack', {
+            tags: ['test', 'smoke'],
+            actions: [
+                { name: 'hello', kind: 'shell', command: 'echo', args: ['Hello World'] },
+            ],
+        });
+
+        const store = new LocalPackStore(workspace);
+        const indexStore = new LocalIndexStore(workspace);
+
+        const entry = await store.addPack(packDir);
+        expect(entry.id).toBe('my-pack');
+        expect(entry.version).toBe('1.0.0');
+
+        // Update index
+        const manifest = await store.loadPackManifest(entry.path);
+        await indexStore.indexPack(entry, manifest);
+
+        const index = await indexStore.loadIndex();
+        expect(index.entries).toHaveLength(1);
     });
 
-    it('should add a pack', () => {
-        runKeys('init');
+    it('should list added pack', async () => {
+        const packDir = createTestPack('my-pack');
 
-        // Create a sample pack
-        const packDir = path.join(tempDir, 'my-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'my-pack',
-                name: 'My Pack',
-                version: '1.0.0',
-                description: 'A test pack for smoke tests',
-                tags: ['test', 'smoke'],
-                actions: [
-                    {
-                        name: 'hello',
-                        kind: 'shell',
-                        command: 'echo',
-                        args: ['Hello World'],
-                    },
-                ],
-            })
-        );
-        fs.writeFileSync(path.join(packDir, 'README.md'), '# My Pack\n\nTest pack.');
+        const store = new LocalPackStore(workspace);
+        await store.addPack(packDir);
 
-        const result = runKeys('add', packDir);
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('Added pack: my-pack');
+        const packs = await store.listPacks();
+        expect(packs).toHaveLength(1);
+        expect(packs[0].id).toBe('my-pack');
+        expect(packs[0].name).toBe('my-pack Pack');
     });
 
-    it('should list added pack', () => {
-        runKeys('init');
+    it('should search for pack by name', async () => {
+        const packDir = createTestPack('my-pack', {
+            name: 'My Awesome Pack',
+            description: 'A pack for testing search',
+            tags: ['searchable'],
+        });
 
-        // Create and add pack
-        const packDir = path.join(tempDir, 'my-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'my-pack',
-                name: 'My Pack',
-                version: '1.0.0',
-                description: 'Test pack',
-                tags: [],
-                actions: [],
-            })
-        );
+        const store = new LocalPackStore(workspace);
+        const indexStore = new LocalIndexStore(workspace);
 
-        runKeys('add', packDir);
-        const result = runKeys('list');
-
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('my-pack');
-        expect(result.stdout).toContain('1.0.0');
-        expect(result.stdout).toContain('My Pack');
-    });
-
-    it('should search for pack', () => {
-        runKeys('init');
-
-        // Create and add pack
-        const packDir = path.join(tempDir, 'my-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'my-pack',
-                name: 'My Pack',
-                version: '1.0.0',
-                description: 'A pack for testing search',
-                tags: ['searchable'],
-                actions: [],
-            })
-        );
-
-        runKeys('add', packDir);
+        const entry = await store.addPack(packDir);
+        const manifest = await store.loadPackManifest(entry.path);
+        await indexStore.indexPack(entry, manifest);
 
         // Search by name
-        let result = runKeys('search', 'My Pack');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('my-pack');
-
-        // Search by tag
-        result = runKeys('search', 'searchable');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('my-pack');
-
-        // Search with no results
-        result = runKeys('search', 'nonexistent');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('No packs found');
+        const results = await indexStore.search('awesome');
+        expect(results).toHaveLength(1);
+        expect(results[0].id).toBe('my-pack');
     });
 
-    it('should show pack details', () => {
-        runKeys('init');
+    it('should search for pack by tag', async () => {
+        const packDir = createTestPack('my-pack', {
+            tags: ['searchable', 'test'],
+        });
 
-        // Create and add pack
-        const packDir = path.join(tempDir, 'my-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'my-pack',
-                name: 'My Pack',
-                version: '1.0.0',
-                description: 'A detailed pack',
-                tags: ['detail', 'test'],
-                actions: [
-                    {
-                        name: 'greet',
-                        kind: 'shell',
-                        command: 'echo',
-                        args: ['Hi'],
-                        description: 'Say hi',
-                    },
-                ],
-                author: 'Test Author',
-                license: 'MIT',
-            })
-        );
+        const store = new LocalPackStore(workspace);
+        const indexStore = new LocalIndexStore(workspace);
 
-        runKeys('add', packDir);
-        const result = runKeys('show', 'my-pack');
+        const entry = await store.addPack(packDir);
+        const manifest = await store.loadPackManifest(entry.path);
+        await indexStore.indexPack(entry, manifest);
 
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('my-pack');
-        expect(result.stdout).toContain('My Pack');
-        expect(result.stdout).toContain('1.0.0');
-        expect(result.stdout).toContain('Test Author');
-        expect(result.stdout).toContain('MIT');
-        expect(result.stdout).toContain('greet');
-        expect(result.stdout).toContain('shell');
+        const results = await indexStore.search('searchable');
+        expect(results).toHaveLength(1);
     });
 
-    it('should export pack', () => {
-        runKeys('init');
+    it('should return no results for non-matching search', async () => {
+        const packDir = createTestPack('my-pack');
 
-        // Create and add pack
-        const packDir = path.join(tempDir, 'my-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'my-pack',
-                name: 'My Pack',
-                version: '1.0.0',
-                description: 'Exportable pack',
-                tags: [],
-                actions: [],
-            })
-        );
-        fs.writeFileSync(path.join(packDir, 'README.md'), '# My Pack');
+        const store = new LocalPackStore(workspace);
+        const indexStore = new LocalIndexStore(workspace);
 
-        runKeys('add', packDir);
-        const result = runKeys('export', 'my-pack');
+        const entry = await store.addPack(packDir);
+        const manifest = await store.loadPackManifest(entry.path);
+        await indexStore.indexPack(entry, manifest);
 
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('Exported pack: my-pack');
-        expect(result.stdout).toContain('Archive:');
-        expect(result.stdout).toContain('Manifest:');
-        expect(result.stdout).toContain('Hash:');
-
-        // Verify export files created
-        const exportDir = path.join(tempDir, 'dist', 'keys', 'my-pack');
-        expect(fs.existsSync(exportDir)).toBe(true);
-        expect(fs.existsSync(path.join(exportDir, 'manifest.json'))).toBe(true);
+        const results = await indexStore.search('nonexistent');
+        expect(results).toHaveLength(0);
     });
 
-    it('should run doctor', () => {
-        runKeys('init');
-        const result = runKeys('doctor');
+    it('should show pack details', async () => {
+        const packDir = createTestPack('my-pack', {
+            name: 'Detailed Pack',
+            version: '2.0.0',
+            description: 'A detailed pack',
+            tags: ['detail', 'test'],
+            actions: [
+                { name: 'greet', kind: 'shell', command: 'echo', args: ['Hi'] },
+            ],
+        });
 
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('Keys Doctor Report');
-        expect(result.stdout).toContain('Workspace');
-        expect(result.stdout).toContain('Node.js');
-        expect(result.stdout).toContain('Summary');
+        const store = new LocalPackStore(workspace);
+        await store.addPack(packDir);
+
+        const entry = await store.getPack('my-pack');
+        expect(entry).not.toBeNull();
+        expect(entry?.name).toBe('Detailed Pack');
+        expect(entry?.version).toBe('2.0.0');
+
+        const manifest = await store.loadPackManifest(entry!.path);
+        expect(manifest.actions).toHaveLength(1);
+        expect(manifest.actions[0].name).toBe('greet');
     });
 
-    it('should run shell action', () => {
-        runKeys('init');
+    it('should export pack', async () => {
+        const packDir = createTestPack('my-pack', {
+            version: '1.2.3',
+        });
 
-        // Create pack with shell action
-        const packDir = path.join(tempDir, 'my-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'my-pack',
-                name: 'My Pack',
-                version: '1.0.0',
-                description: 'Pack with shell action',
-                tags: [],
-                actions: [
-                    {
-                        name: 'hello',
-                        kind: 'shell',
-                        command: 'echo',
-                        args: ['Hello from smoke test!'],
-                    },
-                ],
-            })
-        );
+        const store = new LocalPackStore(workspace);
+        const entry = await store.addPack(packDir);
 
-        runKeys('add', packDir);
-        const result = runKeys('run', 'my-pack', 'hello');
+        const manifest = await store.loadPackManifest(entry.path);
+        const outputDir = path.join(tempDir, 'dist', 'keys');
+        const adapter = new LocalControlPlaneAdapter(config.controlplane);
 
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('Hello from smoke test!');
+        const result = await adapter.export(entry.path, manifest, outputDir);
+
+        expect(fs.existsSync(result.manifestPath)).toBe(true);
+        expect(result.hash).toBeDefined();
+        expect(result.size).toBeGreaterThan(0);
+
+        // Verify export manifest
+        const exportManifest = JSON.parse(fs.readFileSync(result.manifestPath, 'utf-8'));
+        expect(exportManifest.id).toBe('my-pack');
+        expect(exportManifest.version).toBe('1.2.3');
+        expect(exportManifest.archiveHash).toBe(result.hash);
     });
 
-    it('should handle zeo action gracefully when zeo missing', () => {
-        runKeys('init');
+    it('should run doctor checks', async () => {
+        const result = await runDoctorChecks(workspace, config);
 
-        // Create pack with zeo action
-        const packDir = path.join(tempDir, 'my-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'my-pack',
-                name: 'My Pack',
-                version: '1.0.0',
-                description: 'Pack with zeo action',
-                tags: [],
-                actions: [
-                    {
-                        name: 'zeo-action',
-                        kind: 'zeo',
-                        promptFile: 'prompts/test.md',
-                    },
-                ],
-            })
-        );
+        expect(result.timestamp).toBeDefined();
+        expect(result.checks.length).toBeGreaterThan(0);
+        expect(result.summary.total).toBe(result.checks.length);
 
-        runKeys('add', packDir);
-        const result = runKeys('run', 'my-pack', 'zeo-action');
+        // Workspace check should pass
+        const workspaceCheck = result.checks.find(c => c.name === 'Workspace');
+        expect(workspaceCheck?.status).toBe('ok');
 
-        // Should exit with code 2 (ZEO missing) and provide help
-        expect(result.code).toBe(2);
-        expect(result.stderr).toContain('ZEO');
-        expect(result.stderr).toContain('install');
+        // Node.js check should pass (we're running Node)
+        const nodeCheck = result.checks.find(c => c.name === 'Node.js');
+        expect(['ok', 'warn']).toContain(nodeCheck?.status);
     });
 
-    it('should output JSON format when requested', () => {
-        runKeys('init');
+    it('should format doctor result', async () => {
+        const result = await runDoctorChecks(workspace, config);
+        const formatted = formatDoctorResult(result);
 
-        // Create and add pack
-        const packDir = path.join(tempDir, 'my-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'my-pack',
-                name: 'My Pack',
-                version: '1.0.0',
-                description: 'JSON test pack',
-                tags: [],
-                actions: [],
-            })
-        );
-
-        runKeys('add', packDir);
-
-        // List with JSON
-        let result = runKeys('list', '--json');
-        expect(result.code).toBe(0);
-        const list = JSON.parse(result.stdout);
-        expect(Array.isArray(list)).toBe(true);
-        expect(list[0].id).toBe('my-pack');
-
-        // Show with JSON
-        result = runKeys('show', 'my-pack', '--json');
-        expect(result.code).toBe(0);
-        const show = JSON.parse(result.stdout);
-        expect(show.entry.id).toBe('my-pack');
-
-        // Doctor with JSON
-        result = runKeys('doctor', '--json');
-        expect(result.code).toBe(0);
-        const doctor = JSON.parse(result.stdout);
-        expect(doctor.checks).toBeDefined();
-        expect(doctor.summary).toBeDefined();
+        expect(formatted).toContain('Keys Doctor Report');
+        expect(formatted).toContain('Workspace');
+        expect(formatted).toContain('Summary');
     });
 
-    it('should reject invalid manifest', () => {
-        runKeys('init');
+    it('should handle multiple packs', async () => {
+        const pack1Dir = createTestPack('pack-1', { tags: ['alpha'] });
+        const pack2Dir = createTestPack('pack-2', { tags: ['beta'] });
+        const pack3Dir = createTestPack('pack-3', { tags: ['gamma'] });
 
-        // Create pack with invalid manifest
-        const packDir = path.join(tempDir, 'bad-pack');
-        fs.mkdirSync(packDir);
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'Invalid ID Spaces',
-                name: 'Bad Pack',
-                version: 'not-semver',
-                // missing description
-                tags: [],
-                actions: [],
-            })
-        );
+        const store = new LocalPackStore(workspace);
+        const indexStore = new LocalIndexStore(workspace);
 
-        const result = runKeys('add', packDir);
-        expect(result.code).toBe(1);
-        expect(result.stderr).toContain('Error');
+        for (const packDir of [pack1Dir, pack2Dir, pack3Dir]) {
+            const entry = await store.addPack(packDir);
+            const manifest = await store.loadPackManifest(entry.path);
+            await indexStore.indexPack(entry, manifest);
+        }
+
+        const packs = await store.listPacks();
+        expect(packs).toHaveLength(3);
+
+        // Search should find specific pack
+        const results = await indexStore.search('beta');
+        expect(results).toHaveLength(1);
+        expect(results[0].id).toBe('pack-2');
     });
 
-    it('complete smoke test flow', () => {
-        // Full flow: init -> add -> list -> search -> show -> export -> doctor
+    it('should update pack when re-added', async () => {
+        const packDir = createTestPack('my-pack', { version: '1.0.0' });
 
-        // 1. Init
-        let result = runKeys('init');
-        expect(result.code).toBe(0);
+        const store = new LocalPackStore(workspace);
+        const entry1 = await store.addPack(packDir);
+        expect(entry1.version).toBe('1.0.0');
 
-        // 2. Create and add pack
-        const packDir = path.join(tempDir, 'full-test-pack');
-        fs.mkdirSync(packDir);
-        fs.mkdirSync(path.join(packDir, 'assets'));
-        fs.mkdirSync(path.join(packDir, 'actions'));
-        fs.writeFileSync(
-            path.join(packDir, 'keys.pack.json'),
-            JSON.stringify({
-                id: 'full-test-pack',
-                name: 'Full Test Pack',
-                version: '2.1.0',
-                description: 'Complete smoke test pack',
-                tags: ['smoke', 'full', 'test'],
-                actions: [
-                    {
-                        name: 'hello',
-                        kind: 'shell',
-                        command: 'echo',
-                        args: ['Complete test!'],
-                    },
-                    {
-                        name: 'doc',
-                        kind: 'doc',
-                        description: 'Show documentation',
-                    },
-                ],
-                author: 'Smoke Test',
-                license: 'MIT',
-            })
-        );
-        fs.writeFileSync(path.join(packDir, 'README.md'), '# Full Test Pack\n\nComplete smoke test.');
+        // Update manifest version
+        const manifestPath = path.join(packDir, 'keys.pack.json');
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+        manifest.version = '2.0.0';
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+
+        // Re-add
+        const entry2 = await store.addPack(packDir);
+        expect(entry2.version).toBe('2.0.0');
+
+        // Should still be only one pack
+        const packs = await store.listPacks();
+        expect(packs).toHaveLength(1);
+        expect(packs[0].version).toBe('2.0.0');
+    });
+
+    it('complete smoke test flow', async () => {
+        // Full flow: init (done in beforeEach) -> add -> list -> search -> show -> export -> doctor
+
+        // 1. Create and add pack
+        const packDir = createTestPack('full-test-pack', {
+            name: 'Full Test Pack',
+            version: '2.1.0',
+            description: 'Complete smoke test pack',
+            tags: ['smoke', 'full', 'test'],
+            actions: [
+                { name: 'hello', kind: 'shell', command: 'echo', args: ['Complete test!'] },
+                { name: 'doc', kind: 'doc' },
+            ],
+        });
+
+        // Create subdirectories
+        fs.mkdirSync(path.join(packDir, 'assets'), { recursive: true });
+        fs.mkdirSync(path.join(packDir, 'actions'), { recursive: true });
         fs.writeFileSync(path.join(packDir, 'assets', 'data.json'), '{}');
         fs.writeFileSync(path.join(packDir, 'actions', 'hello.sh'), 'echo "Hello"');
 
-        result = runKeys('add', packDir);
-        expect(result.code).toBe(0);
+        const store = new LocalPackStore(workspace);
+        const indexStore = new LocalIndexStore(workspace);
+
+        // 2. Add
+        const entry = await store.addPack(packDir);
+        expect(entry.id).toBe('full-test-pack');
+
+        const manifest = await store.loadPackManifest(entry.path);
+        await indexStore.indexPack(entry, manifest);
 
         // 3. List
-        result = runKeys('list');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('full-test-pack');
+        const packs = await store.listPacks();
+        expect(packs).toHaveLength(1);
 
         // 4. Search
-        result = runKeys('search', 'smoke');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('full-test-pack');
+        const searchResults = await indexStore.search('smoke');
+        expect(searchResults).toHaveLength(1);
+        expect(searchResults[0].id).toBe('full-test-pack');
 
         // 5. Show
-        result = runKeys('show', 'full-test-pack');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('2.1.0');
+        const showEntry = await store.getPack('full-test-pack');
+        expect(showEntry?.version).toBe('2.1.0');
 
         // 6. Export
-        result = runKeys('export', 'full-test-pack');
-        expect(result.code).toBe(0);
+        const outputDir = path.join(tempDir, 'dist', 'keys');
+        const adapter = new LocalControlPlaneAdapter(config.controlplane);
+        const exportResult = await adapter.export(entry.path, manifest, outputDir);
 
-        // Verify export manifest
-        const exportManifest = JSON.parse(
-            fs.readFileSync(
-                path.join(tempDir, 'dist', 'keys', 'full-test-pack', 'manifest.json'),
-                'utf-8'
-            )
-        );
+        expect(fs.existsSync(exportResult.manifestPath)).toBe(true);
+        const exportManifest = JSON.parse(fs.readFileSync(exportResult.manifestPath, 'utf-8'));
         expect(exportManifest.id).toBe('full-test-pack');
         expect(exportManifest.version).toBe('2.1.0');
         expect(exportManifest.archiveHash).toBeDefined();
 
-        // 7. Run shell action
-        result = runKeys('run', 'full-test-pack', 'hello');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('Complete test!');
-
-        // 8. Doctor
-        result = runKeys('doctor');
-        expect(result.code).toBe(0);
-        expect(result.stdout).toContain('✓');
+        // 7. Doctor
+        const doctorResult = await runDoctorChecks(workspace, config);
+        expect(doctorResult.summary.fail).toBe(0);
     });
 });

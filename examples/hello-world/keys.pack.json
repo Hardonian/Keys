@@ -1,0 +1,37 @@
+{
+    "id": "hello-world",
+    "name": "Hello World Pack",
+    "version": "1.0.0",
+    "description": "A simple example pack demonstrating Keys pack format",
+    "tags": [
+        "example",
+        "starter",
+        "hello"
+    ],
+    "entrypoints": {
+        "prompts": [
+            "prompts/greet.md"
+        ],
+        "scripts": [],
+        "workflows": []
+    },
+    "actions": [
+        {
+            "name": "hello",
+            "kind": "shell",
+            "command": "echo",
+            "args": [
+                "Hello from Keys!"
+            ],
+            "description": "Print a greeting to the console"
+        },
+        {
+            "name": "info",
+            "kind": "doc",
+            "description": "Display pack documentation"
+        }
+    ],
+    "author": "Keys Team",
+    "license": "MIT",
+    "repository": "https://github.com/Hardonian/Keys"
+}

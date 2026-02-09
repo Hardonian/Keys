@@ -71,3 +71,9 @@ outputs/**
 # Internal documentation (agent notes, planning docs - not for public repo)
 internal/
 nul
+
+# Keys CLI
+.keys/
+src/dist/
+src/coverage/
+dist/keys/
