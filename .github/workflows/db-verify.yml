@@ -36,7 +36,7 @@ jobs:
         run: |
           npm ci --prefer-offline --no-audit
           cd backend && npm ci --prefer-offline --no-audit
-          cd ../frontend && npm ci --prefer-offline --no-audit
+          cd ../frontend && npm ci --prefer-offline --no-audit --legacy-peer-deps
       
       - name: Install tsx globally
         run: npm install -g tsx
