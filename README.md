@@ -271,3 +271,8 @@ Areas of interest:
 **Built for teams who want AI agents they can trust.**
 
 [Documentation](docs/) • [Issues](https://github.com/Hardonian/Keys/issues) • [Discussions](https://github.com/Hardonian/Keys/discussions)
+
+## Repository Operations Standards
+- Squash-only merges
+- Auto-delete branches
+- Security scanning in CI
