@@ -25,7 +25,7 @@ jobs:
           delete-workflow-runs: true
 
       - name: Clean up old artifacts
-        uses: geekyeggo/delete-artifact@v5
+        uses: geekyeggo/delete-artifact@v6
         with:
           name: |
             backend-test-results
