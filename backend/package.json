@@ -19,7 +19,7 @@
     "jobforge:admin": "tsx scripts/jobforge-admin.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.88.0",
+    "@anthropic-ai/sdk": "^0.91.1",
     "@google/generative-ai": "^0.24.1",
     "@sentry/node": "^7.80.0",
     "@supabase/supabase-js": "^2.103.0",
