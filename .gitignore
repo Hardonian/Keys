@@ -1,79 +1,35 @@
-# Dependencies
-/node_modules
-**/node_modules/
-/.pnp
-.pnp.js
-
-# Testing
-/coverage
-**/playwright-report/
-**/test-results/
-
-# Next.js
-/.next/
-/out/
-frontend/.next/
-frontend/out/
-frontend/public/keys-index.json
-frontend/public/validation_report.json
-frontend/public/artifacts_manifest.json
-
-# Rust
-/target/
-
-# Production
-/build
-backend/dist/
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env*.local
-.env
-.env.local
-
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
 # Python
 __pycache__/
 *.pyc
+*.pyo
+.venv/
+.egg-info/
+dist/
+build/
+*.egg
 
-# Supabase
-.supabase/
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Logs
-logs/
 *.log
-
-# Notebook outputs
-outputs/**
-!outputs/smoke_report.json
-!outputs/smoke_report.md
-
-# Internal documentation (agent notes, planning docs - not for public repo)
-internal/
-nul
-
-# Keys CLI
-.keys/
-src/dist/
-src/coverage/
-dist/keys/
