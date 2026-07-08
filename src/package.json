@@ -29,14 +29,14 @@
         "keys": "tsx cli/keys.ts"
     },
     "dependencies": {
-        "zod": "^3.23.0"
+        "zod": "^3.25.76"
     },
     "devDependencies": {
-        "@types/node": "^20.0.0",
-        "eslint": "^8.57.0",
-        "tsx": "^4.0.0",
-        "typescript": "^5.4.0",
-        "vitest": "^1.6.0"
+        "@types/node": "^20.19.33",
+        "eslint": "^8.57.1",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.3",
+        "vitest": "^1.6.1"
     },
     "engines": {
         "node": ">=18.0.0"
