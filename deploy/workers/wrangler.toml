@@ -1,0 +1,21 @@
+name = "keys-api"
+main = "src/worker.js"
+compatibility_date = "2024-06-01"
+
+[vars]
+ENVIRONMENT = "production"
+APP_NAME = "keys-api"
+SCAN_CRON = "0 3 * * *"
+LOG_LEVEL = "INFO"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "keys"
+database_id = "e57787df-3971-4701-8d79-bd0d453f0ed3"
+
+[triggers]
+crons = ["0 3 * * *"]
+
+[[routes]]
+pattern = "audit.example.com"
+custom_domain = true
