@@ -58,21 +58,21 @@ jobs:
             --generate-repro
       
       - name: Upload index artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: kb_index
           path: outputs/keys_index/kb_index.json
           retention-days: 30
       
       - name: Upload validation report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validation_report
           path: outputs/keys_index/validation_report.json
           retention-days: 30
       
       - name: Upload repro packs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: repro_packs
           path: outputs/repro_packs/*.zip
@@ -135,7 +135,7 @@ jobs:
           "
       
       - name: Upload readiness report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: readiness_report
           path: outputs/keys_index/readiness.json
