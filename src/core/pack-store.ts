@@ -38,7 +38,7 @@ export class LocalPackStore implements PackStore {
             const raw = fs.readFileSync(registryPath, 'utf-8');
             const data = JSON.parse(raw);
             return RegistrySchema.parse(data);
-        } catch (error) {
+        } catch (_error) {
             // Return empty registry on error
             return RegistrySchema.parse({ version: '1.0.0', entries: [] });
         }
@@ -67,7 +67,7 @@ export class LocalPackStore implements PackStore {
 
         try {
             data = JSON.parse(raw);
-        } catch (error) {
+        } catch (_error) {
             throw new Error(`Invalid JSON in pack manifest: ${manifestPath}`);
         }
 

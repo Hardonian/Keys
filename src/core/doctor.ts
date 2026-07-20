@@ -4,7 +4,6 @@
  */
 
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import type { DoctorCheck, DoctorResult, KeysConfig } from './contracts';
 import type { WorkspacePaths } from './workspace';

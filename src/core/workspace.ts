@@ -39,7 +39,6 @@ function findProjectRoot(startDir: string = process.cwd()): string | null {
 
         // Also check for .git as project root indicator
         const gitDir = path.join(current, '.git');
-        const keysInGit = path.join(current, KEYS_DIR);
         if (fs.existsSync(gitDir)) {
             // If .git exists, this is the project root even if .keys doesn't exist yet
             return current;
@@ -117,7 +116,7 @@ export function loadConfig(workspace: WorkspacePaths): KeysConfig {
         const raw = fs.readFileSync(workspace.config, 'utf-8');
         const data = JSON.parse(raw);
         return KeysConfigSchema.parse(data);
-    } catch (error) {
+    } catch (_error) {
         // Return defaults on parse error
         return KeysConfigSchema.parse({
             version: '1.0.0',
