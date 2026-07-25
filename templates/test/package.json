@@ -8,7 +8,7 @@
     "test:single": "tsx test-single-template.ts"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.2.0",
     "tsx": "^4.7.0"
   }
 }
