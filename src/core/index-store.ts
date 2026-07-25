@@ -79,7 +79,7 @@ export class LocalIndexStore implements IndexStore {
             const raw = fs.readFileSync(indexPath, 'utf-8');
             const data = JSON.parse(raw);
             return SearchIndexSchema.parse(data);
-        } catch (error) {
+        } catch (_error) {
             return SearchIndexSchema.parse({
                 version: '1.0.0',
                 updatedAt: new Date().toISOString(),

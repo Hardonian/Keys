@@ -19,7 +19,6 @@ import {
     LocalControlPlaneAdapter,
     runDoctorChecks,
     formatDoctorResult,
-    createSamplePack,
     ZEO_MISSING_EXIT_CODE,
     type PackManifest,
     type RegistryEntry,
@@ -112,7 +111,7 @@ async function commandInit(args: string[], flags: Record<string, string | boolea
         return 0;
     }
 
-    const config = initWorkspace(workspace, {
+    initWorkspace(workspace, {
         workspaceMode: workspace.mode,
     });
 
@@ -409,7 +408,7 @@ async function commandExport(args: string[], flags: Record<string, string | bool
     }
 }
 
-async function commandRun(args: string[], flags: Record<string, string | boolean>): Promise<number> {
+async function commandRun(args: string[], _flags: Record<string, string | boolean>): Promise<number> {
     if (args.length === 0) {
         error('Usage: keys run <id> [action]');
         log('');
@@ -451,7 +450,7 @@ async function commandRun(args: string[], flags: Record<string, string | boolean
     }
 
     // Find action
-    let action = actionName
+    const action = actionName
         ? manifest.actions.find(a => a.name === actionName)
         : manifest.actions[0]; // default to first action
 

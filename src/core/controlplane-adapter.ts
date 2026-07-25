@@ -316,7 +316,7 @@ export class LocalControlPlaneAdapter implements ControlPlaneAdapter {
         fs.writeFileSync(outputPath, JSON.stringify(archive, null, 2));
     }
 
-    async publish?(packId: string): Promise<{ success: boolean; message: string }> {
+    async publish?(_packId: string): Promise<{ success: boolean; message: string }> {
         const available = await this.isAvailable();
 
         if (!available) {
