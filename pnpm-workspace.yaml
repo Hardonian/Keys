@@ -54,6 +54,7 @@ minimumReleaseAgeExclude:
   - vite@6.4.2
   - esbuild@0.28.1
   - vite@6.4.3
+  - sharp@0.35.0
 overrides:
   '@anthropic-ai/sdk@>=0.79.0 <0.91.1': ^0.91.1
   '@opentelemetry/core@<2.8.0': ^2.8.0
@@ -62,6 +63,7 @@ overrides:
   postcss@<8.5.10: ^8.5.10
   qs@>=6.11.1 <=6.15.1: ^6.15.2
   rollup@>=3.0.0 <3.30.0: ^3.30.0
+  sharp@<0.35.0: ^0.35.0
   uuid@<11.1.1: ^11.1.1
   vite@<=6.4.1: ^6.4.2
   vite@<=6.4.2: ^6.4.3
