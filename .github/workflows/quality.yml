@@ -13,6 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -20,25 +23,20 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 10.13.1
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm --filter frontend lint
+        run: pnpm --filter hardonia-ai-companion-frontend lint
 
       - name: Typecheck
-        run: pnpm --filter frontend type-check
+        run: pnpm --filter hardonia-ai-companion-frontend type-check
 
       - name: Test
-        run: pnpm --filter frontend test
+        run: pnpm --filter hardonia-ai-companion-frontend test
 
       - name: Build Check
-        run: pnpm --filter frontend build
+        run: pnpm --filter hardonia-ai-companion-frontend build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

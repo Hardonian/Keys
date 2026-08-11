@@ -15,7 +15,7 @@ jobs:
     name: Backend CI
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    
+
     services:
       postgres:
         image: postgres:15
@@ -43,7 +43,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -51,20 +54,15 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 10.13.1
-      
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Lint
-        run: pnpm --filter backend lint
-      
+        run: pnpm --filter hardonia-ai-companion-backend lint
+
       - name: Type check
-        run: pnpm --filter backend type-check
-      
+        run: pnpm --filter hardonia-ai-companion-backend type-check
+
       - name: Verify database contract
         if: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
         run: |
@@ -77,18 +75,15 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      
+
       - name: Run tests
-        run: pnpm --filter backend test -- --coverage --reporter=verbose
+        run: pnpm --filter hardonia-ai-companion-backend test -- --coverage --reporter=verbose
         env:
           NODE_ENV: test
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           REDIS_URL: redis://localhost:6379
-      
-      - name: Check coverage thresholds
-        run: pnpm --filter backend test -- --coverage --reporter=json --outputFile=coverage.json || true
-      
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -96,7 +91,7 @@ jobs:
           flags: backend
           fail_ci_if_error: false
         continue-on-error: true
-      
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -109,11 +104,14 @@ jobs:
     name: Frontend CI
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -121,11 +119,6 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 10.13.1
-      
       - name: Cache Next.js build
         uses: actions/cache@v4
         with:
@@ -134,34 +127,34 @@ jobs:
           key: ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('frontend/**/*.js', 'frontend/**/*.jsx', 'frontend/**/*.ts', 'frontend/**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Structural Lint & Edge Check
         run: |
           # Rationale: Ensures no Node.js primitives leak into Edge Runtime
-          pnpm --filter frontend lint
-      
+          pnpm --filter hardonia-ai-companion-frontend lint
+
       - name: Type check
-        run: pnpm --filter frontend type-check
-      
+        run: pnpm --filter hardonia-ai-companion-frontend type-check
+
       - name: Run tests
-        run: pnpm --filter frontend test -- --coverage --reporter=verbose
+        run: pnpm --filter hardonia-ai-companion-frontend test -- --coverage --reporter=verbose
         env:
           NODE_ENV: test
-      
+
       - name: Run E2E tests
         run: |
-          pnpm --filter frontend exec playwright install --with-deps
-          pnpm --filter frontend run test:e2e
+          pnpm --filter hardonia-ai-companion-frontend exec playwright install --with-deps
+          pnpm --filter hardonia-ai-companion-frontend run test:e2e
         env:
           NODE_ENV: test
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      
+
       - name: Production Build (Resilient Mode)
-        run: pnpm --filter frontend build
+        run: pnpm --filter hardonia-ai-companion-frontend build
         env:
           # Rationale: Standardizes environment to avoid build warnings
           NODE_ENV: production
@@ -169,7 +162,7 @@ jobs:
           NEXT_PRIVATE_LOCAL_SKIP_FONTS: true
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -177,7 +170,7 @@ jobs:
           flags: frontend
           fail_ci_if_error: false
         continue-on-error: true
-      
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         if: always()
@@ -186,7 +179,7 @@ jobs:
           path: frontend/.next/
           retention-days: 7
           compression-level: 6
-      
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -199,59 +192,52 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-      
+
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
           python-version: '3.10'
-      
+
       - name: Install detect-secrets
         run: pip install detect-secrets
-      
+
       - name: Run detect-secrets scan
         run: detect-secrets scan --baseline .secrets.baseline
-      
+
       - name: Run Snyk security scan (Backend)
+        if: ${{ secrets.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@master
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --file=backend/package.json
-      
+
       - name: Run Snyk security scan (Frontend)
+        if: ${{ secrets.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@master
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --file=frontend/package.json
-      
-      - name: Run npm audit (Backend)
-        run: |
-          cd backend
-          npm audit --audit-level=high
-      
-      - name: Run npm audit (Frontend)
-        run: |
-          cd frontend
-          npm audit --audit-level=high
+
+      - name: Run pnpm audit
+        run: pnpm audit --audit-level=high
 
   ci-summary:
     name: CI Summary
     runs-on: ubuntu-latest
     needs: [backend, frontend, security]
     if: always()
-    
+
     steps:
       - name: Check CI Status
         run: |
@@ -262,11 +248,12 @@ jobs:
           echo "| Backend | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Frontend | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Security | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ needs.backend.result }}" != "success" ] || \
-             [ "${{ needs.frontend.result }}" != "success" ]; then
+             [ "${{ needs.frontend.result }}" != "success" ] || \
+             [ "${{ needs.security.result }}" != "success" ]; then
             echo "❌ CI pipeline failed. Please check the logs above."
             exit 1
           fi
-          
+
           echo "✅ All CI checks passed!"

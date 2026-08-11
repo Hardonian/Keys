@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Local-first pack management for AI agents - backendless CLI for ZEO and ControlPlane integration",
   "private": true,
+  "packageManager": "pnpm@10.13.1",
   "workspaces": [
     "src",
     "frontend",
