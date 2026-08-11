@@ -24,18 +24,19 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - uses: pnpm/action-setup@v6
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: |
@@ -51,10 +52,10 @@ jobs:
           echo "🚀 Running migrations using TypeScript runner..."
           echo "📊 Using SUPABASE_URL from GitHub Secrets"
           echo "🔑 Using SUPABASE_SERVICE_ROLE_KEY from GitHub Secrets"
-          
+
           cd backend
           npm run migrate
-          
+
           # Check exit code
           if [ $? -eq 0 ]; then
             echo "success=true" >> $GITHUB_OUTPUT
@@ -79,7 +80,7 @@ jobs:
         run: |
           echo "## 🔄 Migration Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.run-migrations.outputs.success }}" == "true" ]; then
             echo "✅ **Status:** Migrations completed successfully" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY

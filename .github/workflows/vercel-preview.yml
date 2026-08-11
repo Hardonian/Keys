@@ -9,19 +9,20 @@ jobs:
   deploy-preview:
     runs-on: ubuntu-latest
     if: github.event.action != 'closed'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - uses: pnpm/action-setup@v6
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -61,27 +62,27 @@ jobs:
           script: |
             const previewUrl = '${{ steps.vercel-deploy.outputs.PREVIEW_URL }}';
             const prNumber = context.payload.pull_request.number;
-            
+
             const comment = `## 🚀 Vercel Preview Deployment
-            
+
             **Preview URL:** ${previewUrl}
-            
+
             This preview will be updated automatically on every push to this PR.
-            
+
             ---
             *Deployed by [GitHub Actions](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
-            
+
             // Find existing comment
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
-            
-            const botComment = comments.data.find(comment => 
+
+            const botComment = comments.data.find(comment =>
               comment.user.type === 'Bot' && comment.body.includes('Vercel Preview Deployment')
             );
-            
+
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -101,7 +102,7 @@ jobs:
   cleanup-preview:
     runs-on: ubuntu-latest
     if: github.event.action == 'closed'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
