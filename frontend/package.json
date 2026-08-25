@@ -69,7 +69,7 @@
     "eslint": "^9.26.0",
     "eslint-config-next": "^16.1.6",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "jsdom": "^25.0.1",
+    "jsdom": "^30.0.1",
     "next-sitemap": "^4.2.3",
     "postcss": "^8.5.23",
     "prettier": "^3.8.2",
