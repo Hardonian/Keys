@@ -85,7 +85,7 @@ jobs:
           REDIS_URL: redis://localhost:6379
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           file: ./backend/coverage/coverage-final.json
           flags: backend
@@ -164,7 +164,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           file: ./frontend/coverage/coverage-final.json
           flags: frontend
