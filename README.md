@@ -1,5 +1,9 @@
 # Keys
 
+<!-- BEGIN: REPO HERO -->
+![Keys — hero generated locally on the GPU stack](assets/repo-hero.png)
+<!-- END: REPO HERO -->
+
 > **The Keyring for AI Toolkits** — Local-first pack management for AI agents
 
 [![Keys CLI](https://github.com/Hardonian/Keys/actions/workflows/keys-cli.yml/badge.svg)](https://github.com/Hardonian/Keys/actions/workflows/keys-cli.yml)
