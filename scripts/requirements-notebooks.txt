@@ -1,5 +1,5 @@
 ipykernel==7.3.0
-joblib==1.4.2
+joblib==1.6.0
 matplotlib==3.9.2
 nbclient==0.11.0
 nbformat==5.11.1
