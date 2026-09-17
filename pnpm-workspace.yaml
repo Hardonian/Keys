@@ -9,11 +9,11 @@ packages:
   - "frontend"
   - "backend"
 allowBuilds:
-  '@sentry/cli': set this to true or false
-  esbuild: set this to true or false
-  msw: set this to true or false
-  sharp: set this to true or false
-  unrs-resolver: set this to true or false
+  '@sentry/cli': true
+  esbuild: true
+  msw: true
+  sharp: true
+  unrs-resolver: true
 minimumReleaseAgeExclude:
   - qs@6.14.2
   - minimatch@3.1.3
@@ -58,16 +58,28 @@ minimumReleaseAgeExclude:
 overrides:
   '@anthropic-ai/sdk@>=0.79.0 <0.91.1': ^0.91.1
   '@opentelemetry/core@<2.8.0': ^2.8.0
+  '@xmldom/xmldom@<0.8.15': ^0.8.15
+  brace-expansion@<1.1.18: ^1.1.18
+  brace-expansion@>=2.0.0 <2.1.4: ^2.1.4
+  brace-expansion@>=4.0.0 <5.0.6: ^5.0.7
+  browserslist@<4.28.7: ^4.28.7
   esbuild@<=0.24.2: ^0.24.3
   esbuild@>=0.27.3 <0.28.1: ^0.28.1
-  postcss@<8.5.10: ^8.5.10
-  qs@>=6.11.1 <=6.15.1: ^6.15.2
+  fast-uri@<3.1.6: ^3.1.6
+  js-yaml@<4.3.2: ^4.3.2
+  nanoid@<3.3.18: ^3.3.18
+  next@>=15.0.0 <15.5.24: ^15.5.24
+  next@>=16.0.0 <16.3.3: ^16.3.3
+  postcss@<8.5.23: ^8.5.23
+  qs@<6.16.0: ^6.16.0
   rollup@>=3.0.0 <3.30.0: ^3.30.0
-  sharp@<0.35.0: ^0.35.0
+  shell-quote@<1.8.4: ^1.8.4
+  sharp@<0.35.4: ^0.35.4
   uuid@<11.1.1: ^11.1.1
   vite@<=6.4.1: ^6.4.2
   vite@<=6.4.2: ^6.4.3
   vite@>=7.0.0 <=7.3.1: ^7.3.2
   vite@>=7.0.0 <=7.3.4: ^7.3.5
   vite@>=7.1.0 <=7.3.1: ^7.3.2
-  vitest@<3.2.6: ^3.2.6
+  vitest@<4.1.11: ^4.1.11
+  ws@<8.21.0: ^8.21.0
