@@ -67,7 +67,7 @@ def main():
     
     parser.add_argument(
         "--no-dry-run",
-        action="store_true",
+        action="store_false",
         dest="dry_run",
         help="Actually execute code during validation (USE WITH CAUTION)",
     )
@@ -126,7 +126,7 @@ def main():
         print(f"Validating {len(artifacts)} artifacts...")
         validator = ArtifactValidator(
             repo_root=args.repo_root,
-            dry_run=not args.no_dry_run if args.dry_run else True,
+            dry_run=args.dry_run,
         )
         results = validator.validate_all(artifacts)
         
