@@ -155,4 +155,4 @@ export {
   Building2, CloudIcon, CheckIcon, ArrowRightIcon,
 };
 
-const GithubIcon = Github;
+export const GithubIcon = Github;
