@@ -50,8 +50,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1(@types/react@19.2.18)(react@18.3.1)
       use-sync-external-store:
-        specifier: ^1.6.0
-        version: 1.6.0(react@18.3.1)
+        specifier: ^1.7.0
+        version: 1.7.0(react@18.3.1)
     devDependencies:
       '@types/pg':
         specifier: ^8.16.0
@@ -248,7 +248,7 @@ importers:
         version: 4.4.3
       zustand:
         specifier: ^5.0.12
-        version: 5.0.15(@types/react@19.2.18)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
+        version: 5.0.15(@types/react@19.2.18)(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
     devDependencies:
       '@next/bundle-analyzer':
         specifier: ^16.1.6
@@ -4776,6 +4776,11 @@ packages:
 
   use-sync-external-store@1.6.0:
     resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  use-sync-external-store@1.7.0:
+    resolution: {integrity: sha512-6L+EeigHMQhdaIPNIFUKwfWJSwWFQ8gJbJ2DLOs5sDIegTwR9fRxvnM3uciHKjIZhFz+KAv2emhWMRvDmMcY8A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -9789,6 +9794,10 @@ snapshots:
     dependencies:
       react: 18.3.1
 
+  use-sync-external-store@1.7.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+
   util-deprecate@1.0.2: {}
 
   vary@1.1.2: {}
@@ -10033,8 +10042,8 @@ snapshots:
 
   zod@4.4.3: {}
 
-  zustand@5.0.15(@types/react@19.2.18)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)):
+  zustand@5.0.15(@types/react@19.2.18)(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)):
     optionalDependencies:
       '@types/react': 19.2.18
       react: 18.3.1
-      use-sync-external-store: 1.6.0(react@18.3.1)
+      use-sync-external-store: 1.7.0(react@18.3.1)
