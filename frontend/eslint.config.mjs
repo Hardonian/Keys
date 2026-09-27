@@ -42,6 +42,7 @@ export default [
       'react/no-unescaped-entities': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'react-hooks/exhaustive-deps': 'error',
+      '@next/next/no-location-assign-relative-destination': 'off',
     },
   },
   {
