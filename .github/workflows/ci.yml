@@ -67,7 +67,7 @@ jobs:
         if: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
         run: |
           cd backend
-          npm install -g tsx
+          pnpm add -g tsx
           cd ..
           pnpm run db:verify
         env:
