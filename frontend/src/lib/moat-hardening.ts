@@ -162,7 +162,7 @@ export class MoatHardening {
       config: {
         deterministic: bundle.replay.deterministic,
         seed: bundle.replay.seed || 'default-seed',
-        environment: bundle.replay.environment,
+        environment: bundle.replay.environment as Record<string, string>,
         dependencies: bundle.replay.dependencies,
       },
       steps: [],

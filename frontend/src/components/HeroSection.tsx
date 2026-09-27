@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Github, Map, Code2, Users, CheckCircle } from 'lucide-react';
+import { Map, Code2, Users, CheckCircle } from 'lucide-react';
+import { Github } from '../lib/icons';
 
 interface HeroSectionProps {
   className?: string;

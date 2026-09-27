@@ -9,7 +9,7 @@
  * @phase Phase 3 - Explainability by Default
  */
 
-import { z } from 'zod';
+import { z, type ZodIssue } from 'zod';
 
 // Evidence Bundle Schema
 export const EvidenceBundleSchema = z.object({
@@ -30,7 +30,7 @@ export const EvidenceBundleSchema = z.object({
     input: z.object({
       raw: z.string(),
       normalized: z.string(),
-      context: z.record(z.unknown()),
+      context: z.record(z.string(), z.unknown()),
     }),
   }),
   
@@ -43,7 +43,7 @@ export const EvidenceBundleSchema = z.object({
     duration_ms: z.number(),
     input_hash: z.string(),
     output_hash: z.string(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
   })),
   
   // Policy Evaluations
@@ -53,7 +53,7 @@ export const EvidenceBundleSchema = z.object({
     result: z.enum(['passed', 'failed', 'waived']),
     reason: z.string(),
     evaluated_at: z.string().datetime(),
-    evidence: z.record(z.unknown()),
+    evidence: z.record(z.string(), z.unknown()),
   })),
   
   // Reasoning Trace
@@ -97,7 +97,7 @@ export const EvidenceBundleSchema = z.object({
       version: z.string(),
       hash: z.string(),
     })),
-    environment: z.record(z.string()),
+    environment: z.record(z.string(), z.string()),
     command: z.string(),
   }),
   
@@ -260,7 +260,7 @@ export function validateEvidenceBundle(bundle: unknown): { valid: boolean; error
   
   return {
     valid: false,
-    errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+    errors: result.error.issues.map((e: ZodIssue) => `${e.path.join('.')}: ${e.message}`),
   };
 }
 

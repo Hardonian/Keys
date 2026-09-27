@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Check, ArrowRight, Building2, Github, Cloud } from 'lucide-react';
+import { Check, ArrowRight, Building2, Cloud } from 'lucide-react';
+import { Github } from '../lib/icons';
 import { motion } from 'framer-motion';
 
 const pricingPlans = {
