@@ -41,6 +41,37 @@ jobs:
       - name: Install tsx globally
         run: npm install -g tsx
 
+      # Diagnostics only: prints length + sha256:8 fingerprint + reachability
+      # class. Never prints secret values.
+      - name: Preflight secrets (fingerprints only)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          node -e '
+          const crypto = require("crypto");
+          const names = ["SUPABASE_URL","NEXT_PUBLIC_SUPABASE_URL","SUPABASE_SERVICE_ROLE_KEY","NEXT_PUBLIC_SUPABASE_ANON_KEY"];
+          for (const n of names) {
+            const v = process.env[n] || "";
+            const fp = v ? crypto.createHash("sha256").update(v).digest("hex").slice(0,8) : "unset";
+            if (v.startsWith("http")) {
+              let cls = "other";
+              try { const h = new URL(v).hostname; cls = /^localhost$|^127\./.test(h) ? "localhost" : h; } catch {}
+              console.log(`PRECHECK ${n}: len=${v.length} sha256:${fp} scheme=${v.split(":")[0]} host=${cls.split(".").slice(-2).join(".")}`);
+            } else {
+              console.log(`PRECHECK ${n}: len=${v.length} sha256:${fp}`);
+            }
+          }'
+          node -e '
+          const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+          if (!url) { console.log("PRECHECK reachability: no URL set"); process.exit(0); }
+          fetch(url + "/auth/v1/health", { signal: AbortSignal.timeout(8000) })
+            .then(r => console.log("PRECHECK reachability: http=" + r.status))
+            .catch(e => { console.log("PRECHECK reachability: FAILED " + (e.cause ? e.cause.code || e.cause.message : e.name)); });
+          '
+
       - name: Verify database schema
         run: npm run db:verify
         env:
