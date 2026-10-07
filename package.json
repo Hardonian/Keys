@@ -67,6 +67,7 @@
     "use-sync-external-store": "^1.7.0"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "2.103.0",
     "@types/pg": "^8.16.0",
     "concurrently": "^8.2.2",
     "husky": "^9.1.7",
