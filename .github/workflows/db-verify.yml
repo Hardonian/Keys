@@ -34,10 +34,9 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: |
-          npm ci --prefer-offline --no-audit
-          cd backend && npm ci --prefer-offline --no-audit
-          cd ../frontend && npm ci --prefer-offline --no-audit --legacy-peer-deps
+        # pnpm workspace (src/, frontend/, backend/) — root npm ci fails:
+        # there is no root package-lock.json. Matches ci.yml.
+        run: pnpm install --frozen-lockfile
 
       - name: Install tsx globally
         run: npm install -g tsx
