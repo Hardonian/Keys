@@ -17,6 +17,8 @@ jobs:
   verify-secrets:
     name: Verify Required Secrets
     runs-on: ubuntu-latest
+    env:
+      HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
     
     steps:
       - name: Checkout code
@@ -110,7 +112,7 @@ jobs:
           fi
 
       - name: Test Vercel CLI Connection
-        if: secrets.VERCEL_TOKEN != ''
+        if: env.HAS_VERCEL_TOKEN == 'true'
         run: |
           echo "## 🔗 Testing Vercel Connection" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
