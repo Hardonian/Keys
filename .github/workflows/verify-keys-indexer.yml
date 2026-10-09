@@ -39,7 +39,7 @@ jobs:
       - name: Run keys-indexer in strict mode
         env:
           KEYS_INDEX_STRICT: '1'
-        run: pnpm keys:index
+        run: pnpm keys:legacy:index
 
       - name: Capture outputs
         run: |
@@ -52,7 +52,7 @@ jobs:
         env:
           KEYS_INDEX_STRICT: '1'
         run: |
-          pnpm keys:index
+          pnpm keys:legacy:index
           diff -u /tmp/keys-indexer/keys-index.json frontend/public/keys-index.json
           diff -u /tmp/keys-indexer/validation_report.json frontend/public/validation_report.json
           diff -u /tmp/keys-indexer/artifacts_manifest.json frontend/public/artifacts_manifest.json

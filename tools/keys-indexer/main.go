@@ -17,6 +17,7 @@ func main() {
 	flag.StringVar(&config.ArtifactsDir, "artifacts-dir", "./docs/library", "Directory containing artifact metadata files.")
 	flag.StringVar(&config.OutputDir, "output-dir", "./frontend/public", "Directory to write index outputs to.")
 	flag.StringVar(&config.SchemaDir, "schema-dir", "./tools/keys-indexer/schemas", "Directory containing JSON schema files.")
+	flag.StringVar(&config.RepoRoot, "repo-root", "", "Repository root used to resolve content_path values (defaults to the current working directory).")
 	flag.BoolVar(&config.Strict, "strict", false, "Fail if any validation errors are found.")
 	flag.Parse()
 

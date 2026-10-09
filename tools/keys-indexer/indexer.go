@@ -22,6 +22,7 @@ type Config struct {
 	ArtifactsDir string
 	OutputDir    string
 	SchemaDir    string
+	RepoRoot     string
 	Strict       bool
 }
 
@@ -107,7 +108,15 @@ func Run(config Config) error {
 		return fmt.Errorf("load metadata schema: %w", err)
 	}
 
-	repoRoot, err := os.Getwd()
+	repoRoot := config.RepoRoot
+	if repoRoot == "" {
+		wd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("resolve repo root: %w", err)
+		}
+		repoRoot = wd
+	}
+	repoRoot, err = filepath.Abs(repoRoot)
 	if err != nil {
 		return fmt.Errorf("resolve repo root: %w", err)
 	}

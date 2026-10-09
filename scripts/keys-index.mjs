@@ -45,7 +45,7 @@ async function main() {
     process.exit(0);
   }
 
-  const args = ['run', '.', '--artifacts-dir', artifactsDir, '--output-dir', outputDir, '--schema-dir', schemaDir];
+  const args = ['run', '.', '--artifacts-dir', artifactsDir, '--output-dir', outputDir, '--schema-dir', schemaDir, '--repo-root', repoRoot];
   const strictFlag = process.argv.includes('--strict') || process.env.KEYS_INDEX_STRICT === '1';
   if (strictFlag) {
     args.push('--strict');
