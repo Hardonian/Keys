@@ -41,3 +41,6 @@ target/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Internal-only working docs (must never be published to the public repo)
+internal/
