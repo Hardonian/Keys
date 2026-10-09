@@ -83,6 +83,7 @@ jobs:
         with:
           name: build-files
           path: frontend/.next/
+          include-hidden-files: true
           retention-days: 1
 
   # Job 3: Functional E2E Tests
