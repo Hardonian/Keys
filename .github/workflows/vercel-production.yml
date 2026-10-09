@@ -67,16 +67,21 @@ jobs:
             const productionUrl = '${{ steps.vercel-deploy.outputs.PRODUCTION_URL }}';
             const commitSha = context.sha;
             const ref = context.ref;
+            const deploymentId = context.payload.deployment?.id;
 
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: context.payload.deployment?.id || 0,
-              state: 'success',
-              environment: 'production',
-              description: `Deployed to ${productionUrl}`,
-              environment_url: productionUrl
-            });
+            if (deploymentId) {
+              await github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deploymentId,
+                state: 'success',
+                environment: 'production',
+                description: `Deployed to ${productionUrl}`,
+                environment_url: productionUrl
+              });
+            } else {
+              core.info(`No GitHub deployment object on '${context.eventName}' event; skipping status update. URL: ${productionUrl}`);
+            }
 
             // Create a comment on the commit if it's a push
             if (context.eventName === 'push') {
