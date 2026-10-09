@@ -2,9 +2,9 @@
   "id": "notebook-decision-log",
   "title": "Notebook Decision Log Template",
   "description": "A lightweight template for capturing decisions and assumptions during analysis.",
-  "tags": ["notebook", "analysis", "documentation"],
-  "categories": ["notebook", "analysis"],
-  "tools_supported": ["jupyter", "codex", "claude-code"],
+  "tags": ["analysis", "documentation", "notebook"],
+  "categories": ["analysis", "notebook"],
+  "tools_supported": ["claude-code", "codex", "jupyter"],
   "updated_at": "2024-05-15T00:00:00Z",
   "schema_version": "1.0.0",
   "content_path": "docs/library/notebook-decision-log.md"

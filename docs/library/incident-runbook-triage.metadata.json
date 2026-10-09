@@ -3,8 +3,8 @@
   "title": "Incident Triage Runbook",
   "description": "A structured triage flow for production incidents.",
   "tags": ["incident", "operations", "reliability"],
-  "categories": ["runbook", "incident-response"],
-  "tools_supported": ["codex", "claude-code", "cursor"],
+  "categories": ["incident-response", "runbook"],
+  "tools_supported": ["claude-code", "codex", "cursor"],
   "updated_at": "2024-05-12T00:00:00Z",
   "schema_version": "1.0.0",
   "content_path": "docs/library/incident-runbook-triage.md"
