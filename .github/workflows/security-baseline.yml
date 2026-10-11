@@ -7,6 +7,8 @@ on:
     - cron: '21 5 * * 1'
 permissions:
   contents: read
+  actions: read
+  security-events: write
 jobs:
   codeql:
     runs-on: ubuntu-latest

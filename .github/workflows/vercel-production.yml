@@ -28,9 +28,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -38,7 +38,6 @@ jobs:
       - name: Pull Vercel Environment Information
         id: vercel-pull
         run: |
-          cd frontend
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -46,7 +45,6 @@ jobs:
 
       - name: Build Project Artifacts
         run: |
-          cd frontend
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -55,7 +53,6 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         id: vercel-deploy
         run: |
-          cd frontend
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} > deployment-url.txt
           echo "PRODUCTION_URL=$(cat deployment-url.txt | grep -o 'https://[^ ]*\.vercel\.app' | head -1)" >> $GITHUB_OUTPUT
         env:
@@ -70,16 +67,21 @@ jobs:
             const productionUrl = '${{ steps.vercel-deploy.outputs.PRODUCTION_URL }}';
             const commitSha = context.sha;
             const ref = context.ref;
+            const deploymentId = context.payload.deployment?.id;
 
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: context.payload.deployment?.id || 0,
-              state: 'success',
-              environment: 'production',
-              description: `Deployed to ${productionUrl}`,
-              environment_url: productionUrl
-            });
+            if (deploymentId) {
+              await github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deploymentId,
+                state: 'success',
+                environment: 'production',
+                description: `Deployed to ${productionUrl}`,
+                environment_url: productionUrl
+              });
+            } else {
+              core.info(`No GitHub deployment object on '${context.eventName}' event; skipping status update. URL: ${productionUrl}`);
+            }
 
             // Create a comment on the commit if it's a push
             if (context.eventName === 'push') {

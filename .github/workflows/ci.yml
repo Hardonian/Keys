@@ -8,13 +8,15 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20' # Upgraded to 20 for better Next.js 14/15 stability
+  NODE_VERSION: '22' # Node 22 required: jsdom@30/undici@8 need >=22.19
 
 jobs:
   backend:
     name: Backend CI
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      HAS_SUPABASE_CREDS: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
 
     services:
       postgres:
@@ -64,7 +66,7 @@ jobs:
         run: pnpm --filter hardonia-ai-companion-backend type-check
 
       - name: Verify database contract
-        if: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+        if: ${{ env.HAS_SUPABASE_CREDS == 'true' }}
         run: |
           cd backend
           pnpm add -g tsx
@@ -177,6 +179,7 @@ jobs:
         with:
           name: frontend-build
           path: frontend/.next/
+          include-hidden-files: true
           retention-days: 7
           compression-level: 6
 
@@ -192,6 +195,8 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      HAS_SNYK_TOKEN: ${{ secrets.SNYK_TOKEN != '' }}
 
     steps:
       - name: Checkout code
@@ -214,7 +219,7 @@ jobs:
         run: detect-secrets scan --baseline .secrets.baseline
 
       - name: Run Snyk security scan (Backend)
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: ${{ env.HAS_SNYK_TOKEN == 'true' }}
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -222,7 +227,7 @@ jobs:
           args: --severity-threshold=high --file=backend/package.json
 
       - name: Run Snyk security scan (Frontend)
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: ${{ env.HAS_SNYK_TOKEN == 'true' }}
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

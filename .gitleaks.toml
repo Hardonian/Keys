@@ -1,0 +1,22 @@
+# Gitleaks configuration for the Keys repository.
+#
+# Extends the default ruleset and allowlists *verified* non-secret false
+# positives only. Each entry below was inspected by hand:
+#   - .secrets.baseline      : detect-secrets' own baseline (contains hashed_secret
+#                              digests, never plaintext credentials).
+#   - templates/USAGE.md     : documentation of a GET URL query string
+#                              (?milestone=02-authentication,04-api-routes).
+#   - stitch_extract/**.html : static design mock-ups using synthetic sample data
+#                              (e.g. "txn_1234567890").
+title = "Keys gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Verified non-secret false positives: scanner baseline, docs query strings, design mock-ups"
+paths = [
+  '''(^|/)\.secrets\.baseline$''',
+  '''^templates/USAGE\.md$''',
+  '''^stitch_extract/stitch_keys_oss_and_pricing_page/keys_interactive_api_playground_[0-9]+/code\.html$''',
+]

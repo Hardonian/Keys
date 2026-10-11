@@ -83,6 +83,7 @@ jobs:
         with:
           name: build-files
           path: frontend/.next/
+          include-hidden-files: true
           retention-days: 1
 
   # Job 3: Functional E2E Tests
@@ -165,14 +166,6 @@ jobs:
         with:
           name: build-files
           path: frontend/.next/
-
-      - name: Start dev server
-        run: npm run dev &
-        env:
-          PORT: 3000
-
-      - name: Wait for server
-        run: npx wait-on http://localhost:3000 --timeout 60000
 
       - name: Run visual regression tests
         run: |
