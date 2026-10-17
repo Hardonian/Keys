@@ -4,10 +4,19 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy-preview:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event.action != 'closed'
 
     steps:
@@ -101,6 +110,7 @@ jobs:
 
   cleanup-preview:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event.action == 'closed'
 
     steps:

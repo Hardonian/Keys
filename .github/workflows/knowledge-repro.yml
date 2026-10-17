@@ -18,15 +18,20 @@ on:
       - 'tools/keys_indexer/**'
   schedule:
     # Run weekly on Sundays at 00:00 UTC
-    - cron: '0 0 * * 0'
+    - cron: '0 6 * * 1'  # weekly Mon 06:00 UTC
   workflow_dispatch:
 
 env:
   PYTHON_VERSION: '3.11'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   index-and-validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     name: Index and Validate Knowledge Artifacts
     
     steps:
@@ -80,6 +85,7 @@ jobs:
 
   readiness-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     name: ReadyLayer Readiness Check
     needs: index-and-validate
     
@@ -177,6 +183,7 @@ jobs:
 
   notify-on-failure:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     name: Notify on Critical Failures
     needs: readiness-check
     if: failure()

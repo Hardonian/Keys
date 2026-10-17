@@ -3,8 +3,16 @@ name: CI - Build, Test & Visual Regression
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   pull_request:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   workflow_dispatch:
     inputs:
       update_baselines:
@@ -26,6 +34,7 @@ jobs:
   lint-and-typecheck:
     name: 🔍 Lint & Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: frontend
@@ -55,6 +64,7 @@ jobs:
   build:
     name: 🏗️ Build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: lint-and-typecheck
     defaults:
       run:
@@ -90,6 +100,7 @@ jobs:
   e2e-functional:
     name: 🧪 Functional E2E Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: build
     defaults:
       run:
@@ -136,6 +147,7 @@ jobs:
   visual-regression:
     name: 📸 Visual Regression Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: build
     defaults:
       run:
@@ -201,6 +213,7 @@ jobs:
   ui-audit:
     name: 🔍 UI Consistency Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: build
     defaults:
       run:
@@ -249,6 +262,7 @@ jobs:
   summary:
     name: 📋 Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [lint-and-typecheck, build, e2e-functional, visual-regression, ui-audit]
     if: always()
 

@@ -3,6 +3,10 @@ name: PR Status Summary
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   workflow_run:
     workflows: ["CI", "Code Review", "Vercel Preview Deployment"]
     types: [completed]
@@ -12,9 +16,14 @@ permissions:
   pull-requests: write
   checks: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pr-status-summary:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'pull_request' || github.event.workflow_run.event == 'pull_request'
     
     steps:

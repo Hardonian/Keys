@@ -3,7 +3,7 @@ name: Database Contract Verification
 on:
   schedule:
     # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: '0 6 * * 1'  # weekly Mon 06:00 UTC
   workflow_dispatch:
   push:
     branches: [main]
@@ -14,6 +14,10 @@ on:
 
 env:
   NODE_VERSION: '18'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify-database-contract:

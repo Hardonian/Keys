@@ -18,10 +18,15 @@ on:
 env:
   NODE_VERSION: '20'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   detect-and-run-migrations:
     name: Detect and Run Migrations
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 

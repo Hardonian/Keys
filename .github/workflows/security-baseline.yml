@@ -1,17 +1,31 @@
 name: Security Baseline
 on:
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   push:
     branches: [main, master]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   schedule:
-    - cron: '21 5 * * 1'
+    - cron: '0 6 * * 1'  # weekly Mon 06:00 UTC
+  workflow_dispatch:
 permissions:
   contents: read
   actions: read
   security-events: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   codeql:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v4.38.2

@@ -3,12 +3,24 @@ name: CI
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
   workflow_dispatch:
 
 env:
   NODE_VERSION: '22' # Node 22 required: jsdom@30/undici@8 need >=22.19
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
@@ -240,6 +252,7 @@ jobs:
   ci-summary:
     name: CI Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [backend, frontend, security]
     if: always()
 

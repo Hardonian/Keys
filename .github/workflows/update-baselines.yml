@@ -8,10 +8,15 @@ on:
         required: true
         default: 'main'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   update-baselines:
     name: 📸 Update Visual Baselines
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
 
     steps:

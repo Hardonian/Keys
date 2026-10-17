@@ -15,6 +15,10 @@ on:
 env:
     NODE_VERSION: "20"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
     keys-cli:
         name: Keys CLI CI

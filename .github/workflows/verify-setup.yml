@@ -13,10 +13,15 @@ permissions:
   pull-requests: read
   actions: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-secrets:
     name: Verify Required Secrets
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
     
