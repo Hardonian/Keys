@@ -257,8 +257,8 @@ importers:
         version: 5.0.15(@types/react@19.2.18)(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
     devDependencies:
       '@next/bundle-analyzer':
-        specifier: ^16.1.6
-        version: 16.3.2
+        specifier: ^16.4.1
+        version: 16.4.1
       '@next/eslint-plugin-next':
         specifier: ^16.1.6
         version: 16.3.2(eslint@9.39.5(jiti@1.21.7))
@@ -1049,8 +1049,8 @@ packages:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.4
 
-  '@next/bundle-analyzer@16.3.2':
-    resolution: {integrity: sha512-1WSK3fjvlZzA3cpP6XsM9JW2/LDWWlldlYN5sL/h2kvAQCu2KeXLxNkqfI/0ac+ikOYFzWuuBpL9O0Cu3mrfww==}
+  '@next/bundle-analyzer@16.4.1':
+    resolution: {integrity: sha512-d/Q9is3bTt9Qlf4yIPI1+0CqMJTPHKS6+XZeFVVL3QUAR3ppRhRbKU4Ce4AgFxOoA/oo3nSH8vqvJoezHSMJGA==}
 
   '@next/env@13.5.11':
     resolution: {integrity: sha512-fbb2C7HChgM7CemdCY+y3N1n8pcTKdqtQLbC7/EQtPdLvlMUT9JX/dBYl8MMZAtYG4uVMyPFHXckb68q/NRwqg==}
@@ -5021,6 +5021,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.22.0:
+    resolution: {integrity: sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
@@ -5688,7 +5700,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
-  '@next/bundle-analyzer@16.3.2':
+  '@next/bundle-analyzer@16.4.1':
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
@@ -6869,7 +6881,7 @@ snapshots:
 
   acorn-walk@8.3.5:
     dependencies:
-      acorn: 8.18.0
+      acorn: 8.19.0
 
   acorn@8.18.0: {}
 
@@ -10013,7 +10025,7 @@ snapshots:
   webpack-bundle-analyzer@4.10.1:
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      acorn: 8.18.0
+      acorn: 8.19.0
       acorn-walk: 8.3.5
       commander: 7.2.0
       debounce: 1.2.1
@@ -10024,7 +10036,7 @@ snapshots:
       opener: 1.5.2
       picocolors: 1.1.1
       sirv: 2.0.4
-      ws: 8.21.3
+      ws: 8.22.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -10155,6 +10167,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@8.21.3: {}
+
+  ws@8.22.0: {}
 
   xml-name-validator@5.0.0: {}
 
