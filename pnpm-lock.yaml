@@ -260,8 +260,8 @@ importers:
         specifier: ^16.4.1
         version: 16.4.1
       '@next/eslint-plugin-next':
-        specifier: ^16.4.1
-        version: 16.4.1(eslint@10.13.0(jiti@1.21.7))
+        specifier: ^16.4.2
+        version: 16.4.2(eslint@10.13.0(jiti@1.21.7))
       '@playwright/test':
         specifier: ^1.64.1
         version: 1.64.1
@@ -1031,8 +1031,8 @@ packages:
   '@next/eslint-plugin-next@16.3.2':
     resolution: {integrity: sha512-z+HW1cZgt8QhByw8p2EbxF94AImgsKIYUbtSkA7Zld2T9yrKAlys4jNOcAOCtv6csX2CoA/5qCVyesL5pHmJ0A==}
 
-  '@next/eslint-plugin-next@16.4.1':
-    resolution: {integrity: sha512-2io6M+wAqe7nT5mt2gEVy6FOzye2DmwhjaYCpSvHfrIKL11SXNTwSARxpPHJacRmfgSBSDnNmnEXSp0DaJ23BQ==}
+  '@next/eslint-plugin-next@16.4.2':
+    resolution: {integrity: sha512-gCTWlw0e+Y6kajpFyKKgA195jUJCRhlzJE0lV7ufe8a+ghIsANWZ0/FiJwg6DuOG1+OvRbcZDcFBoRh3mNJx0g==}
 
   '@next/swc-darwin-arm64@16.4.1':
     resolution: {integrity: sha512-U+hQ5Gj3fpzf4fveTIF3dpUFYhaSW8vHhdAnbiIomzXzg7boreYFgBqprepXFtW4sw+aTttiNmg0gew/iFNhbg==}
@@ -2909,8 +2909,8 @@ packages:
   fast-wrap-ansi@0.2.2:
     resolution: {integrity: sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q==}
 
-  fastq@1.20.1:
-    resolution: {integrity: sha512-GGToxJ/w1x32s/D2EKND7kTil4n8OVk/9mycTc4VDza13lOvpUZTGX3mFSCtV9ksdGBVzvsyAVLM6mHFThxXxw==}
+  fastq@1.20.3:
+    resolution: {integrity: sha512-XKv5nnLs6nLF71NgiKJLIZFLkPyIEuOselLG7ujZnGrRfQK8HpvY+WqKhAJUAdLomwVHErVS4LfxFlPq0/FTAw==}
 
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
@@ -5560,7 +5560,7 @@ snapshots:
     transitivePeerDependencies:
       - eslint
 
-  '@next/eslint-plugin-next@16.4.1(eslint@10.13.0(jiti@1.21.7))':
+  '@next/eslint-plugin-next@16.4.2(eslint@10.13.0(jiti@1.21.7))':
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.13.0(jiti@1.21.7))
       fast-glob: 3.3.1
@@ -5603,7 +5603,7 @@ snapshots:
   '@nodelib/fs.walk@1.2.8':
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
-      fastq: 1.20.1
+      fastq: 1.20.3
 
   '@nolyfill/is-core-module@1.0.39': {}
 
@@ -7684,7 +7684,7 @@ snapshots:
     dependencies:
       fast-string-width: 3.0.2
 
-  fastq@1.20.1:
+  fastq@1.20.3:
     dependencies:
       reusify: 1.1.0
 
