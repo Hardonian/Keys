@@ -22,7 +22,7 @@
     "@anthropic-ai/sdk": "^0.128.0",
     "@google/generative-ai": "^0.24.1",
     "@sentry/node": "^7.80.0",
-    "@supabase/supabase-js": "^2.103.0",
+    "@supabase/supabase-js": "^2.118.0",
     "@types/js-yaml": "^4.0.9",
     "axios": "^1.20.0",
     "cors": "^2.8.6",
